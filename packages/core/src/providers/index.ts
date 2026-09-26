@@ -6,4 +6,5 @@
  * contract and request types first so downstream modules can depend on a
  * stable surface.
  */
+export * from "./schemas";
 export * from "./types";

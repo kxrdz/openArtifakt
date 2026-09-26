@@ -3,7 +3,7 @@
 ## 1. Provider contract and schema conversion
 
 - [x] 1.1 Add `@openartifact/shared` as a workspace dependency of `packages/core` and create `packages/core/src/providers/types.ts` with the adapter contract (`ProviderAdapter`), `ChatRequest`, `ModelConfig`, `ProviderCapabilities`, `ModelInfo`, and `ToolDefinition` (zod-schema wrapper); re-export from `src/index.ts` and `src/providers/index.ts`. Verify: `pnpm --filter @openartifact/core typecheck`, `lint`, and `test` pass and root `pnpm check` stays green.
-- [ ] 1.2 Create `packages/core/src/providers/schemas.ts` converting a zod `ToolDefinition` to each provider's JSON-schema dialect (strip `$schema`/`additionalProperties` for OpenAI/Gemini/Ollama; reduce to the Gemini-accepted subset), with unit tests covering object/string/enum/number shapes and the Gemini subset. Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
+- [x] 1.2 Create `packages/core/src/providers/schemas.ts` converting a zod `ToolDefinition` to each provider's JSON-schema dialect (strip `$schema`/`additionalProperties` for OpenAI/Gemini/Ollama; reduce to the Gemini-accepted subset), with unit tests covering object/string/enum/number shapes and the Gemini subset. Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
 
 ## 2. Retry and fallback plumbing
 
