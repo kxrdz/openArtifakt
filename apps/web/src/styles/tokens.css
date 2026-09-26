@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Design tokens (CSS custom properties for color, type, spacing, radius,
+ * elevation and motion) land here in step 5 (design foundation). Components
+ * must never hard-code colors or font sizes once those tokens exist.
+ */

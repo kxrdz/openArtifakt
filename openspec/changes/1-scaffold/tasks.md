@@ -10,7 +10,7 @@
 
 ## 3. Web app
 
-- [ ] 3.1 Create `apps/web` Vite + React 18 + TypeScript + Tailwind scaffold (`index.html`, `vite.config.ts`, `tsconfig.json`, `src/main.tsx`, `src/App.tsx`, minimal `src/styles/tokens.css` placeholder) that builds to `dist/`. Verify: `pnpm --filter @openartifact/web build` succeeds and root `pnpm check` stays green.
+- [x] 3.1 Create `apps/web` Vite + React 18 + TypeScript + Tailwind scaffold (`index.html`, `vite.config.ts`, `tsconfig.json`, `src/main.tsx`, `src/App.tsx`, minimal `src/styles/tokens.css` placeholder) that builds to `dist/`. Verify: `pnpm --filter @openartifact/web build` succeeds and root `pnpm check` stays green.
 
 ## 4. Server app
 
