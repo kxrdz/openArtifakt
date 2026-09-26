@@ -79,6 +79,143 @@ describe("StreamParser: fence literalism", () => {
   });
 });
 
+describe("StreamParser: artifact parsing", () => {
+  it("emits open/delta/close for a complete artifact", () => {
+    const input =
+      '<artifact identifier="demo" type="application/vnd.react" title="Demo" language="tsx">\nexport default () => <div>hi</div>;\n</artifact>';
+    const events = parse(input);
+    expect(events).toEqual([
+      {
+        type: "artifact_open",
+        identifier: "demo",
+        artifactType: "application/vnd.react",
+        title: "Demo",
+        language: "tsx",
+      },
+      {
+        type: "artifact_delta",
+        identifier: "demo",
+        text: "\nexport default () => <div>hi</div>;\n",
+      },
+      { type: "artifact_close", identifier: "demo" },
+    ]);
+  });
+
+  it("reassembles an open tag split across chunks", () => {
+    const parser = new StreamParser();
+    const first = parser.push("<arti");
+    const second = parser.push(
+      'fact identifier="x" type="application/vnd.code" title="X" language="ts">body',
+    );
+    const third = parser.push("</artifact>");
+    expect([...first, ...second, ...third]).toEqual([
+      {
+        type: "artifact_open",
+        identifier: "x",
+        artifactType: "application/vnd.code",
+        title: "X",
+        language: "ts",
+      },
+      { type: "artifact_delta", identifier: "x", text: "body" },
+      { type: "artifact_close", identifier: "x" },
+    ]);
+  });
+
+  it("reassembles a close tag split across chunks", () => {
+    const parser = new StreamParser();
+    expect(
+      parser.push('<artifact identifier="a" type="application/vnd.code" title="A">body</art'),
+    ).toEqual([
+      { type: "artifact_open", identifier: "a", artifactType: "application/vnd.code", title: "A" },
+      { type: "artifact_delta", identifier: "a", text: "body" },
+    ]);
+    expect(parser.push("ifact>")).toEqual([{ type: "artifact_close", identifier: "a" }]);
+    expect(parser.end()).toEqual([]);
+  });
+
+  it("treats artifact content as raw text (nested tags and markdown stay literal)", () => {
+    const input =
+      '<artifact identifier="a" type="text/html" title="A">\n<h1>hi</h1>\n**bold** <span>inline</span>\n</artifact>';
+    const events = parse(input);
+    expect(events[0]).toEqual({
+      type: "artifact_open",
+      identifier: "a",
+      artifactType: "text/html",
+      title: "A",
+    });
+    expect(events[1]).toEqual({
+      type: "artifact_delta",
+      identifier: "a",
+      text: "\n<h1>hi</h1>\n**bold** <span>inline</span>\n",
+    });
+    expect(events[2]).toEqual({ type: "artifact_close", identifier: "a" });
+  });
+
+  it("preserves an unknown type verbatim", () => {
+    const input = '<artifact identifier="u" type="application/vnd.unknown" title="U">x</artifact>';
+    const events = parse(input);
+    expect(events[0]).toEqual({
+      type: "artifact_open",
+      identifier: "u",
+      artifactType: "application/vnd.unknown",
+      title: "U",
+    });
+  });
+
+  it("generates a kebab-case identifier from the title when missing", () => {
+    const input = '<artifact type="application/vnd.code" title="My Cool Component!">x</artifact>';
+    const events = parse(input);
+    expect(events[0]).toEqual({
+      type: "artifact_open",
+      identifier: "my-cool-component",
+      artifactType: "application/vnd.code",
+      title: "My Cool Component!",
+    });
+    expect(events.at(-1)).toEqual({ type: "artifact_close", identifier: "my-cool-component" });
+  });
+
+  it('falls back to "artifact" when both identifier and title are missing', () => {
+    const input = '<artifact type="application/vnd.code">x</artifact>';
+    const events = parse(input);
+    expect(events[0]).toEqual({
+      type: "artifact_open",
+      identifier: "artifact",
+      artifactType: "application/vnd.code",
+      title: "",
+    });
+  });
+
+  it("flags an unclosed artifact on end()", () => {
+    const parser = new StreamParser();
+    expect(parser.push('<artifact identifier="a" type="application/vnd.code" title="A">body')).toEqual([
+      { type: "artifact_open", identifier: "a", artifactType: "application/vnd.code", title: "A" },
+      { type: "artifact_delta", identifier: "a", text: "body" },
+    ]);
+    expect(parser.end()).toEqual([{ type: "artifact_close", identifier: "a", incomplete: true }]);
+  });
+
+  it("keeps a stray close tag as literal text", () => {
+    expect(parse("before </artifact> after")).toEqual([
+      { type: "text", text: "before </artifact> after" },
+    ]);
+  });
+
+  it("keeps a lone < in prose as literal text", () => {
+    expect(parse("1 < 2")).toEqual([{ type: "text", text: "1 < 2" }]);
+  });
+
+  it("parses multiple artifacts in sequence", () => {
+    const input =
+      '<artifact identifier="a" type="application/vnd.code" title="A">one</artifact>\n<artifact identifier="b" type="application/vnd.code" title="B">two</artifact>';
+    const events = parse(input);
+    const ids = events
+      .filter((e) => e.type === "artifact_open")
+      .map((e) => (e as { identifier: string }).identifier);
+    expect(ids).toEqual(["a", "b"]);
+    expect(events.filter((e) => e.type === "artifact_close").length).toBe(2);
+  });
+});
+
 describe("StreamParser: mermaid fences", () => {
   it("emits mermaid_open/delta/close for a mermaid fence", () => {
     const input = "```mermaid\ngraph TD;\n  A --> B;\n```\n";

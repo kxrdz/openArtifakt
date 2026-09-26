@@ -1,6 +1,9 @@
 import type { ParserEvent } from "./events";
 
-type Mode = "text" | "fence-info" | "fence-body";
+type Mode = "text" | "tag" | "fence-info" | "fence-body" | "artifact-body";
+
+/** Tag names the parser can open (case-sensitive). Task 2.3 adds `tool_call`. */
+const KNOWN_TAGS = ["artifact"] as const;
 
 /**
  * The language word of a fence info string (e.g. "```mermaid" → "mermaid"),
@@ -11,35 +14,85 @@ function parseFenceLanguage(info: string): string {
   return first.toLowerCase();
 }
 
+function isNameChar(c: string): boolean {
+  return /[a-zA-Z0-9_-]/.test(c);
+}
+
+/** Kebab-case, lowercase, `[^a-z0-9]+` → `-`; falls back to `artifact`. */
+function slugify(title: string): string {
+  const slug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug.length > 0 ? slug : "artifact";
+}
+
+interface ParsedTagName {
+  name: string;
+  isClose: boolean;
+}
+
+/** Extract the tag name and whether it is a close tag from a complete `<...>`. */
+function parseTagName(tag: string): ParsedTagName | null {
+  const body = tag.trim();
+  const m = /^<\/?\s*([a-zA-Z][\w-]*)/.exec(body);
+  if (!m || m[1] === undefined) return null;
+  return { name: m[1], isClose: body.startsWith("</") };
+}
+
+const ATTR_RE = /([a-zA-Z_][\w-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
+
+/** Parse `name="value"` attributes out of a complete tag string. */
+function parseAttributes(tag: string): Record<string, string> {
+  const attrs: Record<string, string> = {};
+  ATTR_RE.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = ATTR_RE.exec(tag)) !== null) {
+    const key = m[1];
+    if (key === undefined) continue;
+    attrs[key] = m[2] ?? m[3] ?? "";
+  }
+  return attrs;
+}
+
 /**
  * Incremental, character-level stream parser (§5).
  *
  * It converts raw streamed model text into structured {@link ParserEvent}s:
- * ordinary prose streams immediately as `text`, fenced code blocks keep
- * `<artifact>`/`<tool_call>` tags literal, and a fence whose language is
- * `mermaid` emits `mermaid_open`/`mermaid_delta`/`mermaid_close`.
+ * ordinary prose streams immediately as `text`, `<artifact …>…</artifact>`
+ * blocks emit `artifact_open`/`artifact_delta`/`artifact_close`, fenced code
+ * blocks keep `<artifact>`/`<tool_call>` tags literal, and a fence whose
+ * language is `mermaid` emits `mermaid_open`/`mermaid_delta`/`mermaid_close`.
  *
  * The API is a tiny synchronous push model:
  * - `push(chunk)` feeds one delta and returns the events it produced.
  * - `end()` flushes any held-back suffix and returns the final events.
  *
- * Only the minimal ambiguous suffix is held back (at most the start of a
- * potential code fence), so text streams without waiting for the full
- * response and the same input yields the same events however it is chunked.
+ * Only the minimal ambiguous suffix is held back (at most the current
+ * incomplete tag or fence marker), so text and code stream without waiting
+ * for the full response and the same input yields the same events however it
+ * is chunked.
  */
 export class StreamParser {
   private mode: Mode = "text";
   private out: ParserEvent[] = [];
 
-  // Coalescing buffers so consecutive `text`/`mermaid_delta` events merge into
-  // single events (they only split when another event type intervenes).
+  // Coalescing buffers so consecutive `text`/`mermaid_delta`/`artifact_delta`
+  // events merge into single events (they only split when another event type
+  // intervenes). At most one is non-empty at a time.
   private textBuf = "";
   private mermaidBuf = "";
+  private artifactBuf = "";
 
   // TEXT state: potential fence opener (≤3 leading spaces + a backtick run).
   private lineStart = true;
   private pendingSpaces = "";
   private pendingBackticks = "";
+
+  // TAG state: potential `<artifact …>` / `</artifact>` open/close tag.
+  private tagBuf = "";
+  private tagName = "";
+  private tagNameDone = false;
 
   // Fence state.
   private fenceLength = 0;
@@ -53,12 +106,17 @@ export class StreamParser {
   private bodyBackticks = "";
   private bodyTrailing = "";
 
+  // ARTIFACT_BODY state: raw content plus a probe for `</artifact>`.
+  private artifactIdentifier = "";
+  private closeProbe = "";
+
   /** Feed one text delta and return the events it produced. */
   push(chunk: string): ParserEvent[] {
     const out: ParserEvent[] = [];
     this.out = out;
     this.textBuf = "";
     this.mermaidBuf = "";
+    this.artifactBuf = "";
     for (const c of chunk) {
       this.dispatch(c);
     }
@@ -73,10 +131,18 @@ export class StreamParser {
     this.out = out;
     this.textBuf = "";
     this.mermaidBuf = "";
+    this.artifactBuf = "";
 
     switch (this.mode) {
       case "text":
         this.flushHold();
+        break;
+      case "tag":
+        // An unclosed tag (no `>` seen) is literal text.
+        this.emitText(this.tagBuf);
+        this.tagBuf = "";
+        this.tagName = "";
+        this.tagNameDone = false;
         break;
       case "fence-info":
         // An opening fence marker with no terminating newline is not a fence;
@@ -93,6 +159,13 @@ export class StreamParser {
         }
         this.enterTextMode();
         break;
+      case "artifact-body":
+        if (this.closeProbe !== "") {
+          this.emitArtifactDelta(this.closeProbe);
+          this.closeProbe = "";
+        }
+        this.closeArtifact(true);
+        break;
     }
 
     this.flushBuffers();
@@ -105,11 +178,17 @@ export class StreamParser {
       case "text":
         this.textChar(c);
         break;
+      case "tag":
+        this.tagChar(c);
+        break;
       case "fence-info":
         this.fenceInfoChar(c);
         break;
       case "fence-body":
         this.fenceBodyChar(c);
+        break;
+      case "artifact-body":
+        this.artifactBodyChar(c);
         break;
     }
   }
@@ -169,7 +248,11 @@ export class StreamParser {
       this.fenceInfoChar(c);
     } else {
       this.flushHold();
-      this.emitText(c);
+      if (c === "<") {
+        this.enterTag();
+      } else {
+        this.emitText(c);
+      }
       this.lineStart = false;
     }
   }
@@ -181,6 +264,155 @@ export class StreamParser {
     }
     this.pendingSpaces = "";
     this.pendingBackticks = "";
+  }
+
+  // ---------------------------------------------------------------------------
+  // TAG state
+  // ---------------------------------------------------------------------------
+
+  private enterTag(): void {
+    this.mode = "tag";
+    this.tagBuf = "<";
+    this.tagName = "";
+    this.tagNameDone = false;
+  }
+
+  private tagChar(c: string): void {
+    this.tagBuf += c;
+
+    if (this.tagNameDone) {
+      // Reading attributes / waiting for `>`.
+      if (c === ">") this.finalizeTag();
+      return;
+    }
+
+    if (c === "/") {
+      // Only `</` (a close-tag start) can still become a tracked tag.
+      if (this.tagBuf !== "</") this.flushTagAsText();
+      return;
+    }
+
+    if (c === ">") {
+      if (this.tagName === "artifact") this.finalizeTag();
+      else this.flushTagAsText();
+      return;
+    }
+
+    if (c === " " || c === "\t" || c === "\n" || c === "\r") {
+      if (this.tagName === "artifact") this.tagNameDone = true;
+      else this.flushTagAsText();
+      return;
+    }
+
+    if (isNameChar(c)) {
+      this.tagName += c;
+      if (!KNOWN_TAGS.some((n) => n.startsWith(this.tagName))) this.flushTagAsText();
+      return;
+    }
+
+    // Any other character (e.g. "<!", "<?", "<=", "<3"): not a tag.
+    this.flushTagAsText();
+  }
+
+  /** The buffered `<...>` is not a tracked tag: emit it as literal text. */
+  private flushTagAsText(): void {
+    this.emitText(this.tagBuf);
+    this.enterTextMode();
+    this.lineStart = false;
+  }
+
+  private finalizeTag(): void {
+    const raw = this.tagBuf;
+    const parsed = parseTagName(raw);
+    this.tagBuf = "";
+    this.tagName = "";
+    this.tagNameDone = false;
+
+    if (!parsed || parsed.name !== "artifact") {
+      // Defensive: tagChar only finalizes `artifact`, but stay safe.
+      this.emitText(raw);
+      this.enterTextMode();
+      this.lineStart = false;
+      return;
+    }
+
+    if (parsed.isClose) {
+      // A stray `</artifact>` with no open artifact is literal text.
+      this.emitText(raw);
+      this.enterTextMode();
+      this.lineStart = false;
+      return;
+    }
+
+    this.openArtifact(parseAttributes(raw));
+  }
+
+  private openArtifact(attrs: Record<string, string>): void {
+    const type = (attrs["type"] ?? "").trim();
+    const title = (attrs["title"] ?? "").trim();
+    const language = (attrs["language"] ?? "").trim();
+    const identifier = (attrs["identifier"] ?? "").trim() || slugify(title);
+
+    this.flushBuffers();
+    this.out.push({
+      type: "artifact_open",
+      identifier,
+      artifactType: type,
+      title,
+      ...(language ? { language } : {}),
+    });
+    this.mode = "artifact-body";
+    this.artifactIdentifier = identifier;
+    this.closeProbe = "";
+  }
+
+  // ---------------------------------------------------------------------------
+  // ARTIFACT_BODY state
+  // ---------------------------------------------------------------------------
+
+  private artifactBodyChar(c: string): void {
+    if (this.closeProbe !== "") {
+      this.closeProbe += c;
+      const status = this.closeProbeStatus(this.closeProbe);
+      if (status === "complete") {
+        this.closeArtifact(false);
+      } else if (status === "not-close") {
+        // Diverged from `</artifact>`: the probe is raw artifact content.
+        this.emitArtifactDelta(this.closeProbe);
+        this.closeProbe = "";
+      }
+      return;
+    }
+
+    if (c === "<") {
+      this.closeProbe = "<";
+      return;
+    }
+    this.emitArtifactDelta(c);
+  }
+
+  private closeProbeStatus(s: string): "pending" | "complete" | "not-close" {
+    const CLOSE = "</artifact";
+    if (s.length <= CLOSE.length) {
+      return CLOSE.startsWith(s) ? "pending" : "not-close";
+    }
+    const rest = s.slice(CLOSE.length);
+    if (/^[ \t\r\n]*$/.test(rest)) return "pending";
+    if (/^[ \t\r\n]*>$/.test(rest)) return "complete";
+    return "not-close";
+  }
+
+  private closeArtifact(incomplete: boolean): void {
+    this.flushBuffers();
+    this.out.push({
+      type: "artifact_close",
+      identifier: this.artifactIdentifier,
+      ...(incomplete ? { incomplete: true } : {}),
+    });
+    this.artifactIdentifier = "";
+    this.closeProbe = "";
+    this.enterTextMode();
+    this.lineStart = false;
   }
 
   // ---------------------------------------------------------------------------
@@ -323,11 +555,17 @@ export class StreamParser {
     this.bodyIndent = "";
     this.bodyBackticks = "";
     this.bodyTrailing = "";
+    this.tagBuf = "";
+    this.tagName = "";
+    this.tagNameDone = false;
+    this.artifactIdentifier = "";
+    this.closeProbe = "";
   }
 
   private emitText(text: string): void {
     if (text.length === 0) return;
     this.flushMermaidBuf();
+    this.flushArtifactBuf();
     this.textBuf += text;
   }
 
@@ -339,12 +577,20 @@ export class StreamParser {
   private emitMermaidDelta(text: string): void {
     if (text.length === 0) return;
     this.flushTextBuf();
+    this.flushArtifactBuf();
     this.mermaidBuf += text;
   }
 
   private emitMermaidClose(): void {
     this.flushBuffers();
     this.out.push({ type: "mermaid_close" });
+  }
+
+  private emitArtifactDelta(text: string): void {
+    if (text.length === 0) return;
+    this.flushTextBuf();
+    this.flushMermaidBuf();
+    this.artifactBuf += text;
   }
 
   private flushTextBuf(): void {
@@ -361,8 +607,20 @@ export class StreamParser {
     }
   }
 
+  private flushArtifactBuf(): void {
+    if (this.artifactBuf.length > 0) {
+      this.out.push({
+        type: "artifact_delta",
+        identifier: this.artifactIdentifier,
+        text: this.artifactBuf,
+      });
+      this.artifactBuf = "";
+    }
+  }
+
   private flushBuffers(): void {
     this.flushTextBuf();
     this.flushMermaidBuf();
+    this.flushArtifactBuf();
   }
 }
