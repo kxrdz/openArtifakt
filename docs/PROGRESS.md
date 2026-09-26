@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Continue feature 3 on `feature/3-provider-adapters`: tasks 3.1–3.4 (all four adapters) and 4.1 (the `createProviderAdapter` factory) are done and committed. The factory selects the vendor adapter by provider id, resolves `apiKeyRef` from the environment (or an explicit override), and wraps the raw stream with `withRetry` (whole-request boundary) and `withFallbackTools` (only when `capabilities.nativeTools` is false), so the only provider-name branch is the single selection switch. Next is task 4.2: add `scripts/smoke.mjs` and the root `smoke` script (`pnpm smoke --provider <id>`) that runs one real request per provider using `.env` keys, skips with a clear message when a key is absent, documents the script in `.env.example`, and verifies `pnpm smoke --provider openai-compatible` prints a skip or a response without logging secrets._
+_Change `3-provider-adapters` is fully implemented (all tasks ticked, `pnpm check` green). Next iteration: run the `openspec-archive-change` skill for `3-provider-adapters`, merge `feature/3-provider-adapters` into `main`, tick step 3 below, add a Log entry, and start feature 4 (agent loop, tools, security layer) on `feature/4-agent-loop-tools-security`._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
