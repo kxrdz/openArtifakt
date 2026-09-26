@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Continue feature 3 on `feature/3-provider-adapters`: task 2.2 is done and committed (`withFallbackTools` in `fallback.ts`, routing `text_delta` through the feature-2 `StreamParser` and re-serializing artifact/mermaid content back to text); next is task 3.1 (the `openai-compatible` adapter in `openai.ts`, accumulating `tool_calls[].function.arguments` by `index` with parallel-call support, plus recorded fixtures and the four shared scenarios)._
+_Continue feature 3 on `feature/3-provider-adapters`: task 3.1 is done and committed (the `openai-compatible` adapter in `openai.ts` — a pure wire-format reducer accumulating `tool_calls[].function.arguments` by `index` for parallel calls, an incremental SSE decoder, a canonical→vendor request builder, and `createOpenAiCompatibleAdapter`, with five recorded fixtures under `test/fixtures/providers/openai/` covering plain text, one tool call, parallel tool calls, fragmented args, and an error mid-stream); next is task 3.2 (the `anthropic` adapter in `anthropic.ts`, handling `content_block_start`/`content_block_delta`/`content_block_stop`/`message_delta` with stop-reason mapping, plus recorded fixtures and the four shared scenarios)._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
