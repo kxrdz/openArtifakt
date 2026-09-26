@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Continue feature 3 on `feature/3-provider-adapters`: task 3.1 is done and committed (the `openai-compatible` adapter in `openai.ts` — a pure wire-format reducer accumulating `tool_calls[].function.arguments` by `index` for parallel calls, an incremental SSE decoder, a canonical→vendor request builder, and `createOpenAiCompatibleAdapter`, with five recorded fixtures under `test/fixtures/providers/openai/` covering plain text, one tool call, parallel tool calls, fragmented args, and an error mid-stream); next is task 3.2 (the `anthropic` adapter in `anthropic.ts`, handling `content_block_start`/`content_block_delta`/`content_block_stop`/`message_delta` with stop-reason mapping, plus recorded fixtures and the four shared scenarios)._
+_Continue feature 3 on `feature/3-provider-adapters`: tasks 3.1 (openai-compatible) and 3.2 (anthropic) are done and committed. Task 3.2 added `anthropic.ts` — a reducer over `message_start`/`content_block_start`/`content_block_delta` (`text_delta`, `input_json_delta`)/`content_block_stop`/`message_delta`/`message_stop` that emits `tool_call_start`/`delta`/`end` per tool_use block by index, a single `usage` event on `message_delta`, stop-reason mapping (`end_turn`/`tool_use`/`max_tokens`), and `tool_result`-in-user-message request conversion, with four recorded fixtures under `test/fixtures/providers/anthropic/`. Next is task 3.3 (the `gemini` adapter in `gemini.ts`, mapping `functionCall`/`functionResponse` parts and emitting usage/stop events, plus recorded fixtures and schema-subset conversion)._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
