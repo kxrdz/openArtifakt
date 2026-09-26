@@ -3,7 +3,7 @@
 ## 1. Shared canonical model
 
 - [x] 1.1 Add the canonical message model to `packages/shared` (`Role`, `ContentPart`, `Message` types plus zod schemas and a `parseMessage`/`parseContentPart` guard), re-export from `src/index.ts`, and add unit tests covering text, tool call, and tool result parts. Verify: `pnpm --filter @openartifact/shared test` passes and root `pnpm check` stays green.
-- [ ] 1.2 Add the canonical `StreamEvent` union (`text_delta`, `tool_call_start/delta/end`, `usage`, `done`, `error`) with zod schemas, re-export from `src/index.ts`, and add unit tests covering every variant including terminal `done`/`error`. Verify: `pnpm --filter @openartifact/shared test` passes and root `pnpm check` stays green.
+- [x] 1.2 Add the canonical `StreamEvent` union (`text_delta`, `tool_call_start/delta/end`, `usage`, `done`, `error`) with zod schemas, re-export from `src/index.ts`, and add unit tests covering every variant including terminal `done`/`error`. Verify: `pnpm --filter @openartifact/shared test` passes and root `pnpm check` stays green.
 
 ## 2. Incremental stream parser
 

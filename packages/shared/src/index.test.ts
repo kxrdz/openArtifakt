@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   SHARED_VERSION,
   isMessage,
+  isStreamEvent,
   messageSchema,
   parseContentPart,
   parseMessage,
+  parseStreamEvent,
+  streamEventSchema,
 } from "./index";
 
 describe("shared", () => {
@@ -82,5 +85,70 @@ describe("canonical message model", () => {
       false,
     );
     expect(isMessage("not a message")).toBe(false);
+  });
+});
+
+describe("canonical stream events", () => {
+  it("parses a text_delta event", () => {
+    expect(parseStreamEvent({ type: "text_delta", text: "hello" })).toEqual({
+      type: "text_delta",
+      text: "hello",
+    });
+  });
+
+  it("parses the tool call lifecycle events", () => {
+    expect(parseStreamEvent({ type: "tool_call_start", id: "call-1", name: "read_file" })).toEqual({
+      type: "tool_call_start",
+      id: "call-1",
+      name: "read_file",
+    });
+    expect(parseStreamEvent({ type: "tool_call_delta", id: "call-1", argsDelta: '{"path":' })).toEqual({
+      type: "tool_call_delta",
+      id: "call-1",
+      argsDelta: '{"path":',
+    });
+    expect(
+      parseStreamEvent({ type: "tool_call_end", id: "call-1", args: { path: "src/index.ts" } }),
+    ).toEqual({ type: "tool_call_end", id: "call-1", args: { path: "src/index.ts" } });
+  });
+
+  it("parses a usage event", () => {
+    expect(parseStreamEvent({ type: "usage", inputTokens: 100, outputTokens: 42 })).toEqual({
+      type: "usage",
+      inputTokens: 100,
+      outputTokens: 42,
+    });
+  });
+
+  it("parses every terminal done stopReason", () => {
+    for (const stopReason of ["end_turn", "tool_use", "max_tokens", "cancelled"] as const) {
+      expect(parseStreamEvent({ type: "done", stopReason })).toEqual({ type: "done", stopReason });
+    }
+  });
+
+  it("parses an error event with a retryable flag", () => {
+    expect(parseStreamEvent({ type: "error", message: "rate limited", retryable: true })).toEqual({
+      type: "error",
+      message: "rate limited",
+      retryable: true,
+    });
+    expect(parseStreamEvent({ type: "error", message: "bad request", retryable: false })).toEqual({
+      type: "error",
+      message: "bad request",
+      retryable: false,
+    });
+  });
+
+  it("rejects an unknown stopReason and unknown event type", () => {
+    expect(streamEventSchema.safeParse({ type: "done", stopReason: "because" }).success).toBe(false);
+    expect(streamEventSchema.safeParse({ type: "mystery" }).success).toBe(false);
+  });
+
+  it("type guard distinguishes stream events from arbitrary values", () => {
+    expect(isStreamEvent({ type: "text_delta", text: "x" })).toBe(true);
+    expect(isStreamEvent({ type: "done", stopReason: "end_turn" })).toBe(true);
+    expect(isStreamEvent({ type: "error", message: "m", retryable: true })).toBe(true);
+    expect(isStreamEvent({ type: "text_delta", text: 42 })).toBe(false);
+    expect(isStreamEvent("not an event")).toBe(false);
   });
 });
