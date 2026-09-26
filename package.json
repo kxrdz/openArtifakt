@@ -14,10 +14,13 @@
     "typecheck": "pnpm -r --if-present run typecheck",
     "lint": "pnpm -r --if-present run lint",
     "test": "pnpm -r --if-present run test",
+    "e2e": "playwright test --config e2e/playwright.config.ts",
     "check": "pnpm typecheck && pnpm lint && pnpm test"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
     "concurrently": "10.0.5",
     "eslint": "10.11.0",
     "eslint-config-prettier": "10.1.8",

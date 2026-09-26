@@ -18,7 +18,7 @@
 
 ## 5. E2E + axe
 
-- [ ] 5.1 Add Playwright + `@axe-core/playwright` with `e2e/playwright.config.ts` (webServer builds the web app and starts the server) and one smoke test asserting the page loads with zero axe serious/critical violations. Verify: `pnpm e2e` passes.
+- [x] 5.1 Add Playwright + `@axe-core/playwright` with `e2e/playwright.config.ts` (webServer builds the web app and starts the server) and one smoke test asserting the page loads with zero axe serious/critical violations. Verify: `pnpm e2e` passes.
 
 ## 6. design:check + CI wiring
 
