@@ -13,4 +13,4 @@
 
 ## 3. Chunk-boundary fuzz test
 
-- [ ] 3.1 Add static fixture responses to `packages/core/test/fixtures/` (prose with literal `<`, split artifact tags, artifact inside a fence, mermaid fence, fallback tool call, unclosed artifact) and a fuzz test that feeds each fixture whole, split at every boundary, and at deterministic random multi-split points, asserting the normalized event sequences are identical. Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
+- [x] 3.1 Add static fixture responses to `packages/core/test/fixtures/` (prose with literal `<`, split artifact tags, artifact inside a fence, mermaid fence, fallback tool call, unclosed artifact) and a fuzz test that feeds each fixture whole, split at every boundary, and at deterministic random multi-split points, asserting the normalized event sequences are identical. Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.

@@ -1,0 +1,5 @@
+I will read the entry point now.
+
+<tool_call name="read_file">{"path": "src/index.ts"}</tool_call>
+
+That returns the file contents.

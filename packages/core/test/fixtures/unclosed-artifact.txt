@@ -1,0 +1,4 @@
+The model started an artifact but never closed it:
+
+<artifact identifier="unfinished" type="application/vnd.code" title="Unfinished" language="ts">
+const value: number = 42;
