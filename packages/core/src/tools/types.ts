@@ -29,6 +29,8 @@ export interface ToolContext {
   onOutput?: (chunk: string, stream: "stdout" | "stderr") => void;
   /** Command timeout in milliseconds (default 120_000). */
   timeoutMs?: number;
+  /** Resolves the ripgrep binary path; `undefined` (default) uses the JS fallback in `search_code`. */
+  findRipgrep?: () => Promise<string | undefined>;
   /** Snapshot storage root (undo). */
   snapshotRoot?: string;
   /** Conversation id segment of the snapshot path. */
