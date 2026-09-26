@@ -31,6 +31,7 @@ const MODEL = "jev-latest";
 const MAX_STATE_CHARS = 24_000; // keep under Jev's 32k state+longest-question budget
 const DEFAULT_COUNT = 10;
 const MAX_RETRIES = 3;
+const DEFAULT_GATE_THRESHOLD = 0.6;
 const MARKER_FILE = join(ROOT, ".jev-review-last");
 
 // --- helpers ---------------------------------------------------------------
@@ -47,6 +48,9 @@ Options:
   --count <n>      Review the last <n> commits (default ${DEFAULT_COUNT})
   --dry-run        Print the payload that would be sent, without calling the API
   --json           Emit the raw structured result as JSON
+  --gate           Exit with code 2 if any commit is blocking or a security risk
+                   (probabilities >= the gate threshold, default 0.6)
+  --gate-threshold <0..1>  Override the --gate threshold (default 0.6)
   --help           Show this help
 
 Requires TYPESAFE_API_KEY in the environment or in .env.
@@ -97,6 +101,8 @@ function parseArgs(argv) {
     if (a === "--help" || a === "-h") return { help: true };
     if (a === "--json") opts.json = true;
     else if (a === "--dry-run") opts.dryRun = true;
+    else if (a === "--gate") opts.gate = true;
+    else if (a === "--gate-threshold") opts.gateThreshold = Number(argv[++i]);
     else if (a === "--range") opts.range = argv[++i];
     else if (a === "--since") opts.since = argv[++i];
     else if (a === "--count") opts.count = Number(argv[++i]);
@@ -452,6 +458,18 @@ async function main() {
   // Record progress only for default/since/count flows (reachable from HEAD).
   if (!opts.range) {
     writeFileSync(MARKER_FILE, results[results.length - 1].sha + "\n");
+  }
+
+  if (opts.gate) {
+    const threshold = Number.isFinite(opts.gateThreshold)
+      ? opts.gateThreshold
+      : DEFAULT_GATE_THRESHOLD;
+    const blocked = results.some(
+      (r) =>
+        r.answers.blocking.noul >= threshold ||
+        r.answers.risk_security.noul >= threshold,
+    );
+    if (blocked) process.exitCode = 2;
   }
 }
 

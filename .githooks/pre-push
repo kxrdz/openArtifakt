@@ -1,0 +1,69 @@
+#!/bin/sh
+# Pre-push hook: review the commits about to be pushed with Jev
+# (TypeSafe System One) via scripts/jev-review.mjs.
+#
+# - Blocks the push (exit 2 -> non-zero) when Jev flags a commit as
+#   `blocking` or `risk_security` at or above the gate threshold.
+# - Fails OPEN on a missing API key or a transient review error, so a
+#   developer without a key is never blocked silently.
+# - Bypass: JEV_REVIEW_BYPASS=1 git push, or git push --no-verify.
+
+# Exit early if the repo doesn't have the script or the reviewer is disabled.
+[ -n "${JEV_REVIEW_BYPASS:-}" ] && exit 0
+
+ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT="$ROOT/scripts/jev-review.mjs"
+[ -f "$SCRIPT" ] || exit 0
+
+have_key() {
+  [ -n "${TYPESAFE_API_KEY:-}" ] && return 0
+  grep -qE '^TYPESAFE_API_KEY=.+' "$ROOT/.env" 2>/dev/null
+}
+
+if ! have_key; then
+  echo "jev-reviewer: TYPESAFE_API_KEY not set; skipping review." >&2
+  echo "jev-reviewer: set it in .env to enable, or bypass with JEV_REVIEW_BYPASS=1." >&2
+  exit 0
+fi
+
+overall=0
+reviewed=0
+
+# Each stdin line: <local ref> <local sha> <remote ref> <remote sha>
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ -n "${local_sha:-}" ] || continue
+  [ "${local_sha}" = "0000000000000000000000000000000000000000" ] && continue
+
+  if [ "${remote_sha:-}" = "0000000000000000000000000000000000000000" ]; then
+    # New branch: review every commit not reachable from a remote-tracking ref.
+    shas="$(git rev-list --topo-order "${local_sha}" --not --remotes 2>/dev/null || true)"
+  else
+    shas="$(git rev-list --topo-order "${remote_sha}..${local_sha}" 2>/dev/null || true)"
+  fi
+
+  [ -n "$shas" ] || continue
+
+  oldest="$(printf '%s\n' "$shas" | tail -n 1)"
+  newest="$(printf '%s\n' "$shas" | head -n 1)"
+  count="$(printf '%s\n' "$shas" | wc -l | tr -d ' ')"
+  reviewed=1
+
+  echo "jev-reviewer: reviewing $count commit(s) ($(printf '%s' "$oldest" | cut -c1-7)..$(printf '%s' "$newest" | cut -c1-7))" >&2
+
+  out="$(node "$SCRIPT" --range "${oldest}..${newest}" --gate 2>&1)"
+  code=$?
+
+  printf '%s\n' "$out" >&2
+
+  if [ "$code" -eq 2 ]; then
+    echo "jev-reviewer: blocking findings above — push blocked." >&2
+    echo "jev-reviewer: fix them, or bypass with JEV_REVIEW_BYPASS=1 (or git push --no-verify)." >&2
+    overall=1
+  elif [ "$code" -ne 0 ]; then
+    # Review failed for a non-gate reason (network, API error, ...): fail open.
+    echo "jev-reviewer: review failed (exit $code); allowing push." >&2
+  fi
+done
+
+[ "$reviewed" -eq 1 ] || exit 0
+exit "$overall"
