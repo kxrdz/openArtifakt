@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Current feature/branch:** none active; feature 3 is merged into `main`.
+- **Current feature/branch:** `feature/4-agent-loop-tools-security` (change `4-agent-loop-tools-security`).
 
 - [x] 1. Scaffold
 - [x] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Start feature 4 on `feature/4-agent-loop-tools-security`: run `openspec-propose` to plan it (agent loop, tools, security layer), then implement its first task._
+_Continue feature 4 on `feature/4-agent-loop-tools-security`: task 1.1 (workspace path jail + secret-file rules) is done and committed. Next is task 2.1: the `packages/core/src/tools/` contract (`Tool`, `ToolContext`, `ToolResult`, approval categories), the result-cap truncation helper (head+tail with a `[... N lines truncated ...]` marker), and a `ToolRegistry`, with unit tests and `src/index.ts` re-exports._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
