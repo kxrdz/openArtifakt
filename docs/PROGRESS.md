@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Continue feature 2 on `feature/2-shared-types-stream-parser`: run `openspec-apply-change` for `2-shared-types-stream-parser` and implement task 2.2 (artifact parsing in the state machine: `artifact_open`/`artifact_delta`/`artifact_close` with split-tag reassembly, raw content, unknown-type preservation, kebab-case identifier generation, and `artifact_close {incomplete: true}` on `end()`), then continue with tasks 2.3–3.1._
+_Continue feature 2 on `feature/2-shared-types-stream-parser`: run `openspec-apply-change` for `2-shared-types-stream-parser` and implement task 2.3 (fallback `tool_call` protocol parsing: emit one `tool_call {name, args}` event per complete `<tool_call name="...">…</tool_call>` block, emit as literal text on invalid JSON args, and keep it literal inside fences), then continue with task 3.1 (fixtures + chunk-boundary fuzz test). Task 2.2 (artifact parsing) is done and committed._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
