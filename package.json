@@ -1,0 +1,34 @@
+{
+  "name": "open-artifact",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Open-source, provider-agnostic coding agent with Artifacts and live diagrams",
+  "type": "module",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently --kill-others --names server,web --prefix-colors cyan,magenta \"pnpm --filter @openartifact/server dev\" \"pnpm --filter @openartifact/web dev\"",
+    "build": "pnpm -r --if-present run build",
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "lint": "pnpm -r --if-present run lint",
+    "test": "pnpm -r --if-present run test",
+    "e2e": "playwright test --config e2e/playwright.config.ts",
+    "design:check": "impeccable detect --json apps/web/src",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm design:check && pnpm e2e"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
+    "concurrently": "10.0.5",
+    "eslint": "10.11.0",
+    "eslint-config-prettier": "10.1.8",
+    "impeccable": "4.1.0",
+    "prettier": "3.9.9",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.1",
+    "vitest": "5.0.2"
+  }
+}
