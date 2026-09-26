@@ -8,6 +8,7 @@
  */
 export * from "./anthropic";
 export * from "./fallback";
+export * from "./gemini";
 export * from "./openai";
 export * from "./retry";
 export * from "./schemas";
