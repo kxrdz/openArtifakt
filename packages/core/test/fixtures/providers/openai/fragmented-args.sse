@@ -1,0 +1,13 @@
+data: {"id":"chatcmpl-4","object":"chat.completion.chunk","created":1700000003,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"call_frag","type":"function","function":{"name":"execute_command","arguments":""}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-4","object":"chat.completion.chunk","created":1700000003,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\"com"}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-4","object":"chat.completion.chunk","created":1700000003,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"mand\":"}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-4","object":"chat.completion.chunk","created":1700000003,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\"pnpm"}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-4","object":"chat.completion.chunk","created":1700000003,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":" test\"}"}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-4","object":"chat.completion.chunk","created":1700000003,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: [DONE]

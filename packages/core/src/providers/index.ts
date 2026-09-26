@@ -7,6 +7,7 @@
  * stable surface.
  */
 export * from "./fallback";
+export * from "./openai";
 export * from "./retry";
 export * from "./schemas";
 export * from "./types";

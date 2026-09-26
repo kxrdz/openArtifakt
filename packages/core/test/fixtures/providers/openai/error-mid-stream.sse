@@ -1,0 +1,7 @@
+data: {"id":"chatcmpl-5","object":"chat.completion.chunk","created":1700000004,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"role":"assistant","content":"Let me think"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-5","object":"chat.completion.chunk","created":1700000004,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"content":" about this..."},"finish_reason":null}]}
+
+data: {"error":{"message":"The server had an error while processing your request","type":"server_error","code":null}}
+
+data: [DONE]
