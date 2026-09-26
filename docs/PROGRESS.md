@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Current feature/branch:** none active — next is feature 2 (`feature/2-shared-types-stream-parser`).
+- **Current feature/branch:** feature 2 active on `feature/2-shared-types-stream-parser` (OpenSpec change `2-shared-types-stream-parser`, 1/6 tasks done).
 
 - [x] 1. Scaffold
 - [ ] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Start feature 2 (Shared types + stream parser). From `main`, create branch `feature/2-shared-types-stream-parser` and run `openspec-propose` to plan OpenSpec change `2-shared-types-stream-parser`, then implement its tasks one per iteration._
+_Continue feature 2 on `feature/2-shared-types-stream-parser`: run `openspec-apply-change` for `2-shared-types-stream-parser` and implement task 1.2 (canonical `StreamEvent` union + zod schemas in `packages/shared`), then continue with tasks 2.1–3.1._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
