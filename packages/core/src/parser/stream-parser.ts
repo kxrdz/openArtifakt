@@ -1,9 +1,18 @@
+import { z } from "zod";
+
 import type { ParserEvent } from "./events";
 
-type Mode = "text" | "tag" | "fence-info" | "fence-body" | "artifact-body";
+type Mode = "text" | "tag" | "fence-info" | "fence-body" | "artifact-body" | "tool-call-body";
 
-/** Tag names the parser can open (case-sensitive). Task 2.3 adds `tool_call`. */
-const KNOWN_TAGS = ["artifact"] as const;
+/** Tag names the parser can open (case-sensitive). */
+const KNOWN_TAGS = ["artifact", "tool_call"] as const;
+
+/** The fallback protocol's argument body must be a JSON object (not an array). */
+const TOOL_CALL_ARGS_SCHEMA = z.record(z.string(), z.unknown());
+
+function isTrackedTagName(name: string): boolean {
+  return KNOWN_TAGS.some((n) => n === name);
+}
 
 /**
  * The language word of a fence info string (e.g. "```mermaid" → "mermaid"),
@@ -56,13 +65,31 @@ function parseAttributes(tag: string): Record<string, string> {
 }
 
 /**
+ * Parse a `<tool_call>` body as JSON arguments. Returns the parsed object, or
+ * `{ ok: false }` when the body is not a JSON object (a non-object value or a
+ * JSON syntax error). The whole block is then emitted as literal text.
+ */
+function parseToolCallArgs(body: string): { ok: true; args: unknown } | { ok: false } {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    return { ok: false };
+  }
+  const result = TOOL_CALL_ARGS_SCHEMA.safeParse(parsed);
+  return result.success ? { ok: true, args: result.data } : { ok: false };
+}
+
+/**
  * Incremental, character-level stream parser (§5).
  *
  * It converts raw streamed model text into structured {@link ParserEvent}s:
  * ordinary prose streams immediately as `text`, `<artifact …>…</artifact>`
  * blocks emit `artifact_open`/`artifact_delta`/`artifact_close`, fenced code
- * blocks keep `<artifact>`/`<tool_call>` tags literal, and a fence whose
- * language is `mermaid` emits `mermaid_open`/`mermaid_delta`/`mermaid_close`.
+ * blocks keep `<artifact>`/`<tool_call>` tags literal, a fence whose language
+ * is `mermaid` emits `mermaid_open`/`mermaid_delta`/`mermaid_close`, and a
+ * complete fallback `<tool_call name="…">…</tool_call>` block emits a single
+ * `tool_call` event.
  *
  * The API is a tiny synchronous push model:
  * - `push(chunk)` feeds one delta and returns the events it produced.
@@ -109,6 +136,12 @@ export class StreamParser {
   // ARTIFACT_BODY state: raw content plus a probe for `</artifact>`.
   private artifactIdentifier = "";
   private closeProbe = "";
+
+  // TOOL_CALL_BODY state: the raw open tag, raw body, and a probe for `</tool_call>`.
+  private toolCallName = "";
+  private toolCallOpenRaw = "";
+  private toolCallBody = "";
+  private toolCallCloseProbe = "";
 
   /** Feed one text delta and return the events it produced. */
   push(chunk: string): ParserEvent[] {
@@ -166,6 +199,14 @@ export class StreamParser {
         }
         this.closeArtifact(true);
         break;
+      case "tool-call-body":
+        // An unclosed `<tool_call>` is not a valid call: emit it as literal text.
+        if (this.toolCallCloseProbe !== "") {
+          this.toolCallBody += this.toolCallCloseProbe;
+          this.toolCallCloseProbe = "";
+        }
+        this.finishToolCall(null);
+        break;
     }
 
     this.flushBuffers();
@@ -189,6 +230,9 @@ export class StreamParser {
         break;
       case "artifact-body":
         this.artifactBodyChar(c);
+        break;
+      case "tool-call-body":
+        this.toolCallBodyChar(c);
         break;
     }
   }
@@ -293,13 +337,13 @@ export class StreamParser {
     }
 
     if (c === ">") {
-      if (this.tagName === "artifact") this.finalizeTag();
+      if (isTrackedTagName(this.tagName)) this.finalizeTag();
       else this.flushTagAsText();
       return;
     }
 
     if (c === " " || c === "\t" || c === "\n" || c === "\r") {
-      if (this.tagName === "artifact") this.tagNameDone = true;
+      if (isTrackedTagName(this.tagName)) this.tagNameDone = true;
       else this.flushTagAsText();
       return;
     }
@@ -328,8 +372,8 @@ export class StreamParser {
     this.tagName = "";
     this.tagNameDone = false;
 
-    if (!parsed || parsed.name !== "artifact") {
-      // Defensive: tagChar only finalizes `artifact`, but stay safe.
+    if (!parsed || !isTrackedTagName(parsed.name)) {
+      // Defensive: tagChar only finalizes tracked tags, but stay safe.
       this.emitText(raw);
       this.enterTextMode();
       this.lineStart = false;
@@ -337,14 +381,18 @@ export class StreamParser {
     }
 
     if (parsed.isClose) {
-      // A stray `</artifact>` with no open artifact is literal text.
+      // A stray close tag with no open block is literal text.
       this.emitText(raw);
       this.enterTextMode();
       this.lineStart = false;
       return;
     }
 
-    this.openArtifact(parseAttributes(raw));
+    if (parsed.name === "artifact") {
+      this.openArtifact(parseAttributes(raw));
+    } else {
+      this.openToolCall(raw, parseAttributes(raw));
+    }
   }
 
   private openArtifact(attrs: Record<string, string>): void {
@@ -411,6 +459,89 @@ export class StreamParser {
     });
     this.artifactIdentifier = "";
     this.closeProbe = "";
+    this.enterTextMode();
+    this.lineStart = false;
+  }
+
+  // ---------------------------------------------------------------------------
+  // TOOL_CALL_BODY state (fallback protocol)
+  // ---------------------------------------------------------------------------
+
+  private openToolCall(raw: string, attrs: Record<string, string>): void {
+    const name = (attrs["name"] ?? "").trim();
+    if (name === "") {
+      // A `<tool_call>` without a `name` is not the fallback protocol.
+      this.emitText(raw);
+      this.enterTextMode();
+      this.lineStart = false;
+      return;
+    }
+    this.flushBuffers();
+    this.toolCallName = name;
+    this.toolCallOpenRaw = raw;
+    this.toolCallBody = "";
+    this.toolCallCloseProbe = "";
+    this.mode = "tool-call-body";
+  }
+
+  private toolCallBodyChar(c: string): void {
+    if (this.toolCallCloseProbe !== "") {
+      this.toolCallCloseProbe += c;
+      const status = this.toolCallCloseStatus(this.toolCallCloseProbe);
+      if (status === "complete") {
+        const closeRaw = this.toolCallCloseProbe;
+        this.toolCallCloseProbe = "";
+        this.finishToolCall(closeRaw);
+      } else if (status === "not-close") {
+        // Diverged from `</tool_call>`: the probe is body content.
+        this.toolCallBody += this.toolCallCloseProbe;
+        this.toolCallCloseProbe = "";
+      }
+      return;
+    }
+
+    if (c === "<") {
+      this.toolCallCloseProbe = "<";
+      return;
+    }
+    this.toolCallBody += c;
+  }
+
+  private toolCallCloseStatus(s: string): "pending" | "complete" | "not-close" {
+    const CLOSE = "</tool_call";
+    if (s.length <= CLOSE.length) {
+      return CLOSE.startsWith(s) ? "pending" : "not-close";
+    }
+    const rest = s.slice(CLOSE.length);
+    if (/^[ \t\r\n]*$/.test(rest)) return "pending";
+    if (/^[ \t\r\n]*>$/.test(rest)) return "complete";
+    return "not-close";
+  }
+
+  /**
+   * Finalize a `<tool_call>` block. With a complete close tag, parse the body
+   * as JSON args; a valid object emits one `tool_call` event. Anything else
+   * (invalid args or an unclosed block) is emitted back as literal text.
+   */
+  private finishToolCall(closeRaw: string | null): void {
+    let parsed: { ok: true; args: unknown } | { ok: false };
+    if (closeRaw === null) {
+      parsed = { ok: false };
+    } else {
+      parsed = parseToolCallArgs(this.toolCallBody);
+    }
+
+    if (parsed.ok) {
+      this.flushBuffers();
+      this.out.push({ type: "tool_call", name: this.toolCallName, args: parsed.args });
+    } else {
+      this.emitText(this.toolCallOpenRaw + this.toolCallBody + (closeRaw ?? ""));
+    }
+
+    this.toolCallName = "";
+    this.toolCallOpenRaw = "";
+    this.toolCallBody = "";
+    this.toolCallCloseProbe = "";
     this.enterTextMode();
     this.lineStart = false;
   }
@@ -560,6 +691,10 @@ export class StreamParser {
     this.tagNameDone = false;
     this.artifactIdentifier = "";
     this.closeProbe = "";
+    this.toolCallName = "";
+    this.toolCallOpenRaw = "";
+    this.toolCallBody = "";
+    this.toolCallCloseProbe = "";
   }
 
   private emitText(text: string): void {

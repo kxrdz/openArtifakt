@@ -216,6 +216,97 @@ describe("StreamParser: artifact parsing", () => {
   });
 });
 
+describe("StreamParser: fallback tool calls", () => {
+  it("emits a single tool_call event for a complete block", () => {
+    const input = '<tool_call name="read_file">{"path": "src/index.ts"}</tool_call>';
+    expect(parse(input)).toEqual([
+      { type: "tool_call", name: "read_file", args: { path: "src/index.ts" } },
+    ]);
+  });
+
+  it("trims whitespace around the JSON args body", () => {
+    const input = '<tool_call name="write_file">\n{"path": "a.txt", "content": "hi"}\n</tool_call>';
+    const events = parse(input);
+    expect(events).toEqual([
+      { type: "tool_call", name: "write_file", args: { path: "a.txt", content: "hi" } },
+    ]);
+  });
+
+  it("reassembles an open tag split across chunks", () => {
+    const parser = new StreamParser();
+    const first = parser.push("<tool_");
+    const second = parser.push('call name="glob">{"pattern": "**/*.ts"}</tool_call>');
+    const rest = parser.end();
+    expect([...first, ...second, ...rest]).toEqual([
+      { type: "tool_call", name: "glob", args: { pattern: "**/*.ts" } },
+    ]);
+  });
+
+  it("reassembles a close tag split across chunks", () => {
+    const parser = new StreamParser();
+    const first = parser.push('<tool_call name="x">{"a": 1}</tool');
+    const second = parser.push("_call>");
+    expect([...first, ...second]).toEqual([
+      { type: "tool_call", name: "x", args: { a: 1 } },
+    ]);
+  });
+
+  it("emits the whole block as literal text on invalid JSON args", () => {
+    const input = '<tool_call name="x">not json</tool_call>';
+    expect(parse(input)).toEqual([{ type: "text", text: input }]);
+  });
+
+  it("emits the whole block as literal text on a non-object JSON body", () => {
+    const input = '<tool_call name="x">[1, 2, 3]</tool_call>';
+    expect(parse(input)).toEqual([{ type: "text", text: input }]);
+  });
+
+  it("keeps a tool_call tag inside a code fence literal", () => {
+    const input =
+      '```xml\n<tool_call name="read_file">{"path": "x.ts"}</tool_call>\n```\n';
+    const events = parse(input);
+    expect(events.every((e) => e.type === "text")).toBe(true);
+    expect(textOf(events)).toBe(input);
+  });
+
+  it("keeps a stray close tag as literal text", () => {
+    expect(parse("before </tool_call> after")).toEqual([
+      { type: "text", text: "before </tool_call> after" },
+    ]);
+  });
+
+  it("keeps a tool_call open tag without a name as literal text", () => {
+    const input = '<tool_call>{"a": 1}</tool_call>';
+    expect(parse(input)).toEqual([{ type: "text", text: input }]);
+  });
+
+  it("emits an unclosed tool_call block as literal text on end()", () => {
+    const parser = new StreamParser();
+    expect(parser.push('<tool_call name="x">{"a": 1}')).toEqual([]);
+    expect(parser.end()).toEqual([
+      { type: "text", text: '<tool_call name="x">{"a": 1}' },
+    ]);
+  });
+
+  it("streams text around tool calls without loss", () => {
+    const input =
+      'I will read\n<tool_call name="read_file">{"path": "x.ts"}</tool_call>\nnow.';
+    const events = parse(input);
+    expect(events).toEqual([
+      { type: "text", text: "I will read\n" },
+      { type: "tool_call", name: "read_file", args: { path: "x.ts" } },
+      { type: "text", text: "\nnow." },
+    ]);
+  });
+
+  it("handles nested angle brackets inside the JSON body", () => {
+    const input = '<tool_call name="search">{"pattern": "a < b"}</tool_call>';
+    expect(parse(input)).toEqual([
+      { type: "tool_call", name: "search", args: { pattern: "a < b" } },
+    ]);
+  });
+});
+
 describe("StreamParser: mermaid fences", () => {
   it("emits mermaid_open/delta/close for a mermaid fence", () => {
     const input = "```mermaid\ngraph TD;\n  A --> B;\n```\n";
