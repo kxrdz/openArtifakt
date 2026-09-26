@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Continue feature 4 on `feature/4-agent-loop-tools-security`: task 1.1 (workspace path jail + secret-file rules) is done and committed. Next is task 2.1: the `packages/core/src/tools/` contract (`Tool`, `ToolContext`, `ToolResult`, approval categories), the result-cap truncation helper (head+tail with a `[... N lines truncated ...]` marker), and a `ToolRegistry`, with unit tests and `src/index.ts` re-exports._
+_Continue feature 4 on `feature/4-agent-loop-tools-security`: tasks 1.1 and 2.1 are done and committed. Task 2.1 added `packages/core/src/tools/` — the tool contract (`Tool<TSchema>` with `defineTool`, `ToolContext`, `ToolResult`, `ApprovalCategory`), the `truncateText`/`truncateResult` cap (head+tail with a `[... N lines truncated ...]` marker, character-slice for a single over-long line), and `ToolRegistry` (register/get/has/list/toDefinitions/size), re-exported from `tools/index.ts` and `src/index.ts`. Next is task 2.2: `read_file`, `list_directory` (`.gitignore`-respecting), `glob` (`*`/`**`/`?`), and `search_code` (ripgrep-if-present with a JS regex fallback), each routing through the path jail, with unit tests._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
