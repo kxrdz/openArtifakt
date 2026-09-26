@@ -8,3 +8,5 @@
  * this placeholder keeps the workspace wired together.
  */
 export const CORE_VERSION = "0.1.0";
+
+export * from "./parser";

@@ -7,7 +7,7 @@
 
 ## 2. Incremental stream parser
 
-- [ ] 2.1 Create `packages/core/src/parser` with the `ParserEvent` vocabulary and a `StreamParser` state machine that streams plain text immediately, keeps `artifact`/`tool_call` tags inside fenced code blocks literal, and emits `mermaid_open`/`mermaid_delta`/`mermaid_close` for `mermaid` fences. Add unit tests (text passthrough, fence literalism, mermaid fence). Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
+- [x] 2.1 Create `packages/core/src/parser` with the `ParserEvent` vocabulary and a `StreamParser` state machine that streams plain text immediately, keeps `artifact`/`tool_call` tags inside fenced code blocks literal, and emits `mermaid_open`/`mermaid_delta`/`mermaid_close` for `mermaid` fences. Add unit tests (text passthrough, fence literalism, mermaid fence). Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
 - [ ] 2.2 Implement artifact parsing in the state machine: `artifact_open`/`artifact_delta`/`artifact_close` with split-tag reassembly, raw content, unknown-type preservation, kebab-case identifier generation from a missing title, and `artifact_close {incomplete: true}` on `end()`. Add unit tests for each edge case. Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
 - [ ] 2.3 Implement the fallback `tool_call` protocol parsing (emit one `tool_call {name, args}` event for a complete `<tool_call name="...">…</tool_call>` block, emit as literal text on invalid JSON args, and keep it literal inside fences). Add unit tests. Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
 
