@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+coverage/
+*.log
+.env
+.env.*
+!.env.example
+pnpm-lock.yaml
+docs/screenshots/
+e2e/playwright-report/
+e2e/test-results/
