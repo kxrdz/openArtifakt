@@ -14,7 +14,7 @@
 
 ## 4. Server app
 
-- [ ] 4.1 Create `apps/server` Hono app (`package.json`, `tsconfig.json`, `src/index.ts`) that binds `127.0.0.1`, serves the web build (or proxies the Vite dev server in development), exposes `/health`, and wire `pnpm dev` to start both apps. Verify: `pnpm dev` starts both apps, `GET http://127.0.0.1:<port>/health` returns ok, and the server serves the built web index.
+- [x] 4.1 Create `apps/server` Hono app (`package.json`, `tsconfig.json`, `src/index.ts`) that binds `127.0.0.1`, serves the web build (or proxies the Vite dev server in development), exposes `/health`, and wire `pnpm dev` to start both apps. Verify: `pnpm dev` starts both apps, `GET http://127.0.0.1:<port>/health` returns ok, and the server serves the built web index.
 
 ## 5. E2E + axe
 

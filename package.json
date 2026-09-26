@@ -9,6 +9,7 @@
     "node": ">=20"
   },
   "scripts": {
+    "dev": "concurrently --kill-others --names server,web --prefix-colors cyan,magenta \"pnpm --filter @openartifact/server dev\" \"pnpm --filter @openartifact/web dev\"",
     "build": "pnpm -r --if-present run build",
     "typecheck": "pnpm -r --if-present run typecheck",
     "lint": "pnpm -r --if-present run lint",
@@ -17,6 +18,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "concurrently": "10.0.5",
     "eslint": "10.11.0",
     "eslint-config-prettier": "10.1.8",
     "prettier": "3.9.9",
