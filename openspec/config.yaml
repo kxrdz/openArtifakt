@@ -1,0 +1,27 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+context: |
+  Tech stack: TypeScript strict, pnpm workspaces, React 18 + Vite + Tailwind + Zustand, Hono server, better-sqlite3, Vitest + Playwright.
+  Workflow: one git branch per feature (feature/N-<slug>), one commit per task. Features are planned and implemented via OpenSpec skills (propose -> apply -> archive).
+  Full specification: docs/SPEC.md (section 12 lists the features). Product context: PRODUCT.md. Visual system: DESIGN.md.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+rules:
+  tasks:
+    - Break each feature into small, independently committable tasks (each task = one git commit)
+    - Each task must map to an acceptance criterion in docs/SPEC.md section 12
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

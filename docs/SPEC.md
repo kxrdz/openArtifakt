@@ -17,13 +17,30 @@ Before anything else, read `AGENTS.md`, `PRODUCT.md` and `docs/PROGRESS.md` (inc
 
 If `PROGRESS.md` shows completed steps:
 1. Run `pnpm check` to confirm the last completed step still passes, and fix it first if it doesn't.
-2. Then work on the next unchecked step, or on what **Next** describes.
+2. Then work on the next unchecked step (feature), or on what **Next** describes.
 
-### After each step (section 12, in order)
-1. Run `pnpm check` and fix every failure.
-2. Tick the step in `docs/PROGRESS.md`, add a one-line entry under **Log**, and update **Next**.
-3. Commit with a descriptive message.
-4. Stop. The loop starts a fresh iteration for the next step.
+### Features, tasks, branches, and OpenSpec
+Section 12 lists the **features**; each is one OpenSpec change on its own git branch, and each **task** inside it is one commit.
+
+- **Feature** = one step in §12 → branch `feature/N-<slug>` (e.g. `feature/1-scaffold`) and OpenSpec change `N-<slug>`.
+- **Task** = one `- [ ]` item in the change's `tasks.md` → one commit.
+- **OpenSpec skills** (`.pi/skills/openspec-*`): `propose` to plan a feature, `apply` to implement its tasks, `archive` to finish and sync specs, `update`/`sync-specs`/`explore` as needed.
+
+**Feature lifecycle:**
+1. From `main`, create the branch: `git checkout -b feature/N-<slug>`.
+2. Run the `openspec-propose` skill to create change `N-<slug>` (proposal.md, `specs/.../spec.md`, design.md, tasks.md). Break the feature into small, independently committable tasks.
+3. Implement tasks one per iteration (see below).
+4. When every task is ticked and `pnpm check` is green, run the `openspec-archive-change` skill (syncs delta specs into `openspec/specs/`), merge the branch into `main`, tick the step in `docs/PROGRESS.md`, add a Log entry, update Next, and commit.
+
+### After each task (one iteration)
+1. Ensure you are on `feature/N-<slug>` (create it from `main` if this is a new feature).
+2. Run the `openspec-apply-change` skill for change `N-<slug>` and implement exactly the next unchecked task.
+3. Run `pnpm check` and fix every failure.
+4. Tick the task in `tasks.md` (`- [ ]` → `- [x]`) and commit: `git commit -m "feat(N-<slug>): <task summary>"`.
+5. Stop. The loop starts a fresh iteration for the next task on the same branch.
+
+### After each feature
+When every task in change `N-<slug>` is ticked and `pnpm check` is green, run the `openspec-archive-change` skill, merge `feature/N-<slug>` into `main`, tick the step in `docs/PROGRESS.md`, add a one-line entry under **Log**, update **Next**, and commit on `main`. Then stop.
 
 ### Decisions and blockers
 - **Never ask the user questions.** If a requirement is ambiguous, choose the simplest option that satisfies it, record the decision in `docs/DECISIONS.md`, and continue.
@@ -39,8 +56,9 @@ If `PROGRESS.md` shows completed steps:
 
 ### Loop mode (fresh session per iteration)
 This build runs as a loop: every iteration is a **fresh agent session** with no memory of earlier ones. The files in the repo are your only memory.
-- Each iteration: read `docs/PROGRESS.md`, then complete **exactly one** unchecked step from section 12 (or continue a partially done one). Verify it, tick it, commit, and stop.
-- If a step is too big for one iteration, finish a coherent part of it, commit, and write under **Next** in `PROGRESS.md` exactly what remains, so the next iteration can continue without guessing.
+- Each iteration: read `docs/PROGRESS.md`, then complete **exactly one task** (the next unchecked task of the next unchecked feature from section 12, or continue a partially done feature). Verify it, tick it, commit, and stop.
+- If a task is too big for one iteration, finish a coherent part of it, commit, and write under **Next** in `PROGRESS.md` exactly what remains, so the next iteration can continue without guessing. Do not tick the task until its specified behavior is fully implemented.
+- Feature branches are created from `main` and merged back into `main` when the feature is archived. The loop's session may start on any branch; always `git checkout` the branch for the current feature before working.
 - When the Definition of Done (section 14) is met, change the line `Status: IN PROGRESS` in `PROGRESS.md` to `Status: DONE`, commit, and stop. Never write `Status: DONE` earlier.
 
 ### Trademarks

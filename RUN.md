@@ -6,10 +6,10 @@ Pi's core deliberately leaves out subagents, plan mode, permission prompts, MCP 
 | Piece | Needed? | How |
 |---|---|---|
 | **Impeccable skill** | **Required** | `bootstrap.sh` runs `npx impeccable install --providers=pi --scope=project`, which installs it into `.pi/skills/`. |
-| **Long-run loop** | **Required, included** | `loop.sh` runs Pi in print mode, one fresh session per step, until `PROGRESS.md` says `Status: DONE`. No extension needed. |
+| **Long-run loop** | **Required, included** | `loop.sh` runs Pi in print mode, one fresh session per task, until `PROGRESS.md` says `Status: DONE`. No extension needed. |
 | **Web access** | Recommended | `pi install npm:pi-web-access` lets the agent look up current library docs when a version has changed. |
 | **Ralph loop extension** | Optional alternative to `loop.sh` | `pi install git:github.com/edxeth/pi-ralph-loop` if you prefer running the loop inside Pi's UI. Use the contents of `PROMPT.md` as the loop prompt. |
-| Subagent extension | Not needed | The spec uses fresh sessions per step instead. |
+| Subagent extension | Not needed | The spec uses fresh sessions per task instead. |
 | Permission extension | Not needed; use a container instead | A permission gate would pause an unattended run. |
 
 Pi packages can run arbitrary code, so review a third-party package before you install it.
@@ -56,13 +56,15 @@ Recommended: start `pi` in the folder, run `/skill:impeccable init`, and let it 
 ```
 
 What the loop does:
-- **Each iteration** is a fresh Pi session. It reads `AGENTS.md`, the spec and `PROGRESS.md`, completes one step, runs `pnpm check`, updates `PROGRESS.md` and commits.
+- **Each iteration** is a fresh Pi session. It reads `AGENTS.md`, the spec and `PROGRESS.md`, then completes one **task**: it ensures the feature branch exists (`feature/N-<slug>`), plans the feature with the `openspec-propose` skill on first contact, implements one task with `openspec-apply-change`, runs `pnpm check`, ticks the task, and commits. One commit per task.
+- **Each feature** is finished by running `openspec-archive-change` and merging `feature/N-<slug>` into `main`.
 - **It stops** when `PROGRESS.md` says `Status: DONE`, after 3 iterations in a row without a commit, or after 40 iterations. You can change the limits: `MAX_ITER=60 STALL_LIMIT=4 ./loop.sh`.
 - **Logs** for every iteration are saved in `.loop-logs/`.
 - **To continue after any stop**, fix the cause if there is one, then run `./loop.sh` again. The repo is the memory, so nothing is lost.
 
 ## 5. While it runs
-- Watch `docs/PROGRESS.md` and `git log --oneline`.
+- Watch `docs/PROGRESS.md`, `git log --oneline --all` and `git branch`.
+- Branches appear per feature (`feature/N-<slug>`); commits appear per task. OpenSpec changes live under `openspec/changes/` and archive under `openspec/changes/archive/`.
 - Don't edit files while an iteration is running.
 - If the loop stops on stalls, read the **Blocked** and **Next** sections in `docs/PROGRESS.md` and the last log. Usually a key, a system package, or a step that is too big is the cause.
 
