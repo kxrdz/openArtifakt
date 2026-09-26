@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Continue feature 3 on `feature/3-provider-adapters`: task 2.1 is done and committed (`withRetry` in `retry.ts` with backoff/jitter, `Retry-After` seconds/date parsing, and the no-retry-after-partial-output latch); next is task 2.2 (the `withFallbackTools` decorator in `fallback.ts` routing `text_delta` through the feature-2 `StreamParser` when `nativeTools` is false)._
+_Continue feature 3 on `feature/3-provider-adapters`: task 2.2 is done and committed (`withFallbackTools` in `fallback.ts`, routing `text_delta` through the feature-2 `StreamParser` and re-serializing artifact/mermaid content back to text); next is task 3.1 (the `openai-compatible` adapter in `openai.ts`, accumulating `tool_calls[].function.arguments` by `index` with parallel-call support, plus recorded fixtures and the four shared scenarios)._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->

@@ -8,7 +8,7 @@
 ## 2. Retry and fallback plumbing
 
 - [x] 2.1 Create `packages/core/src/providers/retry.ts` with a `withRetry` helper (exponential backoff + jitter, max 3 attempts, honor `Retry-After` seconds/date, and never retry after the wrapped stream has emitted any event), with unit tests for 429/5xx/network retry, `Retry-After`, and the no-retry-after-partial-output latch. Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
-- [ ] 2.2 Create `packages/core/src/providers/fallback.ts` with a `withFallbackTools` decorator that routes `text_delta` events through the feature-2 `StreamParser` and emits `tool_call_start`/`tool_call_delta`/`tool_call_end` for `<tool_call>` blocks when `nativeTools` is false, with unit tests (plain text passthrough, one fallback call, malformed-JSON block stays literal). Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
+- [x] 2.2 Create `packages/core/src/providers/fallback.ts` with a `withFallbackTools` decorator that routes `text_delta` events through the feature-2 `StreamParser` and emits `tool_call_start`/`tool_call_delta`/`tool_call_end` for `<tool_call>` blocks when `nativeTools` is false, with unit tests (plain text passthrough, one fallback call, malformed-JSON block stays literal). Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
 
 ## 3. The four adapters
 
