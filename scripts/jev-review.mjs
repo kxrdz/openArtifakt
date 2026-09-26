@@ -44,6 +44,7 @@ Usage:
 
 Options:
   --range <a..b>   Review commits in a git revision range
+  --shas <s1,s2>   Review exactly these commit SHAs (comma-separated)
   --since <sha>    Review commits from <sha> (exclusive) to HEAD
   --count <n>      Review the last <n> commits (default ${DEFAULT_COUNT})
   --dry-run        Print the payload that would be sent, without calling the API
@@ -104,6 +105,7 @@ function parseArgs(argv) {
     else if (a === "--gate") opts.gate = true;
     else if (a === "--gate-threshold") opts.gateThreshold = Number(argv[++i]);
     else if (a === "--range") opts.range = argv[++i];
+    else if (a === "--shas") opts.shas = argv[++i];
     else if (a === "--since") opts.since = argv[++i];
     else if (a === "--count") opts.count = Number(argv[++i]);
     else positional.push(a);
@@ -238,6 +240,9 @@ async function callJev(state, { dryRun }) {
 // --- commit gathering ------------------------------------------------------
 
 function listCommitShas(opts) {
+  if (opts.shas) {
+    return opts.shas.split(",").map((s) => s.trim()).filter(Boolean);
+  }
   if (opts.range) {
     return gitLines(["log", "--reverse", "--format=%H", opts.range]);
   }
@@ -423,7 +428,14 @@ async function main() {
   }
 
   const commits = shas.map(buildCommitState);
-  const rangeLabel = opts.range ?? (opts.since ? `${opts.since}..HEAD` : `${shas[0].slice(0, 7)}..${shas[shas.length - 1].slice(0, 7)}`);
+  const short = (s) => s.slice(0, 7);
+  const rangeLabel =
+    opts.range ??
+    (opts.since
+      ? `${opts.since}..HEAD`
+      : shas.length === 1
+        ? short(shas[0])
+        : `${short(shas[0])}..${short(shas[shas.length - 1])}`);
 
   if (opts.dryRun) {
     process.stdout.write(
@@ -456,7 +468,7 @@ async function main() {
   }
 
   // Record progress only for default/since/count flows (reachable from HEAD).
-  if (!opts.range) {
+  if (!opts.range && !opts.shas) {
     writeFileSync(MARKER_FILE, results[results.length - 1].sha + "\n");
   }
 

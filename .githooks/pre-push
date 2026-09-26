@@ -3,13 +3,16 @@
 # (TypeSafe System One) via scripts/jev-review.mjs.
 #
 # - Blocks the push (exit 2 -> non-zero) when Jev flags a commit as
-#   `blocking` or `risk_security` at or above the gate threshold.
+#   `blocking` or `risk_security` at or above the gate threshold
+#   (JEV_GATE_THRESHOLD, default 0.6).
 # - Fails OPEN on a missing API key or a transient review error, so a
 #   developer without a key is never blocked silently.
 # - Bypass: JEV_REVIEW_BYPASS=1 git push, or git push --no-verify.
 
 # Exit early if the repo doesn't have the script or the reviewer is disabled.
 [ -n "${JEV_REVIEW_BYPASS:-}" ] && exit 0
+
+THRESHOLD="${JEV_GATE_THRESHOLD:-0.6}"
 
 ROOT="$(git rev-parse --show-toplevel)"
 SCRIPT="$ROOT/scripts/jev-review.mjs"
@@ -43,14 +46,13 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 
   [ -n "$shas" ] || continue
 
-  oldest="$(printf '%s\n' "$shas" | tail -n 1)"
-  newest="$(printf '%s\n' "$shas" | head -n 1)"
   count="$(printf '%s\n' "$shas" | wc -l | tr -d ' ')"
+  shas_csv="$(printf '%s\n' "$shas" | paste -sd, -)"
   reviewed=1
 
-  echo "jev-reviewer: reviewing $count commit(s) ($(printf '%s' "$oldest" | cut -c1-7)..$(printf '%s' "$newest" | cut -c1-7))" >&2
+  echo "jev-reviewer: reviewing $count commit(s)" >&2
 
-  out="$(node "$SCRIPT" --range "${oldest}..${newest}" --gate 2>&1)"
+  out="$(node "$SCRIPT" --shas "$shas_csv" --gate --gate-threshold "$THRESHOLD" 2>&1)"
   code=$?
 
   printf '%s\n' "$out" >&2
