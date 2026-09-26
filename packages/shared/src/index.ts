@@ -1,8 +1,9 @@
 /**
  * OpenArtifact shared package.
  *
- * This is the home of the provider-neutral message model and the shared zod
- * schemas used by both the server and the web client. The real types land in
- * feature 2; until then this placeholder keeps the workspace wired together.
+ * Home of the provider-neutral message model (and, in later tasks, the stream
+ * event model) with zod schemas shared by both the server and the web client.
  */
 export const SHARED_VERSION = "0.1.0";
+
+export * from "./messages";
