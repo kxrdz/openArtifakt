@@ -1,0 +1,28 @@
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+*.log
+.DS_Store
+
+# secrets
+.env
+.env.local
+
+# test output
+playwright-report/
+test-results/
+
+# loop logs
+.loop-logs/
+
+# Impeccable: ignore working files, keep shared artifacts tracked
+**/.impeccable/*
+!**/.impeccable/config.json
+!**/.impeccable/design.json
+!**/.impeccable/surfaces/
+!**/.impeccable/critique/
+!**/.impeccable/live/
+**/.impeccable/live/*
+!**/.impeccable/live/config.json
