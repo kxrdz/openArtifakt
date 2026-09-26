@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Current feature/branch:** none active; feature 2 is merged into `main`.
+- **Current feature/branch:** `feature/3-provider-adapters` (change `3-provider-adapters`).
 
 - [x] 1. Scaffold
 - [x] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Start feature 3 on `feature/3-provider-adapters`: run `openspec-propose` to plan it, then implement its first task._
+_Continue feature 3 on `feature/3-provider-adapters`: task 1.1 is done and committed; next is task 1.2 (zod → provider JSON-schema conversion in `schemas.ts`)._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
