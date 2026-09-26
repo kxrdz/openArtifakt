@@ -6,7 +6,7 @@
 
 ## 2. Core package
 
-- [ ] 2.1 Create `packages/core` (no React/Hono/DOM dependencies) with `package.json`, `tsconfig.json`, placeholder `src/index.ts`, and a trivial Vitest test. Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
+- [x] 2.1 Create `packages/core` (no React/Hono/DOM dependencies) with `package.json`, `tsconfig.json`, placeholder `src/index.ts`, and a trivial Vitest test. Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
 
 ## 3. Web app
 
