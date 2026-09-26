@@ -7,6 +7,7 @@
  * stable surface.
  */
 export * from "./anthropic";
+export * from "./factory";
 export * from "./fallback";
 export * from "./gemini";
 export * from "./ollama";

@@ -19,5 +19,5 @@
 
 ## 4. Factory and smoke harness
 
-- [ ] 4.1 Create `packages/core/src/providers/factory.ts` with `createProviderAdapter(config)` that selects the adapter, applies `withFallbackTools` when `nativeTools` is false and `withRetry`, and keeps capability flags as the only branch; add unit tests for selection and fallback wiring. Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
+- [x] 4.1 Create `packages/core/src/providers/factory.ts` with `createProviderAdapter(config)` that selects the adapter, applies `withFallbackTools` when `nativeTools` is false and `withRetry`, and keeps capability flags as the only branch; add unit tests for selection and fallback wiring. Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green.
 - [ ] 4.2 Add `scripts/smoke.mjs` and a root `smoke` script (`pnpm smoke --provider <id>`) that runs one real request per provider using `.env` keys and skips with a clear message when a key is absent; document the script in `.env.example` and verify `pnpm smoke --provider openai-compatible` prints a skip or a response without logging secrets. Verify: root `pnpm check` stays green.
