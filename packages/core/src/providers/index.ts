@@ -6,6 +6,7 @@
  * contract and request types first so downstream modules can depend on a
  * stable surface.
  */
+export * from "./anthropic";
 export * from "./fallback";
 export * from "./openai";
 export * from "./retry";
