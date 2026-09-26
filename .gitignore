@@ -17,6 +17,9 @@ test-results/
 # loop logs
 .loop-logs/
 
+# Jev commit-review progress marker
+.jev-review-last
+
 # Impeccable: ignore working files, keep shared artifacts tracked
 **/.impeccable/*
 !**/.impeccable/config.json
