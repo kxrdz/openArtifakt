@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Continue feature 3 on `feature/3-provider-adapters`: tasks 1.1–1.2 are done and committed (provider contract/types and zod→JSON-schema conversion); next is task 2.1 (the `withRetry` helper in `retry.ts` with backoff/jitter, `Retry-After`, and the no-retry-after-partial-output latch)._
+_Continue feature 3 on `feature/3-provider-adapters`: task 2.1 is done and committed (`withRetry` in `retry.ts` with backoff/jitter, `Retry-After` seconds/date parsing, and the no-retry-after-partial-output latch); next is task 2.2 (the `withFallbackTools` decorator in `fallback.ts` routing `text_delta` through the feature-2 `StreamParser` when `nativeTools` is false)._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
