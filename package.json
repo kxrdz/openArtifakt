@@ -15,7 +15,8 @@
     "lint": "pnpm -r --if-present run lint",
     "test": "pnpm -r --if-present run test",
     "e2e": "playwright test --config e2e/playwright.config.ts",
-    "check": "pnpm typecheck && pnpm lint && pnpm test"
+    "design:check": "impeccable detect --json apps/web/src",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm design:check && pnpm e2e"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
@@ -24,6 +25,7 @@
     "concurrently": "10.0.5",
     "eslint": "10.11.0",
     "eslint-config-prettier": "10.1.8",
+    "impeccable": "4.1.0",
     "prettier": "3.9.9",
     "typescript": "5.9.3",
     "typescript-eslint": "8.70.1",

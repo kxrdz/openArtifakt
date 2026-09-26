@@ -22,4 +22,4 @@
 
 ## 6. design:check + CI wiring
 
-- [ ] 6.1 Add the `design:check` script (`impeccable detect --json apps/web/src`, with `impeccable` pinned as a devDependency), wire it and `e2e` into the root `check`, and add the GitHub Actions CI workflow running `pnpm check`. Verify: `pnpm check` passes end-to-end and the workflow YAML parses.
+- [x] 6.1 Add the `design:check` script (`impeccable detect --json apps/web/src`, with `impeccable` pinned as a devDependency), wire it and `e2e` into the root `check`, and add the GitHub Actions CI workflow running `pnpm check`. Verify: `pnpm check` passes end-to-end and the workflow YAML parses.
