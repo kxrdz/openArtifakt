@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Continue feature 4 on `feature/4-agent-loop-tools-security`: tasks 1.1 and 2.1 are done and committed. Task 2.1 added `packages/core/src/tools/` — the tool contract (`Tool<TSchema>` with `defineTool`, `ToolContext`, `ToolResult`, `ApprovalCategory`), the `truncateText`/`truncateResult` cap (head+tail with a `[... N lines truncated ...]` marker, character-slice for a single over-long line), and `ToolRegistry` (register/get/has/list/toDefinitions/size), re-exported from `tools/index.ts` and `src/index.ts`. Next is task 2.2: `read_file`, `list_directory` (`.gitignore`-respecting), `glob` (`*`/`**`/`?`), and `search_code` (ripgrep-if-present with a JS regex fallback), each routing through the path jail, with unit tests._
+_Continue feature 4 on `feature/4-agent-loop-tools-security`: tasks 1.1, 2.1 and 2.2 are done and committed. Task 2.2 added the four read tools — `read_file` (line-numbered `N|content` output with startLine/endLine clamping), `list_directory` (indented tree, `.gitignore`-respecting via a scoped matcher, depth limit, symlinks marked `@`), `glob` (`*`/`**`/`?`, sorted relative file paths, no symlink following), and `search_code` (ripgrep via a new `ctx.findRipgrep()` hook with a JS walk fallback; both respect `.gitignore` and cap results) — each routing through the path jail, with unit tests. Next is task 2.3: `edit_file` (exact-string replace with helpful not-found/not-unique errors and `replaceAll`), `write_file`, and the pre-mutation snapshot helper writing to `<snapshotRoot>/<conversation>/<turn>/`, with unit tests._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
