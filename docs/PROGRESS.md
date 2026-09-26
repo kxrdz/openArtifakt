@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Current feature/branch:** feature 2 active on `feature/2-shared-types-stream-parser` (OpenSpec change `2-shared-types-stream-parser`, 3/6 tasks done).
+- **Current feature/branch:** feature 2 active on `feature/2-shared-types-stream-parser` (OpenSpec change `2-shared-types-stream-parser`, 4/6 tasks done).
 
 - [x] 1. Scaffold
 - [ ] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Continue feature 2 on `feature/2-shared-types-stream-parser`: run `openspec-apply-change` for `2-shared-types-stream-parser` and implement task 2.3 (fallback `tool_call` protocol parsing: emit one `tool_call {name, args}` event per complete `<tool_call name="...">…</tool_call>` block, emit as literal text on invalid JSON args, and keep it literal inside fences), then continue with task 3.1 (fixtures + chunk-boundary fuzz test). Task 2.2 (artifact parsing) is done and committed._
+_Continue feature 2 on `feature/2-shared-types-stream-parser`: run `openspec-apply-change` for `2-shared-types-stream-parser` and implement task 3.1 (add static fixtures to `packages/core/test/fixtures/` and a chunk-boundary fuzz test asserting identical normalized event sequences for whole/single-split/random multi-split feedings). Task 2.3 (fallback `tool_call` parsing) is done and committed._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
