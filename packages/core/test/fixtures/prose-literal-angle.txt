@@ -1,0 +1,4 @@
+The comparison a < b is true, and 1 < 2 too.
+Generics look like List<T> and Map<K, V> in many languages.
+A heart <3 and an arrow <- are just text.
+A trailing unfinished tag: <artifact

@@ -2,6 +2,9 @@
 
 Format: **Decision**: reason. *Alternatives considered.*
 
+- **`ParserEvent` discriminates on `type`, and the artifact's declared MIME type is named `artifactType`** (§5 lists `artifact_open {identifier, type, title, language?}`): a TS discriminated union cannot carry two `type` properties, and `type` is already the discriminator on every other event, matching `StreamEvent` in `packages/shared`. The artifact's `type` attribute (e.g. `application/vnd.react`) is therefore exposed as `artifactType` and preserved verbatim. *Naming the MIME field `type` with a `kind`/`event` discriminator (breaks consistency with `StreamEvent`); dropping the discriminator.*
+- **Fence language is the first whitespace-delimited word of the info string, lowercased** (e.g. `` ```mermaid extra `` → `mermaid`): follows CommonMark's info-string convention where the first word is the language and the rest is ignored. *Comparing the whole info string to `mermaid` (a fence like `` ```mermaid lang `` would then not render as a diagram).*
+
 - **Local Hono server + Vite React UI instead of Next.js**: the app needs long-lived processes (shell execution, streaming, SQLite) on the user's machine; a local server makes that explicit, and the UI stays a plain client. *Next.js with a custom server.*
 - **Sandboxed iframe with vendored libraries instead of Sandpack's hosted bundler**: works offline and never sends user code to a third party. *Sandpack, a self-hosted bundler.*
 - **Code-first build path in Impeccable**: the run is unattended and has no image generation. *Comp-first.*

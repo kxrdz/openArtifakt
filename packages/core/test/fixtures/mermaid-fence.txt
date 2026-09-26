@@ -1,0 +1,9 @@
+Here is a diagram:
+
+```mermaid
+graph TD;
+  A --> B;
+  B --> C;
+```
+
+That is a three-node graph.

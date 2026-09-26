@@ -1,0 +1,9 @@
+To emit an artifact, write a block like this example:
+
+```html
+<artifact identifier="demo" type="text/html" title="Demo">
+  <h1>hi</h1>
+</artifact>
+```
+
+That example is literal text because it is inside a fenced code block.

@@ -1,0 +1,5 @@
+<artifact identifier="split-demo" type="application/vnd.react" title="Split Demo" language="tsx">
+export default function App() {
+  return <div className="p-4">Hello, world</div>;
+}
+</artifact>
