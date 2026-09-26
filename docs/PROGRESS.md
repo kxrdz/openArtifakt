@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_On `feature/1-scaffold`: implement task 5.1 (Playwright/axe e2e), then 6.1 (design:check + CI). Step 1 is done when `pnpm dev` starts both apps and `pnpm check` passes._
+_On `feature/1-scaffold`: implement task 6.1 (design:check script + wire e2e/design:check into `check` + GitHub Actions CI). Step 1 is done when `pnpm dev` starts both apps and `pnpm check` passes end-to-end._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
