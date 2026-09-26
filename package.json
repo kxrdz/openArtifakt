@@ -15,6 +15,7 @@
     "lint": "pnpm -r --if-present run lint",
     "test": "pnpm -r --if-present run test",
     "e2e": "playwright test --config e2e/playwright.config.ts",
+    "smoke": "tsx scripts/smoke.mjs",
     "design:check": "impeccable detect --json apps/web/src",
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm design:check && pnpm e2e"
   },
@@ -27,6 +28,7 @@
     "eslint-config-prettier": "10.1.8",
     "impeccable": "4.1.0",
     "prettier": "3.9.9",
+    "tsx": "4.23.15",
     "typescript": "5.9.3",
     "typescript-eslint": "8.70.1",
     "vitest": "5.0.2"
