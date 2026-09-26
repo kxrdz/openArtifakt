@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Continue feature 3 on `feature/3-provider-adapters`: task 1.1 is done and committed; next is task 1.2 (zod → provider JSON-schema conversion in `schemas.ts`)._
+_Continue feature 3 on `feature/3-provider-adapters`: tasks 1.1–1.2 are done and committed (provider contract/types and zod→JSON-schema conversion); next is task 2.1 (the `withRetry` helper in `retry.ts` with backoff/jitter, `Retry-After`, and the no-retry-after-partial-output latch)._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
