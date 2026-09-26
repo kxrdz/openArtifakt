@@ -11,3 +11,4 @@ export const CORE_VERSION = "0.1.0";
 
 export * from "./parser";
 export * from "./providers";
+export * from "./security";
