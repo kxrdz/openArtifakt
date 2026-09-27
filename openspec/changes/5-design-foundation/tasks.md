@@ -6,7 +6,7 @@
 
 ## 2. Self-hosted fonts
 
-- [ ] 2.1 Vendor IBM Plex Sans (UI) and IBM Plex Mono (code/paths/terminal) woff2 files into `apps/web/public/fonts/` and add `@font-face` rules + `--font-sans`/`--font-mono` tokens in `tokens.css` so Tailwind's `fontFamily` resolves them; confirm no remote font URL exists anywhere and the app renders both faces offline. Verify: `pnpm build` (web) succeeds, `pnpm design:check` passes. If the build machine cannot download fonts, record the blocker in `docs/PROGRESS.md` with the exact fix and fall back to a system stack behind `TODO(blocked)`.
+- [x] 2.1 Vendor IBM Plex Sans (UI) and IBM Plex Mono (code/paths/terminal) woff2 files into `apps/web/public/fonts/` and add `@font-face` rules + `--font-sans`/`--font-mono` tokens in `tokens.css` so Tailwind's `fontFamily` resolves them; confirm no remote font URL exists anywhere and the app renders both faces offline. Verify: `pnpm build` (web) succeeds, `pnpm design:check` passes. If the build machine cannot download fonts, record the blocker in `docs/PROGRESS.md` with the exact fix and fall back to a system stack behind `TODO(blocked)`.
 
 ## 3. UI primitives
 
