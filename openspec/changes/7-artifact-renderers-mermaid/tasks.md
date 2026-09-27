@@ -22,5 +22,5 @@
 
 ## 5. e2e + screenshots
 
-- [ ] 5.1 Extend the fake provider fixture with a scripted turn streaming one of each artifact type (react, html, svg, mermaid, code) plus a valid and an invalid ```mermaid fence, and add `e2e/artifacts.spec.ts` asserting every type renders, the sandbox blocks access to `window.parent.document`, and the invalid diagram shows an inline error without crashing the message list. Verify `pnpm e2e` passes.
+- [x] 5.1 Extend the fake provider fixture with a scripted turn streaming one of each artifact type (react, html, svg, mermaid, code) plus a valid and an invalid ```mermaid fence, and add `e2e/artifacts.spec.ts` asserting every type renders, the sandbox blocks access to `window.parent.document`, and the invalid diagram shows an inline error without crashing the message list. Verify `pnpm e2e` passes.
 - [ ] 5.2 Extend `e2e/screenshots.spec.ts` to capture each artifact type and the Mermaid syntax-error state in both themes at desktop and mobile widths, and confirm `pnpm screenshots` writes them to `docs/screenshots/`. Verify `pnpm check` stays green end-to-end.
