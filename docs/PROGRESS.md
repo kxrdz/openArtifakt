@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_On `feature/6-chat-ui-approvals-terminal-log`, implement the next unchecked task in `openspec/changes/6-chat-ui-approvals-terminal-log/tasks.md`, starting with task 4.1 (web chat store + SSE client: add `zustand` and `@openartifact/shared` to `apps/web`, add the shared wire types in `packages/shared/src/chat.ts` — agent state, chat event union, approval decision schemas — and add a Vite dev proxy for `/api`). One task per iteration, one commit per task, `pnpm check` green before each commit._
+_On `feature/6-chat-ui-approvals-terminal-log`, implement the next unchecked task in `openspec/changes/6-chat-ui-approvals-terminal-log/tasks.md`, starting with task 4.2 (web SSE-over-fetch parser in `apps/web/src/lib/sse.ts` + Zustand `apps/web/src/store/chatStore.ts` with messages, agent state, terminal output, pending approval, and send/stop/decide actions; unit tests cover SSE parsing and the send → streaming → approval → decision → done transition). One task per iteration, one commit per task, `pnpm check` green before each commit._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
