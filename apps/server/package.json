@@ -15,10 +15,12 @@
     "@hono/node-server": "2.1.1",
     "@openartifact/core": "workspace:*",
     "@openartifact/shared": "workspace:*",
+    "better-sqlite3": "13.0.3",
     "hono": "4.13.9",
     "zod": "4.6.5"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "9.6.0",
     "@types/node": "22.20.4",
     "tsx": "4.23.15"
   }
