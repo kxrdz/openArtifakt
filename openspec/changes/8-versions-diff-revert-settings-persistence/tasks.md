@@ -7,7 +7,7 @@
 
 ## 2. Shared wire types
 
-- [ ] 2.1 Add `settings`, `conversation summary` and `history` (messages + artifact versions + tool-call log) types with zod schemas to `packages/shared` and export them from `index.ts`. Verify `pnpm --filter @openartifact/shared test` and `pnpm --filter @openartifact/shared typecheck`.
+- [x] 2.1 Add `settings`, `conversation summary` and `history` (messages + artifact versions + tool-call log) types with zod schemas to `packages/shared` and export them from `index.ts`. Verify `pnpm --filter @openartifact/shared test` and `pnpm --filter @openartifact/shared typecheck`.
 
 ## 3. Settings server
 
