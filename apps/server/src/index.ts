@@ -1,5 +1,5 @@
 import { serve } from "@hono/node-server";
-import { createApp } from "./app.js";
+import { createApp } from "./app";
 
 const HOST = "127.0.0.1";
 const port = Number(process.env.PORT ?? 4318);
