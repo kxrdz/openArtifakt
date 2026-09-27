@@ -38,7 +38,7 @@
 
 ## 10. Update DESIGN.md
 
-- [ ] 10.1 Rewrite `DESIGN.md` to document every shipped surface (workspace shell, chat, tool/approval cards, terminal log, artifact panel with versions and diff, settings drawer, command palette, empty/error states) plus the keyboard-shortcut map and hardened edge-case rules. Verify the document covers each surface named in the design-foundation documentation requirement.
+- [x] 10.1 Rewrite `DESIGN.md` to document every shipped surface (workspace shell, chat, tool/approval cards, terminal log, artifact panel with versions and diff, settings drawer, command palette, empty/error states) plus the keyboard-shortcut map and hardened edge-case rules. Verify the document covers each surface named in the design-foundation documentation requirement.
 
 ## 11. e2e and screenshots
 
