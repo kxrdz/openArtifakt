@@ -26,8 +26,16 @@ export interface ArtifactStore {
   artifacts: Artifact[];
   /** The identifier currently open in the panel, or null when none. */
   selectedId: string | null;
+  /**
+   * Explicitly pinned version per artifact identifier. Absent (or pointing
+   * at a version that no longer exists) means "follow the latest".
+   */
+  versionSelections: Record<string, number>;
   /** Open an artifact in the panel. */
   selectArtifact: (identifier: string) => void;
+  /** Show a specific stored version; selecting the latest returns to
+   * following it as new versions arrive. */
+  selectVersion: (identifier: string, version: number) => void;
   /** Re-derive artifacts from an assistant message's accumulated text. */
   updateFromContent: (content: string) => void;
   /** Lift an inline diagram into the panel as a Mermaid artifact. */
@@ -52,6 +60,28 @@ const MERMAID_TYPE = "application/vnd.mermaid";
 /** Merge the two source lists in panel order (derived first). */
 function mergeArtifacts(derived: Artifact[], lifted: Artifact[]): Artifact[] {
   return lifted.length === 0 ? derived : [...derived, ...lifted];
+}
+
+/**
+ * Drop pinned versions whose artifact (or pinned version) no longer exists,
+ * e.g. after a re-parse removed an artifact or "new conversation" cleared it.
+ */
+function pruneVersionSelections(
+  selections: Record<string, number>,
+  artifacts: Artifact[],
+): Record<string, number> {
+  let pruned: Record<string, number> | null = null;
+  for (const [identifier, version] of Object.entries(selections)) {
+    const artifact = artifacts.find(
+      (candidate) => candidate.identifier === identifier,
+    );
+    const stillValid = artifact?.versions.some((v) => v.version === version);
+    if (!stillValid) {
+      pruned ??= { ...selections };
+      delete pruned[identifier];
+    }
+  }
+  return pruned ?? selections;
 }
 
 /** Monotonic counter for lifted-diagram identifiers (never reused). */
@@ -90,8 +120,29 @@ export function createArtifactStore() {
     derived: [],
     lifted: [],
     selectedId: null,
+    versionSelections: {},
 
     selectArtifact: (identifier) => set({ selectedId: identifier }),
+
+    selectVersion: (identifier, version) =>
+      set((state) => {
+        const artifact = state.artifacts.find(
+          (candidate) => candidate.identifier === identifier,
+        );
+        const latest = artifact?.versions[artifact.versions.length - 1];
+        if (artifact === undefined || latest === undefined) return state;
+        const versionSelections = { ...state.versionSelections };
+        if (version === latest.version) {
+          // Picking the latest returns to following it (new versions take
+          // over automatically, e.g. while streaming).
+          delete versionSelections[identifier];
+        } else if (artifact.versions.some((v) => v.version === version)) {
+          versionSelections[identifier] = version;
+        } else {
+          return state;
+        }
+        return { versionSelections };
+      }),
 
     updateFromContent: (content) => {
       const document = parseDocument(content);
@@ -104,7 +155,11 @@ export function createArtifactStore() {
         const selectedId = stillPresent
           ? state.selectedId
           : (artifacts[0]?.identifier ?? null);
-        return { derived, artifacts, selectedId };
+        const versionSelections = pruneVersionSelections(
+          state.versionSelections,
+          artifacts,
+        );
+        return { derived, artifacts, selectedId, versionSelections };
       });
     },
 
@@ -134,9 +189,18 @@ export function createArtifactStore() {
         lifted: [],
         artifacts,
         selectedId: artifacts[0]?.identifier ?? null,
+        // A restored conversation starts every artifact on its latest version.
+        versionSelections: {},
       }),
 
-    clear: () => set({ derived: [], lifted: [], artifacts: [], selectedId: null }),
+    clear: () =>
+      set({
+        derived: [],
+        lifted: [],
+        artifacts: [],
+        selectedId: null,
+        versionSelections: {},
+      }),
   }));
 }
 

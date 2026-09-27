@@ -27,7 +27,7 @@
 
 ## 7. Versions, diff and revert
 
-- [ ] 7.1 Add a version dropdown to the artifact panel that selects any stored version and renders its content, showing the version number and a "latest" marker. Verify a web unit test and `pnpm design:check`.
+- [x] 7.1 Add a version dropdown to the artifact panel that selects any stored version and renders its content, showing the version number and a "latest" marker. Verify a web unit test and `pnpm design:check`.
 - [ ] 7.2 Add a locally-bundled, lazily-loaded Monaco diff editor (`VersionDiff`) that diffs any two selected versions read-only, themed from the design tokens, with workers configured for offline use. Verify a web unit test for the version-pair selection logic, `pnpm --filter @openartifact/web build`, and `pnpm design:check`.
 - [ ] 7.3 Add a revert action to the artifact store and panel that appends the older version's content as a new version, never deleting history. Verify a web unit test (revert appends; all prior versions remain) and `pnpm design:check`.
 

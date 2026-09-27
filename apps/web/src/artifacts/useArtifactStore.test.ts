@@ -61,6 +61,77 @@ describe("createArtifactStore", () => {
   });
 });
 
+describe("version selection", () => {
+  const FIRST =
+    '<artifact identifier="a" type="application/vnd.code" title="A" language="python">\nv1\n</artifact>\n';
+  const SECOND =
+    FIRST +
+    '<artifact identifier="a" type="application/vnd.code" title="A" language="python">\nv2\n</artifact>\n';
+  const THIRD =
+    SECOND +
+    '<artifact identifier="a" type="application/vnd.code" title="A" language="python">\nv3\n</artifact>\n';
+
+  it("has no pinned version until one is selected (latest is followed)", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    expect(store.getState().versionSelections).toEqual({});
+  });
+
+  it("pins an older version and keeps it pinned as new versions arrive", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    store.getState().selectVersion("a", 1);
+    expect(store.getState().versionSelections).toEqual({ a: 1 });
+
+    store.getState().updateFromContent(THIRD);
+    expect(store.getState().versionSelections).toEqual({ a: 1 });
+  });
+
+  it("selecting the latest version returns to following it", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    store.getState().selectVersion("a", 1);
+    store.getState().selectVersion("a", 2);
+    expect(store.getState().versionSelections).toEqual({});
+
+    // A new version then takes over automatically.
+    store.getState().updateFromContent(THIRD);
+    expect(store.getState().versionSelections).toEqual({});
+  });
+
+  it("ignores versions and identifiers that do not exist", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    store.getState().selectVersion("a", 9);
+    store.getState().selectVersion("missing", 1);
+    expect(store.getState().versionSelections).toEqual({});
+  });
+
+  it("drops a pin when the artifact or its version disappears", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    store.getState().selectVersion("a", 1);
+
+    store.getState().updateFromContent("");
+    expect(store.getState().versionSelections).toEqual({});
+
+    store.getState().updateFromContent(SECOND);
+    store.getState().selectVersion("a", 2);
+    store.getState().clear();
+    expect(store.getState().versionSelections).toEqual({});
+  });
+
+  it("starts a restored conversation on the latest versions", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    store.getState().selectVersion("a", 1);
+
+    const artifacts = store.getState().artifacts;
+    store.getState().restoreArtifacts(artifacts);
+    expect(store.getState().versionSelections).toEqual({});
+  });
+});
+
 describe("liftToArtifact", () => {
   it("lifts an inline diagram into a complete Mermaid artifact and selects it", () => {
     const store = createArtifactStore();
