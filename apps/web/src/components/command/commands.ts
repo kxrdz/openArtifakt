@@ -130,3 +130,148 @@ export function shortcutKeyLabels(
   labels.push(displayKey(shortcut.key));
   return labels;
 }
+
+/**
+ * The default key map (design decision 2). A single source of truth shared by
+ * the global shortcut layer and the `Kbd` hints on the controls, so a binding
+ * and its on-screen hint can never drift.
+ */
+export const SHORTCUTS = {
+  send: { mod: true, key: "Enter" },
+  stop: { key: "Escape" },
+  approve: { alt: true, key: "a" },
+  reject: { alt: true, key: "r" },
+  toggleArtifactPanel: { mod: true, key: "\\" },
+  toggleTerminalLog: { mod: true, key: "j" },
+  openSettings: { mod: true, key: "," },
+  focusChatInput: { mod: true, key: "i" },
+} satisfies Record<string, Shortcut>;
+
+/**
+ * The side effects a command can trigger (design decision 1). `buildCommands`
+ * receives these closures so the concrete list can reach the stores and the
+ * shell's state (sheet/settings/terminal/panel toggles) without the registry
+ * importing either.
+ */
+export interface CommandActions {
+  send: () => void;
+  stop: () => void;
+  approve: () => void;
+  reject: () => void;
+  toggleArtifactPanel: () => void;
+  toggleTerminalLog: () => void;
+  openSettings: () => void;
+  toggleTheme: () => void;
+  newConversation: () => void;
+  undoLastTurn: () => void;
+  focusChatInput: () => void;
+  jumpToArtifactPanel: () => void;
+}
+
+/** Availability snapshots that gate the conditional commands. */
+export interface CommandAvailability {
+  /** A turn is in flight (Send becomes Stop). */
+  sending: boolean;
+  /** An approval card is waiting for a decision. */
+  hasApproval: boolean;
+  /** The last completed turn changed files and can be undone. */
+  hasUndoableTurn: boolean;
+}
+
+/**
+ * Build the concrete command list (task 4.1). One list drives both the global
+ * shortcut layer and the command palette; the palette-only commands (theme,
+ * new conversation, undo, jump) carry no `shortcut` and so appear only there.
+ */
+export function buildCommands(
+  actions: CommandActions,
+  availability: CommandAvailability,
+): Command[] {
+  return [
+    {
+      id: "send",
+      label: "Send message",
+      hint: "submit",
+      shortcut: SHORTCUTS.send,
+      run: actions.send,
+      when: () => !availability.sending,
+    },
+    {
+      id: "stop",
+      label: "Stop",
+      hint: "cancel turn",
+      shortcut: SHORTCUTS.stop,
+      run: actions.stop,
+      when: () => availability.sending,
+    },
+    {
+      id: "approve",
+      label: "Approve pending action",
+      hint: "allow",
+      shortcut: SHORTCUTS.approve,
+      run: actions.approve,
+      when: () => availability.hasApproval,
+    },
+    {
+      id: "reject",
+      label: "Reject pending action",
+      hint: "deny",
+      shortcut: SHORTCUTS.reject,
+      run: actions.reject,
+      when: () => availability.hasApproval,
+    },
+    {
+      id: "toggle-artifact-panel",
+      label: "Toggle artifact panel",
+      hint: "panel",
+      shortcut: SHORTCUTS.toggleArtifactPanel,
+      run: actions.toggleArtifactPanel,
+    },
+    {
+      id: "toggle-terminal-log",
+      label: "Toggle terminal log",
+      hint: "output",
+      shortcut: SHORTCUTS.toggleTerminalLog,
+      run: actions.toggleTerminalLog,
+    },
+    {
+      id: "open-settings",
+      label: "Open settings",
+      hint: "preferences",
+      shortcut: SHORTCUTS.openSettings,
+      run: actions.openSettings,
+    },
+    {
+      id: "toggle-theme",
+      label: "Toggle theme",
+      hint: "light dark",
+      run: actions.toggleTheme,
+    },
+    {
+      id: "focus-chat-input",
+      label: "Focus chat input",
+      hint: "composer",
+      shortcut: SHORTCUTS.focusChatInput,
+      run: actions.focusChatInput,
+    },
+    {
+      id: "new-conversation",
+      label: "New conversation",
+      hint: "clear",
+      run: actions.newConversation,
+    },
+    {
+      id: "undo-last-turn",
+      label: "Undo last turn",
+      hint: "revert",
+      run: actions.undoLastTurn,
+      when: () => availability.hasUndoableTurn,
+    },
+    {
+      id: "jump-to-artifact-panel",
+      label: "Jump to artifact panel",
+      hint: "artifact version",
+      run: actions.jumpToArtifactPanel,
+    },
+  ];
+}

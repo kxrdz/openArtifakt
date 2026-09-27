@@ -4,7 +4,8 @@ import type { ApprovalRequestEvent } from "@openartifact/shared";
 
 import { lineDiff, truncateText } from "../../lib/diff";
 import { useChatStore } from "../../store/chatStore";
-import { Button, cn, focusRing, StatusDot } from "../ui";
+import { shortcutKeyLabels, SHORTCUTS } from "../command/commands";
+import { Button, cn, focusRing, Kbd, StatusDot } from "../ui";
 
 /** Longest a diff or file body is shown before truncation. */
 const MAX_BODY_CHARS = 6000;
@@ -155,9 +156,19 @@ export function ApprovalCard({ approval }: { approval: ApprovalRequestEvent }) {
               onClick={approve}
             >
               {isCommand && commandEdited ? "Run edited command" : "Approve"}
+              <span className="inline-flex items-center gap-0.5">
+                {shortcutKeyLabels(SHORTCUTS.approve).map((cap) => (
+                  <Kbd key={cap}>{cap}</Kbd>
+                ))}
+              </span>
             </Button>
             <Button variant="danger" size="sm" disabled={busy} onClick={() => setRejecting(true)}>
               Reject
+              <span className="inline-flex items-center gap-0.5">
+                {shortcutKeyLabels(SHORTCUTS.reject).map((cap) => (
+                  <Kbd key={cap}>{cap}</Kbd>
+                ))}
+              </span>
             </Button>
           </>
         )}

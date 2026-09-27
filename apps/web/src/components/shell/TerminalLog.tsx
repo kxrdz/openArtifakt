@@ -2,10 +2,19 @@ import { useLayoutEffect, useRef, useState } from "react";
 import type { UIEvent } from "react";
 
 import { useChatStore } from "../../store/chatStore";
-import { ChevronDownIcon, cn, focusRing, TerminalIcon } from "../ui";
+import { shortcutKeyLabels, SHORTCUTS } from "../command/commands";
+import { ChevronDownIcon, cn, focusRing, Kbd, TerminalIcon } from "../ui";
 
 /** Distance from the bottom (px) below which the log counts as pinned. */
 const BOTTOM_THRESHOLD = 24;
+
+export interface TerminalLogProps {
+  /** Whether the log body is expanded (owned by the shell so `Mod+J` can
+   * toggle it without reaching into this component). */
+  open: boolean;
+  /** Toggles the log body (bound to `Mod+J` by the shell). */
+  onToggle: () => void;
+}
 
 /**
  * Collapsible terminal log, pinned to the bottom of the chat pane (§12.6,
@@ -13,9 +22,8 @@ const BOTTOM_THRESHOLD = 24;
  * in monospace with stderr tinted; auto-scrolls while the user stays at the
  * bottom and pauses the moment they scroll up.
  */
-export function TerminalLog() {
+export function TerminalLog({ open, onToggle }: TerminalLogProps) {
   const lines = useChatStore((state) => state.terminalLines);
-  const [open, setOpen] = useState(true);
   const [pinned, setPinned] = useState(true);
   const bodyRef = useRef<HTMLPreElement>(null);
 
@@ -39,7 +47,7 @@ export function TerminalLog() {
     <section aria-label="Terminal log" className="shrink-0 border-t border-border bg-bg-sunken">
       <button
         type="button"
-        onClick={() => setOpen((value) => !value)}
+        onClick={onToggle}
         aria-expanded={open}
         className={cn(
           "flex h-9 w-full items-center gap-2 px-3 text-xs font-medium text-text-secondary transition-colors duration-fast hover:bg-bg-hover hover:text-text",
@@ -51,12 +59,19 @@ export function TerminalLog() {
         {!open && lines.length > 0 && (
           <span className="text-text-muted">{lines.length} lines</span>
         )}
-        <ChevronDownIcon
-          className={cn(
-            "ml-auto h-4 w-4 transition-transform duration-fast ease-out",
-            open ? "rotate-0" : "-rotate-90",
-          )}
-        />
+        <span className="ml-auto inline-flex items-center gap-1">
+          <span className="inline-flex items-center gap-0.5">
+            {shortcutKeyLabels(SHORTCUTS.toggleTerminalLog).map((cap) => (
+              <Kbd key={cap}>{cap}</Kbd>
+            ))}
+          </span>
+          <ChevronDownIcon
+            className={cn(
+              "h-4 w-4 transition-transform duration-fast ease-out",
+              open ? "rotate-0" : "-rotate-90",
+            )}
+          />
+        </span>
       </button>
 
       {open && (

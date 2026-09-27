@@ -1,6 +1,9 @@
+import type { MutableRefObject } from "react";
+
 import { useChatStore } from "../../store/chatStore";
 import { ChatContainer } from "../chat/ChatContainer";
 import { Composer } from "../chat/Composer";
+import type { ComposerHandle } from "../chat/Composer";
 import { Button, MessageSquareIcon, PanelRightIcon } from "../ui";
 import { TerminalLog } from "./TerminalLog";
 
@@ -10,6 +13,12 @@ export interface ChatPaneProps {
    * Omitted on desktop where the panel is always visible beside the chat.
    */
   onOpenPanel?: () => void;
+  /** Populated by the composer so the shell's global commands reach it. */
+  composerHandleRef?: MutableRefObject<ComposerHandle | null>;
+  /** Whether the terminal log body is expanded (owned by the shell). */
+  terminalOpen: boolean;
+  /** Toggles the terminal log body (`Mod+J`). */
+  onToggleTerminal: () => void;
 }
 
 /**
@@ -17,7 +26,12 @@ export interface ChatPaneProps {
  * streaming message list after), the composer, and the collapsible terminal log
  * at its foot. Wired to the chat store so a conversation renders and streams.
  */
-export function ChatPane({ onOpenPanel }: ChatPaneProps) {
+export function ChatPane({
+  onOpenPanel,
+  composerHandleRef,
+  terminalOpen,
+  onToggleTerminal,
+}: ChatPaneProps) {
   const hasMessages = useChatStore((state) => state.messages.length > 0);
 
   return (
@@ -46,8 +60,8 @@ export function ChatPane({ onOpenPanel }: ChatPaneProps) {
           )}
         </div>
       )}
-      <Composer />
-      <TerminalLog />
+      <Composer handleRef={composerHandleRef} />
+      <TerminalLog open={terminalOpen} onToggle={onToggleTerminal} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { ChatMessage, ToolCallState } from "../store/chatStore";
-import { describeUndo, toolMutatedFile, turnChangedFiles } from "./undo";
+import { describeUndo, lastUndoableTurn, toolMutatedFile, turnChangedFiles } from "./undo";
 
 /** A base tool call the tests patch to exercise each eligibility rule. */
 function toolCall(patch: Partial<ToolCallState> = {}): ToolCallState {
@@ -62,6 +62,40 @@ describe("turnChangedFiles", () => {
     expect(
       turnChangedFiles(assistantMessage([toolCall({ name: "execute_command" })])),
     ).toBe(false);
+  });
+});
+
+describe("lastUndoableTurn", () => {
+  const user: ChatMessage = {
+    id: "u",
+    role: "user",
+    content: "do it",
+    toolCalls: [],
+    createdAt: 0,
+  };
+  const proseAssistant: ChatMessage = {
+    id: "a",
+    role: "assistant",
+    content: "done",
+    toolCalls: [],
+    createdAt: 0,
+  };
+
+  it("returns the most recent turn that changed files", () => {
+    const messages: ChatMessage[] = [
+      user,
+      assistantMessage([toolCall()]), // turn 1
+      user,
+      proseAssistant, // turn 2, no changes
+      user,
+      assistantMessage([toolCall()]), // turn 3
+    ];
+    expect(lastUndoableTurn(messages)).toBe(3);
+  });
+
+  it("returns null when no turn changed files", () => {
+    expect(lastUndoableTurn([user, proseAssistant])).toBeNull();
+    expect(lastUndoableTurn([])).toBeNull();
   });
 });
 

@@ -14,7 +14,7 @@
 
 ## 4. Wire global shortcuts into the shell
 
-- [ ] 4.1 Wire the registry into the workspace shell and stores: send (`Mod+Enter`), stop (`Escape`), approve/reject (`Alt+A`/`Alt+R`, oldest pending approval), toggle artifact panel (`Mod+\`), toggle terminal log (`Mod+J`), open settings (`Mod+,`), focus chat input (`Mod+I`), with `Kbd` hints on the corresponding controls. Verify web unit tests plus `pnpm design:check` and `pnpm --filter @openartifact/web build`.
+- [x] 4.1 Wire the registry into the workspace shell and stores: send (`Mod+Enter`), stop (`Escape`), approve/reject (`Alt+A`/`Alt+R`, oldest pending approval), toggle artifact panel (`Mod+\`), toggle terminal log (`Mod+J`), open settings (`Mod+,`), focus chat input (`Mod+I`), with `Kbd` hints on the corresponding controls. Verify web unit tests plus `pnpm design:check` and `pnpm --filter @openartifact/web build`.
 
 ## 5. Critique pass
 

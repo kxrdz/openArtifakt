@@ -1,11 +1,26 @@
-import { useLayoutEffect, useRef, useState } from "react";
-import type { FormEvent, KeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { FormEvent, KeyboardEvent, MutableRefObject } from "react";
 
+import { shortcutKeyLabels, SHORTCUTS } from "../command/commands";
 import { useChatStore } from "../../store/chatStore";
-import { Button, cn, focusRing, SendIcon, StopIcon } from "../ui";
+import { Button, cn, focusRing, Kbd, SendIcon, StopIcon } from "../ui";
 
 /** The tallest the composer grows before its textarea scrolls (px). */
 const MAX_COMPOSER_HEIGHT = 160;
+
+/**
+ * The imperative surface the shell reaches through the command registry:
+ * submitting the current draft and moving focus into the textarea.
+ */
+export interface ComposerHandle {
+  submit: () => void;
+  focus: () => void;
+}
+
+export interface ComposerProps {
+  /** Populated on every render so global commands reach the latest draft. */
+  handleRef?: MutableRefObject<ComposerHandle | null>;
+}
 
 /**
  * The message composer (§12.6, "Composer"): a growing text input with Send /
@@ -13,7 +28,7 @@ const MAX_COMPOSER_HEIGHT = 160;
  * first: Enter sends, Shift+Enter inserts a newline, and the textarea keeps a
  * visible focus ring.
  */
-export function Composer() {
+export function Composer({ handleRef }: ComposerProps) {
   const isSending = useChatStore((state) => state.isSending);
   const send = useChatStore((state) => state.send);
   const stop = useChatStore((state) => state.stop);
@@ -37,6 +52,20 @@ export function Composer() {
     void send(value);
     setValue("");
   }
+
+  function focusTextarea() {
+    textareaRef.current?.focus();
+  }
+
+  // Re-register the handle after every render so the shell's `send` and
+  // `focus chat input` commands always see the latest draft and ref.
+  useEffect(() => {
+    if (handleRef === undefined) return;
+    handleRef.current = { submit, focus: focusTextarea };
+    return () => {
+      handleRef.current = null;
+    };
+  });
 
   function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     // Enter sends; Shift+Enter (and IME composition) insert a newline.
@@ -77,6 +106,11 @@ export function Composer() {
           onClick={stop}
         >
           Stop
+          <span className="inline-flex items-center gap-0.5">
+            {shortcutKeyLabels(SHORTCUTS.stop).map((cap) => (
+              <Kbd key={cap}>{cap}</Kbd>
+            ))}
+          </span>
         </Button>
       ) : (
         <Button
@@ -86,6 +120,11 @@ export function Composer() {
           disabled={!canSend}
         >
           Send
+          <span className="inline-flex items-center gap-0.5">
+            {shortcutKeyLabels(SHORTCUTS.send).map((cap) => (
+              <Kbd key={cap}>{cap}</Kbd>
+            ))}
+          </span>
         </Button>
       )}
     </form>

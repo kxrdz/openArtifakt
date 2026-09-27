@@ -1,10 +1,18 @@
-export type { Command, Shortcut, ShortcutEvent } from "./commands";
+export type {
+  Command,
+  CommandActions,
+  CommandAvailability,
+  Shortcut,
+  ShortcutEvent,
+} from "./commands";
 export {
+  buildCommands,
   detectIsMac,
   isEditableSafeShortcut,
   matchesShortcut,
   modKeyLabel,
   shortcutKeyLabels,
+  SHORTCUTS,
 } from "./commands";
 export {
   isEditableTarget,

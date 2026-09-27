@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { useChatStore } from "../../store/chatStore";
 
 // The shell's children fetch on mount; drive those clients directly so the
-// test exercises only the status-bar trigger -> drawer wiring.
+// test exercises only the shortcut/status-bar wiring.
 vi.mock("../../lib/history", () => ({
   loadConversations: vi.fn().mockResolvedValue(undefined),
   restoreConversation: vi.fn().mockResolvedValue(undefined),
@@ -24,20 +26,6 @@ import { WorkspaceShell } from "./WorkspaceShell";
 const mockFetchSettings = vi.mocked(fetchSettings);
 const mockFetchSessionInfo = vi.mocked(fetchSessionInfo);
 
-beforeAll(() => {
-  window.matchMedia = matchMediaStub;
-  mockFetchSettings.mockResolvedValue({
-    provider: "openai-compatible",
-    model: "example-model",
-    baseUrl: "https://api.example.com/v1",
-    apiKeyRef: null,
-    approvalMode: "ask",
-    contextWindow: 128000,
-    capabilities: { nativeTools: true, streamingToolArgs: false, vision: false },
-  });
-  mockFetchSessionInfo.mockResolvedValue(null);
-});
-
 // jsdom has no matchMedia implementation; stub it. `matches: false` keeps the
 // shell on the narrow-screen path (no SplitPane/ResizeObserver).
 const matchMediaStub = vi.fn().mockImplementation((query: string) => ({
@@ -53,15 +41,30 @@ const matchMediaStub = vi.fn().mockImplementation((query: string) => ({
 
 beforeAll(() => {
   window.matchMedia = matchMediaStub;
+  mockFetchSettings.mockResolvedValue({
+    provider: "openai-compatible",
+    model: "example-model",
+    baseUrl: "https://api.example.com/v1",
+    apiKeyRef: null,
+    approvalMode: "ask",
+    contextWindow: 128000,
+    capabilities: { nativeTools: true, streamingToolArgs: false, vision: false },
+  });
+  mockFetchSessionInfo.mockResolvedValue(null);
 });
 
 afterAll(() => {
-  // jsdom leaves no matchMedia to restore; the stub simply goes away with it.
   vi.restoreAllMocks();
+});
+
+beforeEach(() => {
+  // A clean chat store for every test (the singleton is shared across tests).
+  useChatStore.getState().reset();
 });
 
 afterEach(() => {
   cleanup();
+  vi.restoreAllMocks();
 });
 
 describe("WorkspaceShell: settings drawer wiring", () => {
@@ -97,5 +100,153 @@ describe("WorkspaceShell: settings drawer wiring", () => {
     await waitFor(() => {
       expect(document.querySelector('[role="dialog"]')).toBeNull();
     });
+  });
+});
+
+describe("WorkspaceShell: global shortcuts", () => {
+  it("opens settings with Mod+,", () => {
+    render(<WorkspaceShell />);
+
+    fireEvent.keyDown(window, { key: ",", metaKey: true });
+
+    expect(
+      document.querySelector('[role="dialog"][aria-label="Settings"]'),
+    ).not.toBeNull();
+  });
+
+  it("opens and closes the artifact sheet with Mod+\\ and Escape on narrow screens", () => {
+    render(<WorkspaceShell />);
+
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+
+    fireEvent.keyDown(window, { key: "\\", metaKey: true });
+
+    const sheet = document.querySelector(
+      '[role="dialog"][aria-label="Artifact panel"]',
+    );
+    expect(sheet).not.toBeNull();
+
+    // The sheet captures Escape itself (global shortcuts are suppressed while
+    // a modal is open), so Escape closes it.
+    fireEvent.keyDown(
+      document.querySelector('button[aria-label="Close artifact panel"]')!,
+      { key: "Escape" },
+    );
+
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it("toggles the terminal log with Mod+J", () => {
+    render(<WorkspaceShell />);
+
+    const header = document.querySelector<HTMLButtonElement>(
+      'section[aria-label="Terminal log"] button',
+    );
+    expect(header?.getAttribute("aria-expanded")).toBe("true");
+
+    fireEvent.keyDown(window, { key: "j", metaKey: true });
+    expect(header?.getAttribute("aria-expanded")).toBe("false");
+
+    fireEvent.keyDown(window, { key: "j", metaKey: true });
+    expect(header?.getAttribute("aria-expanded")).toBe("true");
+  });
+
+  it("stops a running turn with Escape", () => {
+    render(<WorkspaceShell />);
+
+    act(() => {
+      useChatStore.setState({ isSending: true, agentState: "streaming" });
+    });
+    const stop = vi.spyOn(useChatStore.getState(), "stop").mockImplementation(() => {});
+
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(stop).toHaveBeenCalledOnce();
+  });
+
+  it("approves the pending action with Alt+A", () => {
+    render(<WorkspaceShell />);
+
+    act(() => {
+      useChatStore.setState({
+        conversationId: "conv-1",
+        isSending: true,
+        agentState: "awaiting_approval",
+        pendingApproval: {
+          type: "approval_request",
+          callId: "call-1",
+          name: "edit_file",
+          args: { path: "a.ts", oldString: "x", newString: "y" },
+          reason: "Edits a file",
+        },
+      });
+    });
+    const decide = vi
+      .spyOn(useChatStore.getState(), "decide")
+      .mockImplementation(async () => {});
+
+    fireEvent.keyDown(window, { key: "a", altKey: true });
+
+    expect(decide).toHaveBeenCalledWith({ kind: "approve" });
+  });
+
+  it("rejects the pending action with Alt+R", () => {
+    render(<WorkspaceShell />);
+
+    act(() => {
+      useChatStore.setState({
+        conversationId: "conv-1",
+        isSending: true,
+        agentState: "awaiting_approval",
+        pendingApproval: {
+          type: "approval_request",
+          callId: "call-1",
+          name: "edit_file",
+          args: { path: "a.ts", oldString: "x", newString: "y" },
+          reason: "Edits a file",
+        },
+      });
+    });
+    const decide = vi
+      .spyOn(useChatStore.getState(), "decide")
+      .mockImplementation(async () => {});
+
+    fireEvent.keyDown(window, { key: "r", altKey: true });
+
+    expect(decide).toHaveBeenCalledWith({ kind: "reject", note: "" });
+  });
+
+  it("sends the composer draft with Mod+Enter", () => {
+    useChatStore.getState().reset();
+    const send = vi
+      .spyOn(useChatStore.getState(), "send")
+      .mockImplementation(async () => {});
+
+    render(<WorkspaceShell />);
+
+    const textarea = document.querySelector<HTMLTextAreaElement>(
+      'textarea[aria-label="Message OpenArtifact"]',
+    );
+    expect(textarea).not.toBeNull();
+    fireEvent.change(textarea!, { target: { value: "hello" } });
+
+    fireEvent.keyDown(window, { key: "Enter", metaKey: true });
+
+    expect(send).toHaveBeenCalledWith("hello");
+  });
+
+  it("renders Kbd hints on the shortcut-bearing controls", () => {
+    render(<WorkspaceShell />);
+
+    const sendButton = document.querySelector('button[type="submit"]');
+    expect(sendButton?.querySelector("kbd")).not.toBeNull();
+
+    const terminalHeader = document.querySelector<HTMLButtonElement>(
+      'section[aria-label="Terminal log"] button',
+    );
+    expect(terminalHeader?.querySelector("kbd")).not.toBeNull();
+
+    const settings = document.querySelector('button[aria-label="Settings"]');
+    expect(settings?.getAttribute("title")).toContain("Ctrl+,");
   });
 });
