@@ -2,7 +2,7 @@
 
 ## 1. Command registry and shortcut hook
 
-- [ ] 1.1 Add `apps/web/src/components/command/commands.ts` (a declarative command registry: `{ id, label, hint?, shortcut?, run, when? }`) and a `useKeyboardShortcuts` hook that binds shortcuts on a window-level keydown with Mod detection (Meta on macOS, Ctrl elsewhere), an input-field guard (only `Escape` and `Mod+K` fire inside text inputs/contenteditables), and `preventDefault()` on handled bindings. Verify web unit tests (hook fires commands, ignores keys inside inputs, Escape always works) and `pnpm --filter @openartifact/web build`.
+- [x] 1.1 Add `apps/web/src/components/command/commands.ts` (a declarative command registry: `{ id, label, hint?, shortcut?, run, when? }`) and a `useKeyboardShortcuts` hook that binds shortcuts on a window-level keydown with Mod detection (Meta on macOS, Ctrl elsewhere), an input-field guard (only `Escape` and `Mod+K` fire inside text inputs/contenteditables), and `preventDefault()` on handled bindings. Verify web unit tests (hook fires commands, ignores keys inside inputs, Escape always works) and `pnpm --filter @openartifact/web build`.
 
 ## 2. Dialog/overlay primitive
 
