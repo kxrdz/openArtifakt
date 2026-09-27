@@ -3,6 +3,7 @@ import type { AgentState } from "@openartifact/shared";
 import { useChatStore } from "../../store/chatStore";
 import { IconButton, PanelRightIcon, SettingsIcon, StatusDot } from "../ui";
 import type { StatusTone } from "../ui";
+import { ConversationMenu } from "./ConversationMenu";
 import { ProductMark } from "./ProductMark";
 
 /**
@@ -71,6 +72,7 @@ export function StatusBar({ onOpenSettings, onOpenPanel }: StatusBarProps) {
             onClick={onOpenPanel}
           />
         )}
+        <ConversationMenu />
         <IconButton
           aria-label="Settings"
           icon={<SettingsIcon className="h-4 w-4" />}

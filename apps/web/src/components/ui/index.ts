@@ -33,6 +33,7 @@ export {
   ChevronRightIcon,
   CopyIcon,
   DownloadIcon,
+  HistoryIcon,
   MessageSquareIcon,
   PanelRightIcon,
   PlayIcon,

@@ -32,6 +32,10 @@ export interface ArtifactStore {
   updateFromContent: (content: string) => void;
   /** Lift an inline diagram into the panel as a Mermaid artifact. */
   liftToArtifact: (source: string, title?: string) => void;
+  /** Replace all artifacts with a restored conversation's persisted history. */
+  restoreArtifacts: (artifacts: Artifact[]) => void;
+  /** Clear every artifact (used by "new conversation"). */
+  clear: () => void;
 }
 
 /** The full store shape: the public surface plus the two source lists. */
@@ -62,13 +66,21 @@ function nextLiftIdentifier(taken: ReadonlySet<string>): string {
   }
 }
 
-/** The content of the most recent assistant message (empty when none yet). */
-function lastAssistantContent(messages: ChatMessage[]): string {
-  for (let i = messages.length - 1; i >= 0; i -= 1) {
-    const message = messages[i];
-    if (message !== undefined && message.role === "assistant") return message.content;
+/**
+ * The concatenation of every assistant message's content, in order.
+ *
+ * Artifacts are conversation-scoped: reusing an identifier in a later turn
+ * appends a version. Concatenating — exactly as the server's persistence writer
+ * does — lets the full version history (across turns and after a restore)
+ * re-derive from the same text the server persisted, so the web and server
+ * never disagree on versions.
+ */
+function allAssistantContent(messages: ChatMessage[]): string {
+  let content = "";
+  for (const message of messages) {
+    if (message.role === "assistant") content += message.content;
   }
-  return "";
+  return content;
 }
 
 /** Create an artifact store (injectable in tests, like `createChatStore`). */
@@ -115,6 +127,16 @@ export function createArtifactStore() {
         };
       });
     },
+
+    restoreArtifacts: (artifacts) =>
+      set({
+        derived: artifacts,
+        lifted: [],
+        artifacts,
+        selectedId: artifacts[0]?.identifier ?? null,
+      }),
+
+    clear: () => set({ derived: [], lifted: [], artifacts: [], selectedId: null }),
   }));
 }
 
@@ -126,5 +148,5 @@ export const useArtifactStore = createArtifactStore();
 // message. The store is created once, so this subscription runs once.
 useChatStore.subscribe((state, previous) => {
   if (state.messages === previous.messages) return;
-  useArtifactStore.getState().updateFromContent(lastAssistantContent(state.messages));
+  useArtifactStore.getState().updateFromContent(allAssistantContent(state.messages));
 });

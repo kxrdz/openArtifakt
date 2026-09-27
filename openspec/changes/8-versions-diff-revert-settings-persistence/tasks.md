@@ -19,7 +19,7 @@
 
 ## 5. Restore on load (web)
 
-- [ ] 5.1 Add `apps/web/src/lib/history.ts` and extend the chat store + artifact store to load the conversation list on startup and restore a selected conversation's messages, tool-call log and artifact versions. Verify web unit tests (a stored history hydrates the stores, including multi-version artifacts) and `pnpm --filter @openartifact/web build`.
+- [x] 5.1 Add `apps/web/src/lib/history.ts` and extend the chat store + artifact store to load the conversation list on startup and restore a selected conversation's messages, tool-call log and artifact versions. Verify web unit tests (a stored history hydrates the stores, including multi-version artifacts) and `pnpm --filter @openartifact/web build`.
 
 ## 6. Settings drawer
 

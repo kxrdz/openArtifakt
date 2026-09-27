@@ -6,6 +6,7 @@ import {
   type ApprovalDecision,
   type ApprovalRequestEvent,
   type ChatEvent,
+  type ConversationSummary,
 } from "@openartifact/shared";
 
 import { readSseEvents } from "../lib/sse";
@@ -33,6 +34,8 @@ export interface ToolCallState {
   /** Tool result content, once the call finished (or was rejected). */
   result?: string;
   isError?: boolean;
+  /** The user's approval decision, restored from the persisted tool-call log. */
+  decision?: ApprovalDecision;
 }
 
 /** A chat message: a user turn or an assistant turn with its tool calls. */
@@ -50,6 +53,8 @@ export interface TerminalLine {
   text: string;
 }
 
+export type HistoryStatus = "idle" | "loading" | "ready" | "error" | "restoring";
+
 /** The reducible data shape of the store (everything except the actions). */
 export interface ChatState {
   conversationId: string | null;
@@ -61,6 +66,10 @@ export interface ChatState {
   error: string | null;
   /** True while a turn is in flight (Send becomes Stop). */
   isSending: boolean;
+  /** Persisted conversations, loaded on startup (feature 8, §12.8). */
+  conversations: ConversationSummary[];
+  /** Loading/restore status of the conversation list (driven by lib/history). */
+  historyStatus: HistoryStatus;
 }
 
 export const initialChatState: ChatState = {
@@ -71,6 +80,8 @@ export const initialChatState: ChatState = {
   pendingApproval: null,
   error: null,
   isSending: false,
+  conversations: [],
+  historyStatus: "idle",
 };
 
 /**
@@ -150,7 +161,13 @@ export interface ChatStore extends ChatState {
   send: (message: string) => Promise<void>;
   stop: () => void;
   decide: (decision: ApprovalDecision) => Promise<void>;
-  /** Clear the conversation (used by tests and, later, a "new chat" action). */
+  /** Set the conversation-list loading/restore status (driven by lib/history). */
+  setHistoryStatus: (status: HistoryStatus) => void;
+  /** Replace the conversation list (driven by lib/history). */
+  setConversations: (conversations: ConversationSummary[]) => void;
+  /** Replace the live conversation with a restored one (artifact store stays out). */
+  applyRestoredConversation: (conversationId: string, messages: ChatMessage[]) => void;
+  /** Clear the conversation (used by tests and the "new chat" action). */
   reset: () => void;
 }
 
@@ -378,9 +395,34 @@ export function createChatStore(transport: ChatTransport = defaultChatTransport)
       }
     },
 
+    setHistoryStatus: (historyStatus) => set({ historyStatus }),
+
+    setConversations: (conversations) => set({ conversations }),
+
+    applyRestoredConversation: (conversationId, messages) => {
+      get().abortController?.abort();
+      set({
+        conversationId,
+        messages,
+        agentState: "idle",
+        terminalLines: [],
+        pendingApproval: null,
+        error: null,
+        isSending: false,
+        abortController: null,
+      });
+    },
+
     reset: () => {
       get().abortController?.abort();
-      set({ ...initialChatState, abortController: null });
+      set((state) => ({
+        ...initialChatState,
+        abortController: null,
+        // A "new chat" clears the live conversation but keeps the persisted
+        // conversation list, so the user can switch back without a reload.
+        conversations: state.conversations,
+        historyStatus: state.historyStatus,
+      }));
     },
   }));
 }
