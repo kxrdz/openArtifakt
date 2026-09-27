@@ -61,6 +61,8 @@ export function ChatContainer() {
       ref={listRef}
       onScroll={onScroll}
       aria-label="Conversation"
+      role="log"
+      aria-live="polite"
       className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-4"
     >
       {withTurns.map(({ message, turn }, index) => (

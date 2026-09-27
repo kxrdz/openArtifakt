@@ -78,6 +78,7 @@ export function SvgViewer({ code, title }: SvgViewerProps) {
       <div className="min-h-0 flex-1 overflow-auto bg-bg-sunken p-4">
         {/* The sanitized markup is DOMPurify-cleaned SVG: safe to inline. */}
         <div
+          role="img"
           aria-label="SVG preview"
           className="flex min-h-full items-center justify-center [&_svg]:max-w-full"
           dangerouslySetInnerHTML={{ __html: sanitized }}

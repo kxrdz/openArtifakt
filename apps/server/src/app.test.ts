@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createApp } from "./app";
+import { loadConfig } from "./config";
 
 describe("server app", () => {
   it("responds to /health with ok", async () => {
@@ -26,5 +27,32 @@ describe("server app", () => {
     const app = createApp();
     const res = await app.request("/vendor/..%2F..%2Fpackage.json");
     expect(res.status).toBe(404);
+  });
+
+  it("reports the provider readiness and workspace root on /api/session", async () => {
+    const config = { ...loadConfig({}), provider: "ollama" as const, workspaceRoot: "/tmp/ws" };
+    const app = createApp({ config });
+    const res = await app.request("/api/session");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      ok: boolean;
+      provider: string;
+      providerReady: boolean;
+      workspaceRoot: string;
+    };
+    expect(body).toMatchObject({
+      ok: true,
+      provider: "ollama",
+      providerReady: true,
+      workspaceRoot: "/tmp/ws",
+    });
+  });
+
+  it("reports a not-ready provider when the API key is missing", async () => {
+    const config = { ...loadConfig({}), apiKeyRef: "MISSING_KEY" };
+    const app = createApp({ config });
+    const res = await app.request("/api/session");
+    const body = (await res.json()) as { providerReady: boolean };
+    expect(body.providerReady).toBe(false);
   });
 });

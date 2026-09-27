@@ -7,7 +7,7 @@ import { Hono } from "hono";
 
 import type { ProviderAdapter } from "@openartifact/core";
 
-import { loadConfig, ActiveConfig, type ServerConfig } from "./config";
+import { loadConfig, ActiveConfig, type ServerConfig, isProviderReady } from "./config";
 import { defaultSnapshotRoot } from "./agent/runtime";
 import { MemoryRepository, type Repository } from "./db";
 import { createChatRouter } from "./routes/chat";
@@ -85,6 +85,8 @@ export function createApp(options: CreateAppOptions = {}): Hono {
       approvalMode: live.approvalMode,
       fakeProvider: live.fakeProvider,
       provider: live.provider,
+      providerReady: isProviderReady(live),
+      workspaceRoot: live.workspaceRoot,
     });
   });
 

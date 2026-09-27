@@ -184,6 +184,8 @@ export interface ChatStore extends ChatState {
   setConversations: (conversations: ConversationSummary[]) => void;
   /** Replace the live conversation with a restored one (artifact store stays out). */
   applyRestoredConversation: (conversationId: string, messages: ChatMessage[]) => void;
+  /** Dismiss the surfaced transport/turn error banner. */
+  clearError: () => void;
   /** Clear the conversation (used by tests and the "new chat" action). */
   reset: () => void;
 }
@@ -437,6 +439,8 @@ export function createChatStore(transport: ChatTransport = defaultChatTransport)
         abortController: null,
       });
     },
+
+    clearError: () => set({ error: null }),
 
     reset: () => {
       get().abortController?.abort();

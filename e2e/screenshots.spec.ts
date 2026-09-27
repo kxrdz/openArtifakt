@@ -31,7 +31,8 @@ const viewports = [
  * in both light and dark. The empty shell, a streaming conversation, a pending
  * approval card, the populated terminal log, each of the five artifact types
  * and the inline Mermaid syntax error are captured here; feature 8 adds the
- * settings drawer as that surface lands.
+ * settings drawer as that surface lands, and feature 9 adds the command
+ * palette.
  *
  * This spec is a capture tool, not an assertion: it runs only under
  * `pnpm screenshots` (its own Playwright project), never under `pnpm check`.
@@ -269,6 +270,20 @@ const scenarios: Scenario[] = [
       await expect(drawer).toBeVisible();
       await expect(drawer.getByRole("button", { name: "Save" })).toBeVisible();
       await expect(drawer.getByLabel("Approval mode")).toBeVisible();
+    },
+  },
+  {
+    // The command palette (§12.9): every command listed with its shortcut,
+    // opened from the empty shell so the always-available commands (send,
+    // panel/terminal toggles, settings, theme, focus input, new conversation,
+    // jump to panel) are visible.
+    name: "command-palette",
+    run: async (page) => {
+      await page.keyboard.press("Control+K");
+      const palette = page.getByRole("dialog", { name: "Command palette" });
+      await expect(palette).toBeVisible();
+      await expect(page.getByLabel("Search commands")).toBeVisible();
+      await expect(palette.getByRole("option").first()).toBeVisible();
     },
   },
   {

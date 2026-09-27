@@ -26,6 +26,24 @@ export function turnChangedFiles(message: ChatMessage): boolean {
   return message.toolCalls.some(toolMutatedFile);
 }
 
+/**
+ * The 1-based turn number of the most recent completed turn that changed
+ * files and can be undone, or `null` when there is none. Turn numbering
+ * matches the conversation renderer (each user message opens a new turn).
+ */
+export function lastUndoableTurn(messages: ChatMessage[]): number | null {
+  let turn = 0;
+  let last: number | null = null;
+  for (const message of messages) {
+    if (message.role === "user") {
+      turn += 1;
+    } else if (message.role === "assistant" && turnChangedFiles(message)) {
+      last = turn;
+    }
+  }
+  return last;
+}
+
 /** Fold a path list into one comma-separated, human-readable phrase. */
 function list(paths: string[]): string {
   return paths.join(", ");

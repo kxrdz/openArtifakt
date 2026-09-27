@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { loadConfig, PROVIDER_DEFAULTS } from "./config";
+import { isProviderReady, loadConfig, PROVIDER_DEFAULTS } from "./config";
 
 describe("loadConfig", () => {
   it("applies defaults when no env is set", () => {
@@ -97,5 +97,31 @@ describe("loadConfig", () => {
     expect(() => loadConfig({ OPENARTIFACT_FAKE_PROVIDER: "maybe" })).toThrow(
       /OPENARTIFACT_FAKE_PROVIDER/,
     );
+  });
+});
+
+describe("isProviderReady", () => {
+  const base = loadConfig({});
+
+  it("is ready in fake-provider replay mode without a key", () => {
+    expect(isProviderReady({ ...base, fakeProvider: true })).toBe(true);
+  });
+
+  it("is ready for the local ollama provider without a key", () => {
+    const ollama = loadConfig({ OPENARTIFACT_PROVIDER: "ollama" });
+    expect(isProviderReady(ollama)).toBe(true);
+  });
+
+  it("is ready when the referenced API key is present in the environment", () => {
+    expect(isProviderReady(base, { OPENAI_API_KEY: "sk-test" })).toBe(true);
+  });
+
+  it("is not ready when the referenced API key is missing or empty", () => {
+    expect(isProviderReady(base, {})).toBe(false);
+    expect(isProviderReady(base, { OPENAI_API_KEY: "" })).toBe(false);
+  });
+
+  it("is not ready when no key reference is configured", () => {
+    expect(isProviderReady({ ...base, apiKeyRef: undefined }, {})).toBe(false);
   });
 });

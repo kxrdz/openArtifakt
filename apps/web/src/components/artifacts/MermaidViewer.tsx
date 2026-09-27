@@ -217,6 +217,7 @@ export function MermaidViewer({ code, title }: MermaidViewerProps) {
             onPointerCancel={onPointerEnd}
           >
             <div
+              role="img"
               aria-label="Mermaid diagram"
               className="origin-top-left"
               style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})` }}

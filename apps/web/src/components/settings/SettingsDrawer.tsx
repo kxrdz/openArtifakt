@@ -11,7 +11,7 @@ import {
 
 import { fetchSessionInfo } from "../../lib/session";
 import { fetchSettings, saveSettings } from "../../lib/settings";
-import { Badge, Button, cn, focusRing, IconButton, Spinner, XIcon } from "../ui";
+import { Badge, Button, cn, Dialog, focusRing, IconButton, Spinner, XIcon } from "../ui";
 
 /**
  * The settings drawer (§12.8): provider, model, base URL, API-key reference
@@ -101,19 +101,8 @@ export function SettingsDrawer({ onClose }: SettingsDrawerProps) {
     return () => controller.abort();
   }, []);
 
-  // Focus the close control so keyboard flow starts inside the dialog.
-  useEffect(() => {
-    closeRef.current?.focus();
-  }, [loadState]);
-
-  // Escape dismisses from anywhere, not only from a focused control inside.
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
+  // The shared Dialog primitive owns initial focus, the focus trap, Escape and
+  // the scrim; closeRef is only passed in so focus starts on the Close control.
 
   function patch(changes: Partial<Settings>) {
     setDraft((current) => (current === null ? current : { ...current, ...changes }));
@@ -157,28 +146,23 @@ export function SettingsDrawer({ onClose }: SettingsDrawerProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50">
-      <div
-        aria-hidden="true"
-        onClick={onClose}
-        className="absolute inset-0 bg-scrim"
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Settings"
-        className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l border-border bg-bg-elevated shadow-3"
-      >
-        <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-4">
-          <h2 className="text-sm font-semibold text-text">Settings</h2>
-          <IconButton
-            ref={closeRef}
-            className="ml-auto"
-            aria-label="Close settings"
-            icon={<XIcon className="h-4 w-4" />}
-            onClick={onClose}
-          />
-        </div>
+    <Dialog
+      open
+      onClose={onClose}
+      label="Settings"
+      initialFocusRef={closeRef}
+      className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l border-border"
+    >
+      <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-4">
+        <h2 className="text-sm font-semibold text-text">Settings</h2>
+        <IconButton
+          ref={closeRef}
+          className="ml-auto"
+          aria-label="Close settings"
+          icon={<XIcon className="h-4 w-4" />}
+          onClick={onClose}
+        />
+      </div>
 
         {loadState === "loading" ? (
           <div className="flex flex-1 items-center justify-center gap-2 text-sm text-text-muted">
@@ -354,7 +338,6 @@ export function SettingsDrawer({ onClose }: SettingsDrawerProps) {
             </div>
           </form>
         )}
-      </div>
-    </div>
+    </Dialog>
   );
 }

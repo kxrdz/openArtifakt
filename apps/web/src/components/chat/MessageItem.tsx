@@ -79,7 +79,7 @@ export function MessageItem({
 
   if (isUser) {
     return (
-      <article className="flex flex-col items-end">
+      <article className="flex min-w-0 flex-col items-end">
         <span className="mb-1 text-xs font-medium text-text-muted">You</span>
         <div className="max-w-[85%] whitespace-pre-wrap break-words rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm leading-normal text-text">
           {message.content}
@@ -91,9 +91,9 @@ export function MessageItem({
   const approvalCallId = pendingApproval?.callId;
 
   return (
-    <article className="flex w-full flex-col items-start">
+    <article className="flex w-full min-w-0 flex-col items-start">
       <span className="mb-1 text-xs font-medium text-text-muted">OpenArtifact</span>
-      <div className="w-full max-w-[85%] text-sm leading-normal text-text">
+      <div className="min-w-0 w-full max-w-[85%] text-sm leading-normal text-text">
         {message.content === "" ? (
           <span className="text-text-muted">Working…</span>
         ) : (
@@ -102,9 +102,9 @@ export function MessageItem({
       </div>
 
       {message.toolCalls.length > 0 && (
-        <div className="mt-2 flex w-full flex-col gap-2">
+        <div className="mt-2 flex w-full min-w-0 flex-col gap-2">
           {message.toolCalls.map((toolCall) => (
-            <div key={toolCall.callId} className="flex w-full flex-col gap-2">
+            <div key={toolCall.callId} className="flex w-full min-w-0 flex-col gap-2">
               <ToolCallCard toolCall={toolCall} />
               {approvalCallId === toolCall.callId && pendingApproval !== null && (
                 <ApprovalCard approval={pendingApproval} />

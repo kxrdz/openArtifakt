@@ -68,6 +68,18 @@ function singleVersionArtifact(): Artifact {
   };
 }
 
+describe("ArtifactPanel: empty state", () => {
+  it("explains what will appear and lists the five artifact types", () => {
+    useArtifactStore.getState().restoreArtifacts([]);
+    render(<ArtifactPanel />);
+
+    expect(screen.getByText("Nothing rendered yet")).toBeTruthy();
+    for (const type of ["React", "HTML", "SVG", "Mermaid", "Code"]) {
+      expect(screen.getByText(type)).toBeTruthy();
+    }
+  });
+});
+
 describe("ArtifactPanel: diff tab", () => {
   it("opens the diff view for an artifact with multiple versions", () => {
     useArtifactStore.getState().restoreArtifacts([threeVersionArtifact()]);
@@ -154,7 +166,7 @@ describe("ArtifactPanel: revert", () => {
     render(<ArtifactPanel />);
 
     const revertButton = screen.getByRole("button", {
-      name: "Revert",
+      name: "Restore",
     }) as HTMLButtonElement;
     expect(revertButton.disabled).toBe(true);
   });
@@ -168,7 +180,7 @@ describe("ArtifactPanel: revert", () => {
       name: "Version of Script",
     }) as HTMLSelectElement;
     fireEvent.change(dropdown, { target: { value: "1" } });
-    fireEvent.click(screen.getByRole("button", { name: "Revert" }));
+    fireEvent.click(screen.getByRole("button", { name: "Restore" }));
 
     // The reverted content is now the latest and what renders.
     expect(dropdown.value).toBe("4");

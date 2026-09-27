@@ -79,6 +79,24 @@ export const PROVIDER_DEFAULTS: Record<ProviderId, ProviderDefaults> = {
   },
 };
 
+/**
+ * Whether the configured provider can run without further setup (feature 9,
+ * onboard pass). Fake replay mode works offline, ollama is local and
+ * unauthenticated, and every other provider is ready when its referenced API
+ * key is present in the server environment. The result is a non-secret boolean
+ * the session route can share with the browser.
+ */
+export function isProviderReady(
+  config: ServerConfig,
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  if (config.fakeProvider) return true;
+  if (config.provider === "ollama") return true;
+  if (config.apiKeyRef === undefined) return false;
+  const key = env[config.apiKeyRef];
+  return typeof key === "string" && key !== "";
+}
+
 /** The resolved, validated server configuration. */
 export interface ServerConfig {
   provider: ProviderId;

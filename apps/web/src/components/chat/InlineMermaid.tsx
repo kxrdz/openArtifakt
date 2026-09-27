@@ -70,6 +70,7 @@ export function InlineMermaid({ source, title }: InlineMermaidProps) {
   } else if (svg !== null) {
     body = (
       <div
+        role="img"
         aria-label="Mermaid diagram"
         className="overflow-x-auto"
         dangerouslySetInnerHTML={{ __html: svg }}

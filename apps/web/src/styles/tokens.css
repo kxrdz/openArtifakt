@@ -147,9 +147,9 @@
   --color-bg-sunken: hsl(225 28% 4%);
   --color-bg-hover: hsl(222 16% 12%);
 
-  /* Borders */
-  --color-border: hsl(222 16% 18%);
-  --color-border-strong: hsl(222 14% 28%);
+  /* Borders — ≥3:1 against the sunken surfaces (WCAG 1.4.11 non-text). */
+  --color-border: hsl(222 15% 42%);
+  --color-border-strong: hsl(222 14% 50%);
 
   /* Text — tinted from the foreground hue, not pure gray */
   --color-text: hsl(224 20% 92%);
@@ -201,8 +201,8 @@
   --color-bg-sunken: hsl(225 30% 94%);
   --color-bg-hover: hsl(225 30% 95%);
 
-  --color-border: hsl(225 25% 88%);
-  --color-border-strong: hsl(225 18% 74%);
+  --color-border: hsl(225 15% 56%);
+  --color-border-strong: hsl(225 14% 48%);
 
   --color-text: hsl(228 30% 13%);
   --color-text-secondary: hsl(228 16% 33%);
@@ -213,14 +213,15 @@
   --color-accent-hover: hsl(234 80% 47%);
   --color-accent-fg: hsl(0 0% 100%);
 
-  --color-success: hsl(152 55% 32%);
-  --color-success-bg: hsl(152 55% 32% / 0.12);
-  --color-warning: hsl(35 90% 35%);
-  --color-warning-bg: hsl(35 90% 35% / 0.12);
+  /* Status text is dark enough to sit ≥4.5:1 on its 12 %-alpha wash (§12.9). */
+  --color-success: hsl(152 55% 29%);
+  --color-success-bg: hsl(152 55% 29% / 0.12);
+  --color-warning: hsl(35 90% 30%);
+  --color-warning-bg: hsl(35 90% 30% / 0.12);
   --color-danger: hsl(0 65% 42%);
   --color-danger-bg: hsl(0 65% 42% / 0.12);
-  --color-running: hsl(190 90% 32%);
-  --color-running-bg: hsl(190 90% 32% / 0.12);
+  --color-running: hsl(190 90% 27%);
+  --color-running-bg: hsl(190 90% 27% / 0.12);
 
   --shadow-1: 0 1px 2px hsl(225 30% 30% / 0.1), 0 1px 3px hsl(225 30% 30% / 0.06);
   --shadow-2: 0 4px 12px -4px hsl(225 30% 30% / 0.16),
