@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-Step 10 (Docs) is in progress on `feature/10-docs` (change `10-docs` planned; `skip_specs` since docs-only). Tasks 1.1 (README) and 2.1 (CONTRIBUTING) are done. Remaining: 3.1 `.env.example`, 4.1 quickstart verification + decision log; then `openspec-archive-change`, merge to `main`, tick step 10 and update the Log.
+Step 10 (Docs) is in progress on `feature/10-docs` (change `10-docs` planned; `skip_specs` since docs-only). Tasks 1.1 (README), 2.1 (CONTRIBUTING) and 3.1 (`.env.example`) are done. Remaining: 4.1 quickstart verification + decision log; then `openspec-archive-change`, merge to `main`, tick step 10 and update the Log.
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
