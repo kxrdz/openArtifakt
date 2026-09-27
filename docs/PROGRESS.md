@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Current feature/branch:** step 8 (Versions, diff, revert, undo, settings, persistence) on branch `feature/8-versions-diff-revert-settings-persistence` + OpenSpec change `8-versions-diff-revert-settings-persistence` (planned; tasks 1.1–10.2 pending).
+- **Current feature/branch:** step 8 (Versions, diff, revert, undo, settings, persistence) on branch `feature/8-versions-diff-revert-settings-persistence` + OpenSpec change `8-versions-diff-revert-settings-persistence` (task 1.1 done; tasks 1.2–10.2 pending).
 
 - [x] 1. Scaffold
 - [x] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-Step 8 is planned (`openspec/changes/8-versions-diff-revert-settings-persistence`, all artifacts complete and `openspec validate --strict` clean). On branch `feature/8-versions-diff-revert-settings-persistence`, run `openspec-apply-change` for `8-versions-diff-revert-settings-persistence` and implement task 1.1 (better-sqlite3 + db migrations + repository), then continue one task per iteration through 10.2.
+Step 8 is in progress: task 1.1 (better-sqlite3 + db migrations + repository) is done. On branch `feature/8-versions-diff-revert-settings-persistence`, run `openspec-apply-change` for `8-versions-diff-revert-settings-persistence` and implement task 1.2 (repository factory with `node:sqlite` fallback), then continue one task per iteration through 10.2.
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
