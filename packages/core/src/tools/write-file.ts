@@ -9,7 +9,8 @@ import { defineTool } from "./types";
 /**
  * `write_file` (§8). Creates a file or fully rewrites an existing one. Parent
  * directories are created as needed. An existing file is snapshotted before it
- * is overwritten, so a later "Undo this turn" can restore it.
+ * is overwritten, and a new file is recorded with a `.created` marker, so a
+ * later "Undo this turn" can restore or delete it.
  */
 export const writeFileTool = defineTool({
   name: "write_file",
@@ -27,11 +28,12 @@ export const writeFileTool = defineTool({
       const target = await resolveWithinWorkspace(ctx.workspaceRoot, args.path);
       assertWritablePath(realRoot, target);
 
-      await snapshotBeforeMutation(ctx, target);
+      const snapshot = await snapshotBeforeMutation(ctx, target);
       await fs.mkdir(path.dirname(target), { recursive: true });
       await fs.writeFile(target, args.content, "utf8");
 
-      return { content: `Wrote "${args.path}" (${args.content.length} characters)` };
+      const verb = snapshot?.kind === "created" ? "Created" : "Wrote";
+      return { content: `${verb} "${args.path}" (${args.content.length} characters)` };
     } catch (err) {
       return { content: err instanceof Error ? err.message : String(err), isError: true };
     }
