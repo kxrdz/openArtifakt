@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { IconButton, XIcon } from "../ui";
-import { ArtifactEmptyState, ArtifactPanel } from "./ArtifactPanel";
+import { ArtifactPanel } from "./ArtifactPanel";
 import { ChatPane } from "./ChatPane";
 import { SplitPane } from "./SplitPane";
 import { StatusBar } from "./StatusBar";
@@ -67,7 +67,7 @@ export function WorkspaceShell() {
             />
           </div>
           <div className="flex min-h-0 flex-1 flex-col">
-            <ArtifactEmptyState />
+            <ArtifactPanel />
           </div>
         </div>
       )}
