@@ -1,20 +1,14 @@
+import type { AgentState } from "@openartifact/shared";
+
+import { useChatStore } from "../../store/chatStore";
 import { IconButton, SettingsIcon, StatusDot } from "../ui";
 import type { StatusTone } from "../ui";
 import { ProductMark } from "./ProductMark";
 
 /**
- * Agent state shown at a glance in the status bar. Feature 6 wires the real
- * state machine; the empty shell sits in `idle`.
+ * Agent state shown at a glance in the status bar, wired to the chat store so
+ * the loop's state machine (§8) is always visible.
  */
-export type AgentState =
-  | "idle"
-  | "streaming"
-  | "awaiting_approval"
-  | "executing_tool"
-  | "done"
-  | "error"
-  | "cancelled";
-
 const stateLabel: Record<AgentState, string> = {
   idle: "Idle",
   streaming: "Working",
@@ -46,23 +40,24 @@ const statePulse: Record<AgentState, boolean> = {
 };
 
 export interface StatusBarProps {
-  state?: AgentState;
   /** Settings drawer trigger (feature 8); rendered as a visible seam for now. */
   onOpenSettings?: () => void;
 }
 
-export function StatusBar({ state = "idle", onOpenSettings }: StatusBarProps) {
+export function StatusBar({ onOpenSettings }: StatusBarProps) {
+  const agentState = useChatStore((state) => state.agentState);
+
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-border bg-bg-elevated px-3">
       <ProductMark />
       <div className="ml-auto flex items-center gap-1">
         <span className="mr-2 inline-flex items-center gap-1.5 text-xs text-text-secondary">
           <StatusDot
-            tone={stateTone[state]}
-            pulse={statePulse[state]}
-            label={stateLabel[state]}
+            tone={stateTone[agentState]}
+            pulse={statePulse[agentState]}
+            label={stateLabel[agentState]}
           />
-          {stateLabel[state]}
+          {stateLabel[agentState]}
         </span>
         <IconButton
           aria-label="Settings"

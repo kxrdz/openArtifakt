@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Current feature/branch:** none in flight — feature 5 is complete. Next feature is 6 (`feature/6-chat-ui-approvals-terminal-log`, change `6-chat-ui-approvals-terminal-log`).
+- **Current feature/branch:** `feature/6-chat-ui-approvals-terminal-log` — change `6-chat-ui-approvals-terminal-log` planned (proposal, specs, design, tasks). Implementing tasks one per iteration, starting with task 1.1.
 
 - [x] 1. Scaffold
 - [x] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Start feature 6 (Chat UI, approvals, terminal log) on a new branch `feature/6-chat-ui-approvals-terminal-log`: run `openspec-propose` to plan change `6-chat-ui-approvals-terminal-log`, then implement its tasks one per iteration._
+_On `feature/6-chat-ui-approvals-terminal-log`, implement the next unchecked task in `openspec/changes/6-chat-ui-approvals-terminal-log/tasks.md`: task 7.2 (extend `e2e/screenshots.spec.ts` to capture the streaming conversation, a pending approval card and the populated terminal log in both themes/viewports, and confirm `pnpm screenshots` writes them to `docs/screenshots/`). One task per iteration, one commit per task, `pnpm check` green before each commit._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
