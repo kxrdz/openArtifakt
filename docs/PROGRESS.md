@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_On `feature/6-chat-ui-approvals-terminal-log`, implement the next unchecked task in `openspec/changes/6-chat-ui-approvals-terminal-log/tasks.md`, starting with task 4.2 (web SSE-over-fetch parser in `apps/web/src/lib/sse.ts` + Zustand `apps/web/src/store/chatStore.ts` with messages, agent state, terminal output, pending approval, and send/stop/decide actions; unit tests cover SSE parsing and the send → streaming → approval → decision → done transition). One task per iteration, one commit per task, `pnpm check` green before each commit._
+_On `feature/6-chat-ui-approvals-terminal-log`, implement the next unchecked task in `openspec/changes/6-chat-ui-approvals-terminal-log/tasks.md`, starting with task 5.1 (build `ChatContainer`, `MessageItem` and `Composer` in `apps/web/src/components/chat/` with send/stop and keyboard operation, and wire `StatusBar` + `ChatPane` to the store so a conversation renders streamed messages and the agent state is always visible; auto-scroll pauses on manual scroll). This is UI work: load the `impeccable` skill first, run `pnpm design:check` after the change, and verify `pnpm build` (web) typechecks. One task per iteration, one commit per task, `pnpm check` green before each commit._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
