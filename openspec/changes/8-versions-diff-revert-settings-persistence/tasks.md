@@ -11,7 +11,7 @@
 
 ## 3. Settings server
 
-- [ ] 3.1 Add `GET/PUT /api/settings` routes backed by the settings repository, with the API-key reference stored by name only (never the key), and live-apply the saved provider/model/approval-mode/context-window/capabilities to the active server config so the next conversation uses them. Verify a server unit test (routes read/write settings, reject an unknown provider, and the next conversation picks up a changed approval mode) and `pnpm --filter @openartifact/server typecheck`.
+- [x] 3.1 Add `GET/PUT /api/settings` routes backed by the settings repository, with the API-key reference stored by name only (never the key), and live-apply the saved provider/model/approval-mode/context-window/capabilities to the active server config so the next conversation uses them. Verify a server unit test (routes read/write settings, reject an unknown provider, and the next conversation picks up a changed approval mode) and `pnpm --filter @openartifact/server typecheck`.
 
 ## 4. Persistence wiring + history endpoints
 

@@ -14,5 +14,6 @@ export type {
   ToolCallRecord,
 } from "./repository";
 export { SqliteRepository } from "./sqlite-repository";
+export { MemoryRepository } from "./memory-repository";
 export { openRepository } from "./factory";
 export type { OpenedRepository, StorageEngine } from "./factory";

@@ -173,3 +173,37 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   }
   return result.data;
 }
+
+/**
+ * Mutable holder for the live server configuration (§12.8, "Settings").
+ *
+ * {@link loadConfig} freezes the environment into a {@link ServerConfig} at
+ * startup; the settings routes must change provider, model, approval mode,
+ * context window and capability flags *without a server restart*. Both the
+ * settings routes and the chat routes share one {@link ActiveConfig}: the chat
+ * registry reads it each time it creates a conversation, so a saved change
+ * applies to the next turn.
+ */
+export class ActiveConfig {
+  #config: ServerConfig;
+
+  constructor(config: ServerConfig) {
+    this.#config = config;
+  }
+
+  /** The currently-live configuration (a fresh object reference). */
+  get(): ServerConfig {
+    return this.#config;
+  }
+
+  /** Replace the live configuration wholesale. */
+  set(config: ServerConfig): void {
+    this.#config = config;
+  }
+
+  /** Merge a partial configuration over the live one and return the result. */
+  update(partial: Partial<ServerConfig>): ServerConfig {
+    this.#config = { ...this.#config, ...partial };
+    return this.#config;
+  }
+}

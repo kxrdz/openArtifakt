@@ -12,7 +12,7 @@ import {
 } from "@openartifact/core";
 
 import { createAgentRuntime, toModelConfig } from "../agent/runtime";
-import type { ServerConfig } from "../config";
+import type { ActiveConfig, ServerConfig } from "../config";
 import { FakeServerProvider } from "../fake";
 
 /**
@@ -174,16 +174,16 @@ async function writeEvent<T extends { type: string }>(
   await stream.writeSSE({ event: event.type, data: JSON.stringify(event) });
 }
 
-/** In-memory conversation registry (the SQLite seam arrives in feature 8). */
+/** In-memory conversation registry (persistence lands in task 4.1). */
 export class ConversationRegistry {
-  readonly #config: ServerConfig;
-  readonly #providerFactory: () => ProviderAdapter;
+  readonly #activeConfig: ActiveConfig;
+  readonly #providerFactory: (() => ProviderAdapter) | undefined;
   readonly #conversations = new Map<string, Conversation>();
   #counter = 0;
 
-  constructor(config: ServerConfig, providerFactory?: () => ProviderAdapter) {
-    this.#config = config;
-    this.#providerFactory = providerFactory ?? defaultProviderFactory(config);
+  constructor(activeConfig: ActiveConfig, providerFactory?: () => ProviderAdapter) {
+    this.#activeConfig = activeConfig;
+    this.#providerFactory = providerFactory;
   }
 
   get(id: string): Conversation | undefined {
@@ -192,7 +192,13 @@ export class ConversationRegistry {
 
   create(): Conversation {
     const id = `conv-${(this.#counter += 1)}-${Date.now().toString(36)}`;
-    const conversation = buildConversation(id, this.#config, this.#providerFactory());
+    // Read the live config at creation time so a settings change applies to the
+    // next conversation without a server restart (§12.8).
+    const config = this.#activeConfig.get();
+    const provider = this.#providerFactory
+      ? this.#providerFactory()
+      : defaultProviderFactory(config)();
+    const conversation = buildConversation(id, config, provider);
     this.#conversations.set(id, conversation);
     return conversation;
   }
@@ -232,14 +238,15 @@ async function streamTurn(
 }
 
 export interface ChatRoutesOptions {
-  config: ServerConfig;
+  /** Live config; read when a conversation is created so settings apply live. */
+  activeConfig: ActiveConfig;
   /** Provider override (tests supply a tuned fake); defaults per `config.fakeProvider`. */
   providerFactory?: () => ProviderAdapter;
 }
 
 /** The chat routes: `/` (stream), `/:conversationId/approval` and `/:conversationId/stop`. */
 export function createChatRouter(options: ChatRoutesOptions): Hono {
-  const registry = new ConversationRegistry(options.config, options.providerFactory);
+  const registry = new ConversationRegistry(options.activeConfig, options.providerFactory);
   const router = new Hono();
 
   router.post("/", async (c) => {
