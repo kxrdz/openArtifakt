@@ -8,6 +8,19 @@
  */
 export { SvgViewer } from "./SvgViewer";
 export type { SvgViewerProps } from "./SvgViewer";
+export { VersionDiff } from "./VersionDiff";
+export type { VersionDiffProps } from "./VersionDiff";
+export {
+  defaultDiffPair,
+  monacoLanguage,
+  orderedPair,
+  resolveDiffPair,
+  versionNumbers,
+  withVersionPick,
+} from "./versionDiff";
+export type { DiffableVersion, VersionPair } from "./versionDiff";
+export { buildDiffThemeData, cssColorToMonaco } from "./monacoTheme";
+export type { DiffThemeTokens } from "./monacoTheme";
 export { CodeViewer } from "./CodeViewer";
 export type { CodeViewerProps } from "./CodeViewer";
 export { MermaidViewer } from "./MermaidViewer";

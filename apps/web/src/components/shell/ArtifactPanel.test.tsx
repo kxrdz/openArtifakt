@@ -6,6 +6,16 @@ import { useArtifactStore } from "../../artifacts";
 import type { Artifact } from "../../artifacts";
 import { ArtifactPanel } from "./ArtifactPanel";
 
+/** Stub for the lazily-loaded Monaco diff view (the real one is browser-only). */
+vi.mock("../artifacts/VersionDiff", () => ({
+  VersionDiff: (props: { versions: { version: number }[] }) => (
+    <div
+      data-testid="version-diff"
+      data-versions={props.versions.map((version) => version.version).join(",")}
+    />
+  ),
+}));
+
 /**
  * Task 7.1: the version dropdown selects any stored version and the panel
  * renders that version's content, with the version number and a "latest"
@@ -44,6 +54,39 @@ afterEach(() => {
   cleanup();
   useArtifactStore.getState().clear();
   vi.restoreAllMocks();
+});
+
+/** A code artifact with a single complete version. */
+function singleVersionArtifact(): Artifact {
+  return {
+    identifier: "solo",
+    title: "Solo",
+    artifactType: "application/vnd.code",
+    language: "python",
+    incomplete: false,
+    versions: [{ version: 1, content: "print('only')", incomplete: false }],
+  };
+}
+
+describe("ArtifactPanel: diff tab", () => {
+  it("opens the diff view for an artifact with multiple versions", () => {
+    useArtifactStore.getState().restoreArtifacts([threeVersionArtifact()]);
+    render(<ArtifactPanel />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Diff" }));
+    const diff = screen.getByTestId("version-diff");
+    expect(diff.getAttribute("data-versions")).toBe("1,2,3");
+  });
+
+  it("disables the diff tab until a second version exists", () => {
+    useArtifactStore.getState().restoreArtifacts([singleVersionArtifact()]);
+    render(<ArtifactPanel />);
+
+    const diffButton = screen.getByRole("button", {
+      name: "Diff",
+    }) as HTMLButtonElement;
+    expect(diffButton.disabled).toBe(true);
+  });
 });
 
 describe("ArtifactPanel: version dropdown", () => {

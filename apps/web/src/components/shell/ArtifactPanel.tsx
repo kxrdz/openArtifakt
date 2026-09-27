@@ -5,6 +5,7 @@ import type { Artifact, ArtifactVersion } from "../../artifacts";
 import { CodeViewer, MermaidViewer, SvgViewer } from "../artifacts";
 import { HtmlPreview, ReactPreview } from "../../sandbox";
 import { Badge, Button, cn, focusRing, PanelRightIcon, StatusDot } from "../ui";
+import { VersionDiff } from "../artifacts/VersionDiff";
 
 /**
  * The artifact panel (§12.7, "Artifact panel with switcher and tabs").
@@ -16,7 +17,9 @@ import { Badge, Button, cn, focusRing, PanelRightIcon, StatusDot } from "../ui";
  * deferred until it closes (so a partial React component or Mermaid diagram is
  * never compiled/rendered on every token). The version dropdown selects any
  * stored version — pinning an older one never removes the newer ones, and
- * selecting the latest returns to following it as versions arrive.
+ * selecting the latest returns to following it as versions arrive. The Diff
+ * tab (task 7.2) compares any two stored versions in a lazily-loaded Monaco
+ * diff editor.
  */
 
 /** Empty artifact state, shared by the desktop side-by-side panel and the
@@ -94,7 +97,7 @@ function resolveVersion(
   return chosen ?? latest;
 }
 
-type Tab = "preview" | "code";
+type Tab = "preview" | "code" | "diff";
 
 /** Type dispatch: known types to their viewer, unknown types to Code. */
 function ArtifactContent({
@@ -166,9 +169,15 @@ export function ArtifactPanel() {
   // Older versions are always complete, so they preview even while a newer
   // version streams.
   const effectiveTab: Tab =
-    tab === "preview" && previewAvailable && !version.incomplete
-      ? "preview"
-      : "code";
+    tab === "preview" && !(previewAvailable && !version.incomplete)
+      ? "code"
+      : tab === "diff" && selected.versions.length < 2
+        ? "code"
+        : tab;
+
+  // A diff needs two stored versions (task 7.2); the button is disabled
+  // rather than hidden so the tab bar does not reshuffle while streaming.
+  const diffAvailable = selected.versions.length >= 2;
 
   return (
     <div className="flex h-full flex-col">
@@ -233,6 +242,20 @@ export function ArtifactPanel() {
         >
           Code
         </Button>
+        <Button
+          size="sm"
+          variant={effectiveTab === "diff" ? "secondary" : "ghost"}
+          aria-pressed={effectiveTab === "diff"}
+          disabled={!diffAvailable}
+          title={
+            diffAvailable
+              ? "Compare two versions"
+              : "Needs at least two versions"
+          }
+          onClick={() => setTab("diff")}
+        >
+          Diff
+        </Button>
         {/* Version dropdown (§12.8): any stored version; the latest is marked
             and follows new versions until an older one is pinned. */}
         <select
@@ -261,7 +284,21 @@ export function ArtifactPanel() {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
-        <ArtifactContent artifact={selected} version={version} tab={effectiveTab} />
+        {effectiveTab === "diff" ? (
+          <VersionDiff
+            key={selected.identifier}
+            versions={selected.versions}
+            language={codeLanguage(selected)}
+            title={selected.title}
+            preferredVersion={versionSelections[selected.identifier]}
+          />
+        ) : (
+          <ArtifactContent
+            artifact={selected}
+            version={version}
+            tab={effectiveTab}
+          />
+        )}
       </div>
     </div>
   );
