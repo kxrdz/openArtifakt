@@ -29,6 +29,7 @@ export type { DialogProps } from "./Dialog";
 
 export { focusRing } from "./focus-ring";
 export { cn } from "./cn";
+export { versionSelectClass } from "./selectStyles";
 
 export {
   CheckIcon,

@@ -4,7 +4,7 @@ import type * as monacoApi from "monaco-editor";
 
 import type { ArtifactVersion } from "../../artifacts";
 import { useActiveTheme } from "../../hooks/useTheme";
-import { Spinner, cn, focusRing } from "../ui";
+import { Spinner, versionSelectClass } from "../ui";
 import { readDiffThemeTokens } from "./monacoTheme";
 import {
   defaultDiffPair,
@@ -41,12 +41,6 @@ export interface VersionDiffProps {
    */
   preferredVersion?: number;
 }
-
-/** Version-dropdown control styling, shared with the artifact panel. */
-const versionSelectClass = cn(
-  "h-7 rounded-md border border-border bg-bg-sunken px-1.5 font-sans text-xs font-medium text-text",
-  focusRing,
-);
 
 /** The content of one stored version (empty string when it vanished). */
 function versionContent(

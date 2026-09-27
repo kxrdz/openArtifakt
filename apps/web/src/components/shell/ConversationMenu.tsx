@@ -30,6 +30,7 @@ function relativeTime(createdAt: number): string {
 export function ConversationMenu() {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const conversations = useChatStore((state) => state.conversations);
   const historyStatus = useChatStore((state) => state.historyStatus);
   const activeConversationId = useChatStore((state) => state.conversationId);
@@ -41,7 +42,8 @@ export function ConversationMenu() {
     });
   }, []);
 
-  // Dismiss on Escape or a click/pointer outside the menu.
+  // Dismiss on Escape or a click/pointer outside the menu, and move focus
+  // through the menu items with ArrowDown/ArrowUp.
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: PointerEvent) => {
@@ -50,7 +52,20 @@ export function ConversationMenu() {
       }
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+      const items = Array.from(
+        menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]') ?? [],
+      );
+      if (items.length === 0) return;
+      event.preventDefault();
+      const current = items.indexOf(document.activeElement as HTMLButtonElement);
+      const delta = event.key === "ArrowDown" ? 1 : -1;
+      const next = current === -1 ? 0 : (current + delta + items.length) % items.length;
+      items[next]?.focus();
     };
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
@@ -58,6 +73,13 @@ export function ConversationMenu() {
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
+  }, [open]);
+
+  // Move focus into the first item when the menu opens (§12.9 a11y polish).
+  useEffect(() => {
+    if (!open) return;
+    const first = menuRef.current?.querySelector<HTMLButtonElement>('[role="menuitem"]');
+    (first ?? menuRef.current)?.focus();
   }, [open]);
 
   function startNewConversation() {
@@ -89,8 +111,10 @@ export function ConversationMenu() {
 
       {open && (
         <div
+          ref={menuRef}
           role="menu"
           aria-label="Conversations"
+          tabIndex={-1}
           className="absolute right-0 top-full z-50 mt-1 w-72 overflow-hidden rounded-lg border border-border bg-bg-elevated shadow-2"
         >
           <div className="flex h-11 items-center justify-between border-b border-border px-2 pl-3">

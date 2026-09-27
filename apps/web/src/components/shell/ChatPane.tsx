@@ -4,7 +4,15 @@ import { useChatStore } from "../../store/chatStore";
 import { ChatContainer } from "../chat/ChatContainer";
 import { Composer } from "../chat/Composer";
 import type { ComposerHandle } from "../chat/Composer";
-import { Button, MessageSquareIcon, PanelRightIcon, SettingsIcon } from "../ui";
+import {
+  Button,
+  IconButton,
+  MessageSquareIcon,
+  PanelRightIcon,
+  SettingsIcon,
+  StatusDot,
+  XIcon,
+} from "../ui";
 import { TerminalLog } from "./TerminalLog";
 
 export interface ChatPaneProps {
@@ -47,9 +55,30 @@ export function ChatPane({
   workspaceRoot,
 }: ChatPaneProps) {
   const hasMessages = useChatStore((state) => state.messages.length > 0);
+  const error = useChatStore((state) => state.error);
+  const clearError = useChatStore((state) => state.clearError);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
+      {error !== null && (
+        <div
+          role="alert"
+          className="flex shrink-0 items-center gap-2 border-b border-danger bg-danger-bg px-3 py-2"
+        >
+          <StatusDot tone="danger" />
+          <p className="min-w-0 flex-1 text-sm text-danger">
+            {error} — check the terminal log and provider settings, then try
+            again.
+          </p>
+          <IconButton
+            aria-label="Dismiss error"
+            variant="danger"
+            size="sm"
+            icon={<XIcon className="h-3.5 w-3.5" />}
+            onClick={clearError}
+          />
+        </div>
+      )}
       {hasMessages ? (
         <ChatContainer />
       ) : providerReady === false ? (

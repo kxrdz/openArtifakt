@@ -1,10 +1,19 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { MutableRefObject } from "react";
 
 import { useArtifactStore } from "../../artifacts";
 import type { Artifact, ArtifactVersion } from "../../artifacts";
 import { CodeViewer, MermaidViewer, SvgViewer } from "../artifacts";
 import { HtmlPreview, ReactPreview } from "../../sandbox";
-import { Badge, Button, cn, focusRing, PanelRightIcon, StatusDot } from "../ui";
+import {
+  Badge,
+  Button,
+  cn,
+  focusRing,
+  PanelRightIcon,
+  StatusDot,
+  versionSelectClass,
+} from "../ui";
 import { VersionDiff } from "../artifacts/VersionDiff";
 
 /**
@@ -19,7 +28,7 @@ import { VersionDiff } from "../artifacts/VersionDiff";
  * stored version — pinning an older one never removes the newer ones, and
  * selecting the latest returns to following it as versions arrive. The Diff
  * tab (task 7.2) compares any two stored versions in a lazily-loaded Monaco
- * diff editor, and the Revert action (task 7.3) copies the viewed older
+ * diff editor, and the Restore action (task 7.3) copies the viewed older
  * version forward as a new version — history is never deleted.
  */
 
@@ -143,17 +152,22 @@ function ArtifactContent({
   }
 }
 
-/** Version-dropdown control styling, consistent with the settings fields. */
-const versionSelectClass = cn(
-  "h-7 rounded-md border border-border bg-bg-sunken px-1.5 font-sans text-xs font-medium text-text",
-  focusRing,
-);
+/** The imperative surface the shell reaches for the "Jump to artifact panel"
+ * command: moving focus into the artifact switcher without a DOM query. */
+export interface ArtifactPanelHandle {
+  focusSwitcher: () => void;
+}
+
+export interface ArtifactPanelProps {
+  /** Populated each render so the shell's jump command can focus the switcher. */
+  handleRef?: MutableRefObject<ArtifactPanelHandle | null>;
+}
 
 /**
  * The desktop artifact panel: an artifact switcher over Preview/Code tabs and
  * the active renderer (or the empty state before the first artifact).
  */
-export function ArtifactPanel() {
+export function ArtifactPanel({ handleRef }: ArtifactPanelProps) {
   const artifacts = useArtifactStore((state) => state.artifacts);
   const selectedId = useArtifactStore((state) => state.selectedId);
   const selectArtifact = useArtifactStore((state) => state.selectArtifact);
@@ -161,6 +175,16 @@ export function ArtifactPanel() {
   const selectVersion = useArtifactStore((state) => state.selectVersion);
   const revertVersion = useArtifactStore((state) => state.revertVersion);
   const [tab, setTab] = useState<Tab>("preview");
+  const switcherRef = useRef<HTMLButtonElement>(null);
+
+  // Re-register the focus handle after every render (mirrors ComposerHandle).
+  useEffect(() => {
+    if (handleRef === undefined) return;
+    handleRef.current = { focusSwitcher: () => switcherRef.current?.focus() };
+    return () => {
+      handleRef.current = null;
+    };
+  });
 
   const selected =
     artifacts.find((artifact) => artifact.identifier === selectedId) ??
@@ -202,11 +226,12 @@ export function ArtifactPanel() {
         aria-label="Artifacts"
         className="flex h-9 shrink-0 items-center gap-1 overflow-x-auto border-b border-border px-2"
       >
-        {artifacts.map((artifact) => {
+        {artifacts.map((artifact, index) => {
           const active = artifact.identifier === selected.identifier;
           return (
             <button
               key={artifact.identifier}
+              ref={index === 0 ? switcherRef : undefined}
               type="button"
               aria-pressed={active}
               className={cn(
@@ -297,12 +322,12 @@ export function ArtifactPanel() {
           disabled={viewingLatest}
           title={
             viewingLatest
-              ? "View an older version to revert"
+              ? "View an older version to restore"
               : "Copy this version forward as a new version"
           }
           onClick={() => revertVersion(selected.identifier, version.version)}
         >
-          Revert
+          Restore
         </Button>
         {!viewingLatest && <Badge tone="neutral">Viewing older version</Badge>}
         {version.incomplete && (

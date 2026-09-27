@@ -145,7 +145,7 @@ export function SplitPane({ left, right, className }: SplitPaneProps) {
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         onKeyDown={onKeyDown}
-        className="group relative w-1.5 shrink-0 cursor-col-resize touch-none focus-ring"
+        className="group relative w-1.5 shrink-0 cursor-col-resize touch-none before:absolute before:inset-y-0 before:-left-2.5 before:-right-2.5 focus-ring"
       >
         <span
           className={cn(

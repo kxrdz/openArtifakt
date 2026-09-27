@@ -78,6 +78,8 @@ export function TerminalLog({ open, onToggle }: TerminalLogProps) {
         <pre
           ref={bodyRef}
           onScroll={onScroll}
+          role="log"
+          aria-live="polite"
           className="h-32 overflow-auto whitespace-pre-wrap break-words border-t border-border px-3 py-2 font-mono text-xs leading-normal text-text-secondary"
         >
           {lines.length === 0 ? (

@@ -34,7 +34,7 @@
 
 ## 9. Polish pass
 
-- [ ] 9.1 Polish cross-surface consistency (spacing, hierarchy, focus, status readability, copy) to close the remaining critique/audit priority issues, and remove debug output, dead code and unused styles. Verify `pnpm design:check`, `pnpm --filter @openartifact/web build`, and web unit tests stay green.
+- [x] 9.1 Polish cross-surface consistency (spacing, hierarchy, focus, status readability, copy) to close the remaining critique/audit priority issues, and remove debug output, dead code and unused styles. Verify `pnpm design:check`, `pnpm --filter @openartifact/web build`, and web unit tests stay green.
 
 ## 10. Update DESIGN.md
 

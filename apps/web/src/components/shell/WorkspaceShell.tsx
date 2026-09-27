@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { KeyboardEvent } from "react";
 
 import { useArtifactStore } from "../../artifacts";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
@@ -13,9 +12,10 @@ import {
   useKeyboardShortcuts,
 } from "../command";
 import type { ComposerHandle } from "../chat/Composer";
-import { IconButton, XIcon } from "../ui";
+import { Dialog, IconButton, XIcon } from "../ui";
 import { SettingsDrawer } from "../settings/SettingsDrawer";
 import { ArtifactPanel } from "./ArtifactPanel";
+import type { ArtifactPanelHandle } from "./ArtifactPanel";
 import { ChatPane } from "./ChatPane";
 import { SplitPane } from "./SplitPane";
 import { StatusBar } from "./StatusBar";
@@ -27,10 +27,15 @@ const SHEET_BREAKPOINT = "(min-width: 900px)";
  * theme-aware renderer (mermaid, monaco, shiki) follow it in place. */
 function toggleTheme() {
   const root = document.documentElement;
-  root.setAttribute(
-    "data-theme",
-    root.getAttribute("data-theme") === "light" ? "dark" : "light",
-  );
+  const next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+  root.setAttribute("data-theme", next);
+  // Persist the choice so the inline bootstrap in index.html restores it on
+  // reload — the palette's "Toggle theme" would otherwise be lost (§12.9).
+  try {
+    window.localStorage.setItem("openartifact-theme", next);
+  } catch {
+    /* localStorage may be unavailable; the in-session flip still applies */
+  }
 }
 
 /**
@@ -49,6 +54,8 @@ export function WorkspaceShell() {
   const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const composerRef = useRef<ComposerHandle | null>(null);
+  const artifactPanelRef = useRef<ArtifactPanelHandle | null>(null);
+  const pendingPanelFocusRef = useRef(false);
 
   // Public, non-secret session info (provider readiness + workspace root)
   // drives the first-run/no-provider onboard states in the chat pane.
@@ -73,16 +80,13 @@ export function WorkspaceShell() {
     if (isDesktop) setSheetOpen(false);
   }, [isDesktop]);
 
-  // Move focus to the sheet's close control when it opens.
+  // Focus the artifact switcher once the panel (re)opens after the jump command.
   useEffect(() => {
-    if (!isDesktop && sheetOpen) closeButtonRef.current?.focus();
-  }, [isDesktop, sheetOpen]);
-
-  function onSheetKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.key === "Escape") {
-      setSheetOpen(false);
+    if (pendingPanelFocusRef.current && panelOpen && isDesktop) {
+      artifactPanelRef.current?.focusSwitcher();
+      pendingPanelFocusRef.current = false;
     }
-  }
+  }, [panelOpen, isDesktop]);
 
   const togglePanel = useCallback(() => {
     if (isDesktop) setPanelOpen((value) => !value);
@@ -119,10 +123,12 @@ export function WorkspaceShell() {
           focusChatInput: () => composerRef.current?.focus(),
           jumpToArtifactPanel: () => {
             if (isDesktop) {
-              setPanelOpen(true);
-              document
-                .querySelector<HTMLButtonElement>('[aria-label="Artifacts"] button')
-                ?.focus();
+              if (panelOpen) {
+                artifactPanelRef.current?.focusSwitcher();
+              } else {
+                pendingPanelFocusRef.current = true;
+                setPanelOpen(true);
+              }
             } else {
               setSheetOpen(true);
             }
@@ -130,7 +136,7 @@ export function WorkspaceShell() {
         },
         { sending: isSending, hasApproval, hasUndoableTurn },
       ),
-    [isDesktop, isSending, hasApproval, hasUndoableTurn, togglePanel],
+    [isDesktop, isSending, hasApproval, hasUndoableTurn, togglePanel, panelOpen],
   );
 
   // A modal (palette, settings drawer, sheet) captures the keyboard: global
@@ -161,7 +167,7 @@ export function WorkspaceShell() {
                   workspaceRoot={sessionInfo?.workspaceRoot ?? null}
                 />
               }
-              right={<ArtifactPanel />}
+              right={<ArtifactPanel handleRef={artifactPanelRef} />}
             />
           ) : (
             <ChatPane
@@ -190,13 +196,13 @@ export function WorkspaceShell() {
 
       {settingsOpen && <SettingsDrawer onClose={() => setSettingsOpen(false)} />}
 
-      {!isDesktop && sheetOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Artifact panel"
-          onKeyDown={onSheetKeyDown}
-          className="fixed inset-0 z-50 flex flex-col bg-bg"
+      {!isDesktop && (
+        <Dialog
+          open={sheetOpen}
+          onClose={() => setSheetOpen(false)}
+          label="Artifact panel"
+          initialFocusRef={closeButtonRef}
+          className="absolute inset-0 flex flex-col"
         >
           <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-3">
             <h2 className="text-sm font-semibold text-text">Artifacts</h2>
@@ -209,9 +215,9 @@ export function WorkspaceShell() {
             />
           </div>
           <div className="flex min-h-0 flex-1 flex-col">
-            <ArtifactPanel />
+            <ArtifactPanel handleRef={artifactPanelRef} />
           </div>
-        </div>
+        </Dialog>
       )}
     </div>
   );
