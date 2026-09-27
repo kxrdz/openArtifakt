@@ -18,7 +18,7 @@
 
 ## 5. Critique pass
 
-- [ ] 5.1 Run the Impeccable critique across all workspace surfaces (two isolated sub-agents: design review and detector/browser evidence), persist the snapshot under `.impeccable/critique/`, and record every intentionally-unfixed finding in `docs/DECISIONS.md` with a reason. Verify the critique snapshot file exists and the priority issues are enumerated in the change notes.
+- [x] 5.1 Run the Impeccable critique across all workspace surfaces (two isolated sub-agents: design review and detector/browser evidence), persist the snapshot under `.impeccable/critique/`, and record every intentionally-unfixed finding in `docs/DECISIONS.md` with a reason. Verify the critique snapshot file exists and the priority issues are enumerated in the change notes.
 
 ## 6. Audit pass
 

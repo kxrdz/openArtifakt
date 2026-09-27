@@ -50,3 +50,28 @@ The web app already ships every surface (see `DESIGN.md` and the `design-foundat
 ## Migration Plan
 
 No data or API changes. The dialog primitive is additive; existing drawers/sheets adopt it without behavior change. Shortcuts and the palette are additive; existing Enter/Escape behavior in the composer and drawers is preserved. Rollback is a clean `git revert` of the feature branch.
+
+## Critique snapshot (task 5.1)
+
+The Impeccable critique ran dual-agent (design review + detector/evidence) and
+persisted the full report to `.impeccable/critique/openartifact-workspace.md`.
+Design health score **33/40 (Good)**; `pnpm design:check` is clean (zero detector
+findings). Priority issues and their planned disposition (fix in this feature's
+later tasks, or explicitly deferred — see `docs/DECISIONS.md`):
+
+1. **[P0]** Approve/reject shortcuts (`Alt+A`/`Alt+R`) are suppressed while focus
+   is in the composer, so they are dead at the moment an approval is pending →
+   **fix in harden (7.1)**.
+2. **[P1]** `chatStore.error` is never rendered — transport failures show only
+   the word "Error" → **fix in polish (9.1)**.
+3. **[P1]** Light-theme status badge text (`running`/`warning`/`success`) sits
+   below 4.5:1 on its `-bg` wash → **fix in harden/polish (token change)**.
+4. **[P2]** `SettingsDrawer` and the mobile artifact sheet bypass the shared
+   `Dialog` (no focus trap) → **fix in harden (7.1)**.
+5. **[P2]** No `aria-live`/`role="log"` on the streaming conversation and
+   terminal log → **fix in polish (9.1)**.
+
+Deferred with reason (recorded in `docs/DECISIONS.md`): `ConversationMenu`
+metadata, terminal/conversation copy affordance, composer character limit,
+`CodeViewer` virtualization, refresh-mid-approval recovery (needs server change),
+and touch tooltips.
