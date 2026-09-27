@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_On `feature/6-chat-ui-approvals-terminal-log`, implement the next unchecked task in `openspec/changes/6-chat-ui-approvals-terminal-log/tasks.md`, starting with task 1.1 (server consumes `packages/*` source via bundler resolution + `tsx`). One task per iteration, one commit per task, `pnpm check` green before each commit._
+_On `feature/6-chat-ui-approvals-terminal-log`, implement the next unchecked task in `openspec/changes/6-chat-ui-approvals-terminal-log/tasks.md`, starting with task 1.2 (config.ts + security.ts with unit tests). One task per iteration, one commit per task, `pnpm check` green before each commit._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
