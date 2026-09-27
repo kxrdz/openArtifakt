@@ -13,3 +13,4 @@ export * from "./parser";
 export * from "./providers";
 export * from "./security";
 export * from "./tools";
+export * from "./agent";
