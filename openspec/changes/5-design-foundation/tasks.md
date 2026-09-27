@@ -10,7 +10,7 @@
 
 ## 3. UI primitives
 
-- [ ] 3.1 Create `apps/web/src/components/ui/` primitives built on the tokens — `Button` (variants, loading, disabled), `IconButton`, `Badge` (status variants), `StatusDot`, `Kbd`, `Spinner`, and a shared focus-visible ring — all keyboard-operable with visible focus, and export them from a `components/ui/index.ts`; add a small `ui`-primitives screen used only for the screenshots pass (or exercise them in the shell). Verify: `pnpm design:check` passes, no hard-coded colors/font sizes.
+- [x] 3.1 Create `apps/web/src/components/ui/` primitives built on the tokens — `Button` (variants, loading, disabled), `IconButton`, `Badge` (status variants), `StatusDot`, `Kbd`, `Spinner`, and a shared focus-visible ring — all keyboard-operable with visible focus, and export them from a `components/ui/index.ts`; add a small `ui`-primitives screen used only for the screenshots pass (or exercise them in the shell). Verify: `pnpm design:check` passes, no hard-coded colors/font sizes.
 
 ## 4. Workspace shell
 

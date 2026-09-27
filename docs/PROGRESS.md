@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Continue feature 5 on `feature/5-design-foundation`: tasks 1.1 (design tokens + Tailwind wiring + DESIGN.md) and 2.1 (self-hosted IBM Plex Sans + Mono woff2, `@font-face` rules, `--font-sans`/`--font-mono` tokens, no remote font URL) are done and committed. Next is task 3.1: create `apps/web/src/components/ui/` primitives built on the tokens — `Button` (variants, loading, disabled), `IconButton`, `Badge` (status variants), `StatusDot`, `Kbd`, `Spinner`, and a shared focus-visible ring — exported from `components/ui/index.ts`, plus a small screen to exercise them for the screenshots pass. Run `pnpm design:check` after the UI change._
+_Continue feature 5 on `feature/5-design-foundation`: tasks 1.1 (design tokens + Tailwind wiring + DESIGN.md), 2.1 (self-hosted IBM Plex fonts), and 3.1 (UI primitives: Button/IconButton/Badge/StatusDot/Kbd/Spinner + shared `.focus-ring` + `UiPreview` style guide, wired into `App.tsx`) are done and committed. Next is task 4.1: replace `App.tsx` with the empty workspace shell — CSS-grid split pane (chat left / artifact panel right) with a drag-to-resize divider (pointer + arrow-key `role="separator"`), a top status bar (product mark, agent state, settings trigger), a collapsible terminal-log region, and empty states for chat and artifact panel; below 900 px the artifact panel becomes a full-screen sheet opened from the chat. Run `pnpm design:check` after the UI change._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->

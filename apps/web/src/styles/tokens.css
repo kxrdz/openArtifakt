@@ -277,3 +277,20 @@
     }
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Shared primitives layer                                            */
+/* ------------------------------------------------------------------ */
+
+@layer components {
+  /* Two-layer focus ring (background gap + accent) from the --ring-focus
+     token. Interactive primitives opt in with this class; every other
+     focusable element keeps the base-layer :focus-visible outline above. */
+  .focus-ring {
+    outline: none;
+  }
+
+  .focus-ring:focus-visible {
+    box-shadow: var(--ring-focus);
+  }
+}
