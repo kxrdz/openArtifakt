@@ -12,7 +12,7 @@
 
 ## 3. Chat endpoints
 
-- [ ] 3.1 Add `apps/server/src/routes/chat.ts` with `POST /api/chat` (SSE stream of loop events), `POST /api/chat/:conversationId/approval` (approve/edit-command/reject resolves the pending approval), `POST /api/chat/:conversationId/stop` (cancels the turn), plus the conversation registry and command-output forwarding; wire `createApp` options (config, session token) and `/api/session`. Verify an integration test through `app.request()` with the fake provider covers approve-edit → reject-command → final answer, and a second test covers Stop.
+- [x] 3.1 Add `apps/server/src/routes/chat.ts` with `POST /api/chat` (SSE stream of loop events), `POST /api/chat/:conversationId/approval` (approve/edit-command/reject resolves the pending approval), `POST /api/chat/:conversationId/stop` (cancels the turn), plus the conversation registry and command-output forwarding; wire `createApp` options (config, session token) and `/api/session`. Verify an integration test through `app.request()` with the fake provider covers approve-edit → reject-command → final answer, and a second test covers Stop.
 
 ## 4. Web chat store + SSE client
 

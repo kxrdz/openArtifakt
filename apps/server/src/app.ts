@@ -5,6 +5,17 @@ import { fileURLToPath } from "node:url";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 
+import type { ProviderAdapter } from "@openartifact/core";
+
+import { loadConfig, type ServerConfig } from "./config";
+import { createChatRouter } from "./routes/chat";
+import {
+  generateSessionToken,
+  loopbackGuard,
+  sessionCookieValue,
+  sessionTokenGuard,
+} from "./security";
+
 const SERVER_NAME = "open-artifact";
 const SERVER_VERSION = "0.1.0";
 const VITE_DEV_ORIGIN = "http://127.0.0.1:5173";
@@ -15,11 +26,46 @@ const VITE_DEV_ORIGIN = "http://127.0.0.1:5173";
  */
 const WEB_DIST = fileURLToPath(new URL("../../web/dist/", import.meta.url));
 
-export function createApp(): Hono {
+export interface CreateAppOptions {
+  /** Validated server config; defaults to {@link loadConfig} of the live env. */
+  config?: ServerConfig;
+  /** Random per-startup session token; generated when omitted (§9). */
+  sessionToken?: string;
+  /** Provider override for the chat routes (tests inject a tuned fake). */
+  providerFactory?: () => ProviderAdapter;
+}
+
+export function createApp(options: CreateAppOptions = {}): Hono {
+  const config = options.config ?? loadConfig();
+  const sessionToken = options.sessionToken ?? generateSessionToken();
+
   const app = new Hono();
 
   app.get("/health", (c) =>
     c.json({ ok: true, name: SERVER_NAME, version: SERVER_VERSION }),
+  );
+
+  // Local-server security (§9): reject DNS-rebinding hosts and foreign origins.
+  app.use("/api/*", loopbackGuard());
+
+  // Bootstrap the session cookie and report the public config. Token-exempt so
+  // the client can always call it first to receive the cookie.
+  app.get("/api/session", (c) => {
+    c.header("Set-Cookie", sessionCookieValue(sessionToken));
+    return c.json({
+      ok: true,
+      approvalMode: config.approvalMode,
+      fakeProvider: config.fakeProvider,
+      provider: config.provider,
+    });
+  });
+
+  // Everything else under /api requires the session token.
+  app.use("/api/*", sessionTokenGuard(sessionToken));
+
+  app.route(
+    "/api/chat",
+    createChatRouter({ config, providerFactory: options.providerFactory }),
   );
 
   const isProduction = process.env.NODE_ENV === "production";

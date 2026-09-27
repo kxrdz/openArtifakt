@@ -44,6 +44,8 @@ export interface PromptContext {
 /** Everything needed to build a runnable agent loop from server config. */
 export interface AgentRuntimeOptions {
   config: ServerConfig;
+  /** Provider adapter override (e.g. the fake provider); defaults to the configured adapter. */
+  provider?: ProviderAdapter;
   /** Host-driven approval seam; the loop awaits it for every risky tool call. */
   approvalHandler: ApprovalHandler;
   /** Pre-mutation snapshot location (§8 "Undo"); when omitted, no snapshots are taken. */
@@ -117,7 +119,7 @@ export function createAgentRuntime(options: AgentRuntimeOptions): AgentRuntime {
   const { config, approvalHandler } = options;
   const promptContext = options.promptContext ?? defaultPromptContext();
 
-  const provider = createProviderAdapter(toModelConfig(config));
+  const provider = options.provider ?? createProviderAdapter(toModelConfig(config));
   const tools = buildToolRegistry();
   const systemPrompt = buildSystemPrompt({
     workspaceRoot: config.workspaceRoot,
