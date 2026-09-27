@@ -14,4 +14,4 @@
 
 ## 4. Verification and decision log
 
-- [ ] 4.1 Walk the README quickstart end-to-end from a clean checkout (fresh `pnpm install`, then the key-free `OPENARTIFACT_FAKE_PROVIDER=1` start) and confirm `/health` and `/api/session` respond with a working session; confirm `pnpm check` stays green after the docs land; and add a `docs/DECISIONS.md` entry recording that API keys are read from the process environment (`process.env[apiKeyRef]`), not auto-loaded from `.env`. Verify `pnpm check` is green and the decision entry is present.
+- [x] 4.1 Walk the README quickstart end-to-end from a clean checkout (fresh `pnpm install`, then the key-free `OPENARTIFACT_FAKE_PROVIDER=1` start) and confirm `/health` and `/api/session` respond with a working session; confirm `pnpm check` stays green after the docs land; and add a `docs/DECISIONS.md` entry recording that API keys are read from the process environment (`process.env[apiKeyRef]`), not auto-loaded from `.env`. Verify `pnpm check` is green and the decision entry is present.
