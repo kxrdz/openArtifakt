@@ -1,6 +1,7 @@
 import type { StreamEvent } from "@openartifact/shared";
 import { describe, expect, it } from "vitest";
 
+import { FAKE_ARTIFACTS_TEXT } from "./artifacts";
 import { FAKE_COMMAND_ARGS, FAKE_EDIT_ARGS } from "./fixture";
 import {
   FAKE_FINAL_TEXT,
@@ -51,7 +52,7 @@ describe("FakeServerProvider", () => {
     const second = await collect(new FakeServerProvider(), FAKE_FIXTURE_TURNS.length);
     expect(second).toEqual(first);
 
-    expect(first).toHaveLength(4);
+    expect(first).toHaveLength(5);
 
     // Tool calls appear in the scripted order across the turns.
     const started = first.flatMap((turn) =>
@@ -78,6 +79,10 @@ describe("FakeServerProvider", () => {
     // Turn 4: the slow-streaming turn for Stop.
     expect(textOf(first[3]!)).toBe(FAKE_STOP_TEXT);
     expect(first[3]!.at(-1)).toMatchObject({ type: "done", stopReason: "end_turn" });
+
+    // Turn 5: every artifact type plus a valid and an invalid mermaid fence.
+    expect(textOf(first[4]!)).toBe(FAKE_ARTIFACTS_TEXT);
+    expect(first[4]!.at(-1)).toMatchObject({ type: "done", stopReason: "end_turn" });
   });
 
   it("yields streamed text in multiple deltas", async () => {

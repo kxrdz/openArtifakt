@@ -231,6 +231,34 @@
 }
 
 /* ------------------------------------------------------------------ */
+/* Code syntax highlighting (shiki CSS-variables theme)               */
+/*                                                                    */
+/* The CodeViewer highlights with shiki's CSS-variables theme, which  */
+/* emits `var(--color-code-*)` references. These aliases map those    */
+/* slots onto the semantic tokens above. Because they reference       */
+/* `var(--color-*)` (not literal values), they re-resolve when        */
+/* `[data-theme="light"]` overrides the underlying tokens, so code   */
+/* highlights recolor with the theme automatically.                   */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --color-code-foreground: var(--color-text);
+  --color-code-background: var(--color-bg-elevated);
+  --color-code-token-comment: var(--color-text-muted);
+  --color-code-token-keyword: var(--color-accent);
+  --color-code-token-string: var(--color-success);
+  --color-code-token-string-expression: var(--color-success);
+  --color-code-token-constant: var(--color-warning);
+  --color-code-token-function: var(--color-accent-hover);
+  --color-code-token-parameter: var(--color-text-secondary);
+  --color-code-token-punctuation: var(--color-text-muted);
+  --color-code-token-link: var(--color-running);
+  --color-code-token-inserted: var(--color-success);
+  --color-code-token-deleted: var(--color-danger);
+  --color-code-token-changed: var(--color-warning);
+}
+
+/* ------------------------------------------------------------------ */
 /* Base element styling (the parts we did not draw still carry the    */
 /* design: selection, scrollbars, focus, body chrome).                */
 /* ------------------------------------------------------------------ */

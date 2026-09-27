@@ -1,6 +1,7 @@
 import type { ChatRequest, ProviderAdapter } from "@openartifact/core";
 import type { StopReason, StreamEvent } from "@openartifact/shared";
 
+import { FAKE_ARTIFACTS_TEXT } from "./artifacts";
 import { FAKE_COMMAND_ARGS, FAKE_EDIT_ARGS } from "./fixture";
 
 /**
@@ -72,6 +73,8 @@ export const FAKE_STOP_TEXT =
  * 2. streaming bridge → `execute_command` (needs approval) → `tool_use`
  * 3. final answer → `end_turn`
  * 4. slow-streaming text → `end_turn` (for the Stop test)
+ * 5. one `<artifact>` block per type + a valid and an invalid ```mermaid fence →
+ *    `end_turn` (for the artifact renderers e2e)
  */
 export const FAKE_FIXTURE_TURNS: ScriptedTurn[] = [
   {
@@ -94,6 +97,11 @@ export const FAKE_FIXTURE_TURNS: ScriptedTurn[] = [
     splitText: true,
     chunkSize: 4,
     delayMs: 50,
+    stopReason: "end_turn",
+  },
+  {
+    text: FAKE_ARTIFACTS_TEXT,
+    splitText: true,
     stopReason: "end_turn",
   },
 ];

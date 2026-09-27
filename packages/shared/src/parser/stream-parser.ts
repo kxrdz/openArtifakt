@@ -186,7 +186,7 @@ export class StreamParser {
       case "fence-body":
         if (this.fenceIsMermaid) {
           this.flushBodyHold(true);
-          this.emitMermaidClose();
+          this.emitMermaidClose(true);
         } else {
           this.flushBodyHold(false);
         }
@@ -716,9 +716,12 @@ export class StreamParser {
     this.mermaidBuf += text;
   }
 
-  private emitMermaidClose(): void {
+  private emitMermaidClose(incomplete = false): void {
     this.flushBuffers();
-    this.out.push({ type: "mermaid_close" });
+    this.out.push({
+      type: "mermaid_close",
+      ...(incomplete ? { incomplete: true } : {}),
+    });
   }
 
   private emitArtifactDelta(text: string): void {

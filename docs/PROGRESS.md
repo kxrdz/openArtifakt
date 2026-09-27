@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Current feature/branch:** none — step 6 merged; next is step 7 (Artifact renderers + Mermaid), to be planned with `openspec-propose` on `feature/7-artifact-renderers-mermaid`.
+- **Current feature/branch:** `feature/7-artifact-renderers-mermaid` — change `7-artifact-renderers-mermaid` in progress; tasks 1.1–5.1 done.
 
 - [x] 1. Scaffold
 - [x] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Start feature 7 (Artifact renderers + Mermaid): from `main` create `feature/7-artifact-renderers-mermaid`, run `openspec-propose` to plan change `7-artifact-renderers-mermaid` (proposal, specs delta, design, tasks), then implement its tasks one per iteration (one commit per task, `pnpm check` green before each commit)._
+_On `feature/7-artifact-renderers-mermaid`, run `openspec-apply-change` for change `7-artifact-renderers-mermaid` and implement the next unchecked task in its `tasks.md`. Tasks 1.1–5.1 are done. 5.1 added `apps/server/src/fake/artifacts.ts` (pure-string artifact-turn fixture: one `<artifact>` block per type + a valid and an invalid ```mermaid fence, trailing newline so the last fence closes) and a fifth scripted turn in `FakeServerProvider`, plus `e2e/artifacts.spec.ts` (drives turns 1–5, asserts every type renders, the react sandbox probe renders `sandboxed`/never `PARENT ACCESSIBLE` and a direct `page.frames()` probe reads `window.parent.document` → blocked, and the invalid fence shows a line-numbered inline error without crashing). Next is 5.2: extend `e2e/screenshots.spec.ts` to capture each artifact type and the Mermaid syntax-error state in both themes at desktop and mobile widths, and confirm `pnpm screenshots` writes them to `docs/screenshots/`. One commit per task; `pnpm check` green before each commit._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->

@@ -1,15 +1,15 @@
 /**
  * Parser event vocabulary (§5). The incremental stream parser turns raw model
- * text into these structured events; provider adapters and the web UI consume
- * them. This module is core-internal and dependency-free (no zod, no DOM) so a
- * future CLI can reuse it.
+ * text into these structured events; provider adapters, the web UI and core
+ * consume them. This module is dependency-free (no zod, no DOM) so both the
+ * browser client and a future CLI can reuse it.
  *
  * Every event discriminates on `type` (consistent with `StreamEvent` in
  * `@openartifact/shared`). Because `type` is the discriminator, the artifact's
  * declared MIME type is exposed as `artifactType` on `artifact_open`.
  */
 
-export interface TextEvent {
+export interface ParserTextEvent {
   type: "text";
   text: string;
 }
@@ -46,6 +46,8 @@ export interface MermaidDeltaEvent {
 
 export interface MermaidCloseEvent {
   type: "mermaid_close";
+  /** True when the fence was still open (no closing fence) when the stream ended. */
+  incomplete?: boolean;
 }
 
 export interface ToolCallEvent {
@@ -55,7 +57,7 @@ export interface ToolCallEvent {
 }
 
 export type ParserEvent =
-  | TextEvent
+  | ParserTextEvent
   | ArtifactOpenEvent
   | ArtifactDeltaEvent
   | ArtifactCloseEvent
