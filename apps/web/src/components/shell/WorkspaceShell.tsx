@@ -38,7 +38,7 @@ export function WorkspaceShell() {
 
   return (
     <div className="flex h-full flex-col">
-      <StatusBar />
+      <StatusBar onOpenPanel={isDesktop ? undefined : () => setSheetOpen(true)} />
 
       <main className="flex min-h-0 flex-1">
         {isDesktop ? (

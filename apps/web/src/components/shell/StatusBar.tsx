@@ -1,7 +1,7 @@
 import type { AgentState } from "@openartifact/shared";
 
 import { useChatStore } from "../../store/chatStore";
-import { IconButton, SettingsIcon, StatusDot } from "../ui";
+import { IconButton, PanelRightIcon, SettingsIcon, StatusDot } from "../ui";
 import type { StatusTone } from "../ui";
 import { ProductMark } from "./ProductMark";
 
@@ -42,9 +42,14 @@ const statePulse: Record<AgentState, boolean> = {
 export interface StatusBarProps {
   /** Settings drawer trigger (feature 8); rendered as a visible seam for now. */
   onOpenSettings?: () => void;
+  /**
+   * Opens the artifact panel. Only provided on narrow screens, where the panel
+   * is a full-screen sheet; on desktop the panel is always visible inline.
+   */
+  onOpenPanel?: () => void;
 }
 
-export function StatusBar({ onOpenSettings }: StatusBarProps) {
+export function StatusBar({ onOpenSettings, onOpenPanel }: StatusBarProps) {
   const agentState = useChatStore((state) => state.agentState);
 
   return (
@@ -59,6 +64,13 @@ export function StatusBar({ onOpenSettings }: StatusBarProps) {
           />
           {stateLabel[agentState]}
         </span>
+        {onOpenPanel && (
+          <IconButton
+            aria-label="Open artifact panel"
+            icon={<PanelRightIcon className="h-4 w-4" />}
+            onClick={onOpenPanel}
+          />
+        )}
         <IconButton
           aria-label="Settings"
           icon={<SettingsIcon className="h-4 w-4" />}
