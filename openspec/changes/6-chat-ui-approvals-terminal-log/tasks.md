@@ -17,7 +17,7 @@
 ## 4. Web chat store + SSE client
 
 - [x] 4.1 Add `zustand` and `@openartifact/shared` to `apps/web`, add the shared wire types in `packages/shared/src/chat.ts` (agent state, chat event union, approval decision schemas), and add a Vite dev proxy for `/api`. Verify `pnpm --filter @openartifact/shared typecheck` and `pnpm --filter @openartifact/web typecheck` pass.
-- [ ] 4.2 Add `apps/web/src/lib/sse.ts` (SSE-over-fetch parser) and `apps/web/src/store/chatStore.ts` (messages, agent state, terminal output, pending approval, send/stop/decide actions). Verify unit tests cover parsing an SSE stream and the store's send → streaming → approval → decision → done transition.
+- [x] 4.2 Add `apps/web/src/lib/sse.ts` (SSE-over-fetch parser) and `apps/web/src/store/chatStore.ts` (messages, agent state, terminal output, pending approval, send/stop/decide actions). Verify unit tests cover parsing an SSE stream and the store's send → streaming → approval → decision → done transition.
 
 ## 5. Chat UI: messages, composer, status
 
