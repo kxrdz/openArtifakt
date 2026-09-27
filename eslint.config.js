@@ -8,6 +8,8 @@ export default tseslint.config(
       "**/node_modules/**",
       "**/dist/**",
       "**/coverage/**",
+      "**/public/vendor/**",
+      "**/.vendor-entries-*/",
       "**/.impeccable/**",
       "e2e/playwright-report/**",
       "e2e/test-results/**",
