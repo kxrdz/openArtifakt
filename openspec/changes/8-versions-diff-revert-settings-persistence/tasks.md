@@ -3,7 +3,7 @@
 ## 1. Persistence foundation (SQLite + migrations + repository)
 
 - [x] 1.1 Add `better-sqlite3` to `apps/server` and build `apps/server/src/db/`: a connection wrapper, a numbered migration runner with `migrations/001_init.sql` (tables `conversations`, `messages`, `artifacts`, `artifact_versions`, `tool_calls`, `settings`), and a `Repository` interface with a `better-sqlite3` implementation. Verify `pnpm --filter @openartifact/server typecheck` and a Vitest that migrates a temp database and round-trips one conversation, message, artifact version, tool call and settings row.
-- [ ] 1.2 Add a repository factory that selects `better-sqlite3` and falls back to `node:sqlite` behind the same `Repository` interface when the native import throws (per §11). Verify a unit test that the factory falls back when the better-sqlite3 import fails, plus a schema test against `node:sqlite` when the runtime exposes it (skipped otherwise).
+- [x] 1.2 Add a repository factory that selects `better-sqlite3` and falls back to `node:sqlite` behind the same `Repository` interface when the native import throws (per §11). Verify a unit test that the factory falls back when the better-sqlite3 import fails, plus a schema test against `node:sqlite` when the runtime exposes it (skipped otherwise).
 
 ## 2. Shared wire types
 

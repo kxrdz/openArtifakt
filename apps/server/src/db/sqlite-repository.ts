@@ -1,8 +1,7 @@
-import type Database from "better-sqlite3";
-
 import type { Message } from "@openartifact/shared";
 import { parseMessage } from "@openartifact/shared";
 
+import type { SqliteConnection } from "./connection";
 import type {
   ArtifactInput,
   ArtifactRecord,
@@ -15,10 +14,11 @@ import type {
 } from "./repository";
 
 /**
- * The `better-sqlite3` {@link Repository} implementation (§11). It owns no
- * connection of its own — the caller passes one opened by {@link openDatabase}
- * and already migrated by {@link runMigrations} — so the engine stays swappable
- * behind the same interface.
+ * The SQL {@link Repository} implementation (§11). It owns no connection of its
+ * own — the caller passes an engine-agnostic {@link SqliteConnection} already
+ * migrated by {@link runMigrations} — so it works identically over
+ * `better-sqlite3` and `node:sqlite`, keeping the engine swappable behind the
+ * same interface.
  */
 
 interface ConversationRow {
@@ -109,9 +109,9 @@ function artifactVersionFromRow(row: ArtifactVersionRow): ArtifactVersionRecord 
 }
 
 export class SqliteRepository implements Repository {
-  readonly #db: Database.Database;
+  readonly #db: SqliteConnection;
 
-  constructor(db: Database.Database) {
+  constructor(db: SqliteConnection) {
     this.#db = db;
   }
 

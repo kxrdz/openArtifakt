@@ -2,7 +2,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type Database from "better-sqlite3";
+import type { SqliteConnection } from "./connection";
 
 /** Directory holding the numbered `.sql` migrations, relative to this file. */
 export const MIGRATIONS_DIR = fileURLToPath(new URL("./migrations", import.meta.url));
@@ -19,7 +19,7 @@ export interface MigrationRecord {
  * the names applied in this run (empty when the schema is already current).
  */
 export async function runMigrations(
-  db: Database.Database,
+  db: SqliteConnection,
   migrationsDir: string = MIGRATIONS_DIR,
 ): Promise<string[]> {
   db.exec(`CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -32,9 +32,9 @@ export async function runMigrations(
     .filter((name) => /^\d+_.+\.sql$/.test(name))
     .sort();
 
-  const appliedRows = db
-    .prepare("SELECT name FROM schema_migrations")
-    .all() as { name: string }[];
+  const appliedRows = db.prepare("SELECT name FROM schema_migrations").all() as {
+    name: string;
+  }[];
   const applied = new Set(appliedRows.map((row) => row.name));
 
   const appliedNow: string[] = [];
@@ -47,14 +47,14 @@ export async function runMigrations(
         file,
         Date.now(),
       );
-    })();
+    });
     appliedNow.push(file);
   }
   return appliedNow;
 }
 
 /** The migrations already recorded in `schema_migrations`, in apply order. */
-export function listMigrations(db: Database.Database): MigrationRecord[] {
+export function listMigrations(db: SqliteConnection): MigrationRecord[] {
   const rows = db
     .prepare("SELECT name, applied_at FROM schema_migrations ORDER BY id")
     .all() as { name: string; applied_at: number }[];

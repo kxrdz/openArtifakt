@@ -1,15 +1,30 @@
-import Database from "better-sqlite3";
+/** Values accepted as SQLite bind parameters by both storage engines. */
+export type SqliteValue = string | number | bigint | Uint8Array | null;
+
+/** Result of a statement `run`, normalized across engines. */
+export interface SqliteRunResult {
+  changes: number | bigint;
+  lastInsertRowid: number | bigint;
+}
+
+/** A prepared statement, normalized across engines. */
+export interface SqliteStatement {
+  run(...params: SqliteValue[]): SqliteRunResult;
+  get(...params: SqliteValue[]): unknown;
+  all(...params: SqliteValue[]): unknown[];
+}
 
 /**
- * SQLite connection wrapper (§11). Opens (creating if needed) the database at
- * `path` and applies the app's pragmas: WAL journaling for concurrent
- * readers, foreign-key enforcement, and a busy timeout so a concurrent writer
- * waits briefly rather than failing immediately.
+ * The minimal SQLite connection surface shared by `better-sqlite3` and
+ * `node:sqlite` (§11, "Persistence"). Both engines are adapted to this
+ * interface so the {@link import("./repository").Repository} and the migration
+ * runner never care which one is backing them — this is what lets the
+ * {@link import("./factory").openRepository} factory swap engines.
  */
-export function openDatabase(path: string): Database.Database {
-  const db = new Database(path);
-  db.pragma("journal_mode = WAL");
-  db.pragma("foreign_keys = ON");
-  db.pragma("busy_timeout = 5000");
-  return db;
+export interface SqliteConnection {
+  exec(sql: string): void;
+  prepare(sql: string): SqliteStatement;
+  /** Run `fn` atomically. `better-sqlite3` maps to `db.transaction`; `node:sqlite` emulates it. */
+  transaction<T>(fn: () => T): T;
+  close(): void;
 }

@@ -5,14 +5,14 @@ import { join } from "node:path";
 import type { Message } from "@openartifact/shared";
 import { describe, expect, it } from "vitest";
 
-import { openDatabase } from "./connection";
+import { openBetterSqlite3Connection } from "./better-sqlite3";
 import { listMigrations, runMigrations } from "./migrations";
 import { SqliteRepository } from "./sqlite-repository";
 
 describe("SQLite persistence (better-sqlite3)", () => {
   it("migrates a temp database and round-trips every record kind", async () => {
     const dir = await mkdtemp(join(tmpdir(), "openartifact-db-"));
-    const db = openDatabase(join(dir, "data.db"));
+    const db = openBetterSqlite3Connection(join(dir, "data.db"));
     try {
       const applied = await runMigrations(db);
       expect(applied).toContain("001_init.sql");
