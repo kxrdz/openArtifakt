@@ -2,7 +2,7 @@
 
 ## 1. Provider id and wiring
 
-- [ ] 1.1 Add `9router` to `providerIdSchema` in `packages/core/src/providers/types.ts` and `packages/shared/src/settings.ts`, map it to `createOpenAiCompatibleAdapter` in `factory.ts`, and add the `9router` defaults row + `isProviderReady` case in `apps/server/src/config.ts` — verify `pnpm check` is green (typecheck enforces the exhaustive switch and `Record<ProviderId, ProviderDefaults>`).
+- [x] 1.1 Add `9router` to `providerIdSchema` in `packages/core/src/providers/types.ts` and `packages/shared/src/settings.ts`, map it to `createOpenAiCompatibleAdapter` in `factory.ts`, and add the `9router` defaults row + `isProviderReady` case in `apps/server/src/config.ts` — verify `pnpm check` is green (typecheck enforces the exhaustive switch and `Record<ProviderId, ProviderDefaults>`).
 - [ ] 1.2 Update the provider-id enumerations in `packages/core/src/providers/factory.test.ts` and `packages/shared/src/persistence.test.ts`, add a config test asserting the `9router` defaults and a factory test asserting `9router` resolves to the openai-compatible adapter — verify the provider test suites pass.
 
 ## 2. Smoke harness

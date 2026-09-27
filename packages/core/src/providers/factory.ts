@@ -54,6 +54,9 @@ function selectAdapter(
 
   switch (config.provider) {
     case "openai-compatible":
+    case "9router":
+      // 9Router is an OpenAI-compatible gateway (optional Bearer auth), so it
+      // reuses the openai-compatible adapter with its own defaults.
       return createOpenAiCompatibleAdapter({ baseUrl, apiKey, headers, fetchImpl });
     case "anthropic":
       return createAnthropicAdapter({ baseUrl, apiKey, headers, fetchImpl });
