@@ -340,7 +340,7 @@ describe("StreamParser: mermaid fences", () => {
       { type: "mermaid_open" },
       { type: "mermaid_delta", text: "graph TD;\n" },
     ]);
-    expect(parser.end()).toEqual([{ type: "mermaid_close" }]);
+    expect(parser.end()).toEqual([{ type: "mermaid_close", incomplete: true }]);
   });
 
   it("streams mermaid deltas across chunk boundaries", () => {

@@ -46,6 +46,8 @@ export interface MermaidDeltaEvent {
 
 export interface MermaidCloseEvent {
   type: "mermaid_close";
+  /** True when the fence was still open (no closing fence) when the stream ended. */
+  incomplete?: boolean;
 }
 
 export interface ToolCallEvent {

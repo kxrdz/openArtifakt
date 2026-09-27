@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_On `feature/7-artifact-renderers-mermaid`, run `openspec-apply-change` for change `7-artifact-renderers-mermaid` and implement the next unchecked task in its `tasks.md`. 1.1 is done (StreamParser moved into `packages/shared`, core re-exports it; the parser `TextEvent` was renamed `ParserTextEvent` to avoid clashing with the chat wire `TextEvent`). Next is 1.2 (web artifact model in `apps/web/src/artifacts/`: `parseDocument` over the shared `StreamParser` + `useArtifactStore`). One commit per task; `pnpm check` green before each commit._
+_On `feature/7-artifact-renderers-mermaid`, run `openspec-apply-change` for change `7-artifact-renderers-mermaid` and implement the next unchecked task in its `tasks.md`. 1.1 and 1.2 are done: the parser lives in `packages/shared` (core re-exports it) and gained an `incomplete` flag on `mermaid_close`; the web artifact model is in `apps/web/src/artifacts/` (`parseDocument` folds parser events into text/mermaid blocks + artifacts keyed by identifier with a `versions` list, and `useArtifactStore` derives them from the last assistant message and tracks the selection). Next is 2.1 (vendor script + server `/vendor/*` route with CORS). One commit per task; `pnpm check` green before each commit._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
