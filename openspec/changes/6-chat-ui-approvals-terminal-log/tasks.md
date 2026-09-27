@@ -8,7 +8,7 @@
 
 ## 2. Fake provider mode
 
-- [ ] 2.1 Add `apps/server/src/fake/` — a scripted `ProviderAdapter` replaying a fixed fixture conversation (streaming text → `edit_file` needing approval → `execute_command` needing approval → final answer → slow-streaming turn for Stop) with per-turn delays, plus a seeded temp workspace (`notes.txt`). Verify a unit test replays the turns in order deterministically and yields text in multiple deltas.
+- [x] 2.1 Add `apps/server/src/fake/` — a scripted `ProviderAdapter` replaying a fixed fixture conversation (streaming text → `edit_file` needing approval → `execute_command` needing approval → final answer → slow-streaming turn for Stop) with per-turn delays, plus a seeded temp workspace (`notes.txt`). Verify a unit test replays the turns in order deterministically and yields text in multiple deltas.
 
 ## 3. Chat endpoints
 
