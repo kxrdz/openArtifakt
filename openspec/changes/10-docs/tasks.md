@@ -10,7 +10,7 @@
 
 ## 3. .env.example
 
-- [ ] 3.1 Refresh `.env.example` into two labelled groups — **Server configuration** (`OPENARTIFACT_PROVIDER`, `OPENARTIFACT_MODEL`, `OPENARTIFACT_BASE_URL`, `OPENARTIFACT_API_KEY_REF`, `OPENARTIFACT_APPROVAL_MODE`, `OPENARTIFACT_WORKSPACE_ROOT`, `OPENARTIFACT_CONTEXT_WINDOW`, `OPENARTIFACT_NATIVE_TOOLS`, `OPENARTIFACT_STREAMING_TOOL_ARGS`, `OPENARTIFACT_VISION`, `OPENARTIFACT_FAKE_PROVIDER`, `PORT`) and **Provider keys + smoke** (the existing `*_API_KEY`/`OLLAMA_BASE_URL`/`TYPESAFE_API_KEY`) — each variable commented with its meaning and default, so the file doubles as the configuration reference. Verify every `OPENARTIFACT_*` name matches `apps/server/src/config.ts` (`ENV`) and the existing smoke keys are preserved.
+- [x] 3.1 Refresh `.env.example` into two labelled groups — **Server configuration** (`OPENARTIFACT_PROVIDER`, `OPENARTIFACT_MODEL`, `OPENARTIFACT_BASE_URL`, `OPENARTIFACT_API_KEY_REF`, `OPENARTIFACT_APPROVAL_MODE`, `OPENARTIFACT_WORKSPACE_ROOT`, `OPENARTIFACT_CONTEXT_WINDOW`, `OPENARTIFACT_NATIVE_TOOLS`, `OPENARTIFACT_STREAMING_TOOL_ARGS`, `OPENARTIFACT_VISION`, `OPENARTIFACT_FAKE_PROVIDER`, `PORT`) and **Provider keys + smoke** (the existing `*_API_KEY`/`OLLAMA_BASE_URL`/`TYPESAFE_API_KEY`) — each variable commented with its meaning and default, so the file doubles as the configuration reference. Verify every `OPENARTIFACT_*` name matches `apps/server/src/config.ts` (`ENV`) and the existing smoke keys are preserved.
 
 ## 4. Verification and decision log
 
