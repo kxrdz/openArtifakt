@@ -6,7 +6,7 @@
 
 ## 2. Dialog/overlay primitive
 
-- [ ] 2.1 Add a `Dialog`/`Overlay` primitive to `apps/web/src/components/ui/` with a scrim (`--color-scrim`), focus trap (Tab cycles within, focus restored on close), Escape-to-close, and `prefers-reduced-motion` handling. Verify web unit tests (focus trapped, Escape closes, focus restored) plus `pnpm design:check` and `pnpm --filter @openartifact/web build`.
+- [x] 2.1 Add a `Dialog`/`Overlay` primitive to `apps/web/src/components/ui/` with a scrim (`--color-scrim`), focus trap (Tab cycles within, focus restored on close), Escape-to-close, and `prefers-reduced-motion` handling. Verify web unit tests (focus trapped, Escape closes, focus restored) plus `pnpm design:check` and `pnpm --filter @openartifact/web build`.
 
 ## 3. Command palette
 

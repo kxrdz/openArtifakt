@@ -70,6 +70,22 @@ export default {
         out: "var(--ease-out)",
         standard: "var(--ease-standard)",
       },
+      keyframes: {
+        // Dialog/overlay enter motion (applied under `motion-safe:` only).
+        // Values reference the motion tokens, never literal durations.
+        "dialog-fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "dialog-panel-in": {
+          from: { opacity: "0", transform: "scale(0.98)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
+      },
+      animation: {
+        "dialog-fade-in": "dialog-fade-in var(--duration-normal) var(--ease-out)",
+        "dialog-panel-in": "dialog-panel-in var(--duration-normal) var(--ease-out)",
+      },
     },
   },
   plugins: [],
