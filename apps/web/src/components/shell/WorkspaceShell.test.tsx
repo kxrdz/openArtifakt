@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useChatStore } from "../../store/chatStore";
@@ -60,6 +60,8 @@ afterAll(() => {
 beforeEach(() => {
   // A clean chat store for every test (the singleton is shared across tests).
   useChatStore.getState().reset();
+  // Reset the session-info client so each test starts from "unknown" status.
+  mockFetchSessionInfo.mockResolvedValue(null);
 });
 
 afterEach(() => {
@@ -99,6 +101,47 @@ describe("WorkspaceShell: settings drawer wiring", () => {
 
     await waitFor(() => {
       expect(document.querySelector('[role="dialog"]')).toBeNull();
+    });
+  });
+});
+
+describe("WorkspaceShell: first-run and no-provider states", () => {
+  it("shows the first-run hint and workspace root when a provider is ready", async () => {
+    mockFetchSessionInfo.mockResolvedValue({
+      ok: true,
+      approvalMode: "ask",
+      fakeProvider: false,
+      provider: "openai-compatible",
+      providerReady: true,
+      workspaceRoot: "/tmp/project",
+    });
+    render(<WorkspaceShell />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Ask about your project")).toBeTruthy();
+    });
+    expect(screen.getByText("Working in /tmp/project")).toBeTruthy();
+  });
+
+  it("shows a path into settings when no provider is ready", async () => {
+    mockFetchSessionInfo.mockResolvedValue({
+      ok: true,
+      approvalMode: "ask",
+      fakeProvider: false,
+      provider: "openai-compatible",
+      providerReady: false,
+    });
+    render(<WorkspaceShell />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Add a provider to get started")).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Open settings" }));
+    await waitFor(() => {
+      expect(
+        document.querySelector('[role="dialog"][aria-label="Settings"]'),
+      ).not.toBeNull();
     });
   });
 });

@@ -3,6 +3,8 @@ import type { KeyboardEvent } from "react";
 
 import { useArtifactStore } from "../../artifacts";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
+import { fetchSessionInfo } from "../../lib/session";
+import type { SessionInfo } from "../../lib/session";
 import { lastUndoableTurn } from "../../lib/undo";
 import { useChatStore } from "../../store/chatStore";
 import {
@@ -44,8 +46,19 @@ export function WorkspaceShell() {
   const [panelOpen, setPanelOpen] = useState(true);
   const [terminalOpen, setTerminalOpen] = useState(true);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const composerRef = useRef<ComposerHandle | null>(null);
+
+  // Public, non-secret session info (provider readiness + workspace root)
+  // drives the first-run/no-provider onboard states in the chat pane.
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetchSessionInfo(controller.signal).then((info) => {
+      if (info !== null) setSessionInfo(info);
+    });
+    return () => controller.abort();
+  }, []);
 
   // Cheap boolean selectors: the shell re-renders only when availability
   // actually flips, not on every streamed text delta.
@@ -143,6 +156,9 @@ export function WorkspaceShell() {
                   composerHandleRef={composerRef}
                   terminalOpen={terminalOpen}
                   onToggleTerminal={() => setTerminalOpen((value) => !value)}
+                  onOpenSettings={() => setSettingsOpen(true)}
+                  providerReady={sessionInfo?.providerReady ?? null}
+                  workspaceRoot={sessionInfo?.workspaceRoot ?? null}
                 />
               }
               right={<ArtifactPanel />}
@@ -152,6 +168,9 @@ export function WorkspaceShell() {
               composerHandleRef={composerRef}
               terminalOpen={terminalOpen}
               onToggleTerminal={() => setTerminalOpen((value) => !value)}
+              onOpenSettings={() => setSettingsOpen(true)}
+              providerReady={sessionInfo?.providerReady ?? null}
+              workspaceRoot={sessionInfo?.workspaceRoot ?? null}
             />
           )
         ) : (
@@ -160,6 +179,9 @@ export function WorkspaceShell() {
             composerHandleRef={composerRef}
             terminalOpen={terminalOpen}
             onToggleTerminal={() => setTerminalOpen((value) => !value)}
+            onOpenSettings={() => setSettingsOpen(true)}
+            providerReady={sessionInfo?.providerReady ?? null}
+            workspaceRoot={sessionInfo?.workspaceRoot ?? null}
           />
         )}
       </main>

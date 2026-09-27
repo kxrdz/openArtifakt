@@ -24,17 +24,30 @@ import { VersionDiff } from "../artifacts/VersionDiff";
  */
 
 /** Empty artifact state, shared by the desktop side-by-side panel and the
- * narrow-screen sheet. */
+ * narrow-screen sheet. Kept visually distinct from the chat pane's first-run
+ * state: it lists the five artifact types it will render rather than repeating
+ * the conversation hint. */
 export function ArtifactEmptyState() {
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
       <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-bg-elevated text-text-muted">
         <PanelRightIcon className="h-5 w-5" />
       </span>
-      <h2 className="text-md font-semibold text-text">No artifact open</h2>
+      <h2 className="text-md font-semibold text-text">Nothing rendered yet</h2>
       <p className="max-w-sm text-sm text-text-secondary">
-        React, HTML, SVG, Mermaid and code output appear here with a version
-        history you can diff and revert.
+        When the agent produces something worth viewing or running, it appears
+        here with a version history you can diff and revert.
+      </p>
+      <div className="flex max-w-sm flex-wrap items-center justify-center gap-1.5">
+        {["React", "HTML", "SVG", "Mermaid", "Code"].map((type) => (
+          <Badge key={type} tone="neutral">
+            {type}
+          </Badge>
+        ))}
+      </div>
+      <p className="max-w-sm text-xs text-text-muted">
+        Ask the agent to build a component, draw a diagram or write a snippet,
+        then open it from the chat.
       </p>
     </div>
   );

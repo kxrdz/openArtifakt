@@ -15,6 +15,10 @@ export interface SessionInfo {
   approvalMode: string;
   fakeProvider: boolean;
   provider: string;
+  /** Whether the configured provider can run without further setup. */
+  providerReady?: boolean;
+  /** Absolute workspace root the agent's tools operate in (not secret). */
+  workspaceRoot?: string;
 }
 
 /**

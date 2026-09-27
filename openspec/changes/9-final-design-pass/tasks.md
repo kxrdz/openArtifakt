@@ -30,7 +30,7 @@
 
 ## 8. Onboard (first-run states)
 
-- [ ] 8.1 Polish the first-run / no-provider / no-workspace states: the empty chat and artifact states explain what will appear and the next action, and a missing provider shows a clear path into settings to configure one. Verify web unit tests plus `pnpm design:check` and `pnpm --filter @openartifact/web build`.
+- [x] 8.1 Polish the first-run / no-provider / no-workspace states: the empty chat and artifact states explain what will appear and the next action, and a missing provider shows a clear path into settings to configure one. Verify web unit tests plus `pnpm design:check` and `pnpm --filter @openartifact/web build`.
 
 ## 9. Polish pass
 
