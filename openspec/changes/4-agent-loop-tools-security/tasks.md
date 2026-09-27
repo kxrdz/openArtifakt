@@ -19,4 +19,4 @@
 
 ## 4. Integration
 
-- [ ] 4.1 Add `packages/core/test/fake-provider.ts` (test-only scripted `ProviderAdapter`) and an integration test that runs read → edit → execute-tests → final answer in a temp directory, proves `..`/symlink escapes are rejected, and proves cancelling mid-command leaves a valid history; confirm `src/index.ts` re-exports `agent`, `tools`, `security` and `prompts`. Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green end-to-end.
+- [x] 4.1 Add `packages/core/test/fake-provider.ts` (test-only scripted `ProviderAdapter`) and an integration test that runs read → edit → execute-tests → final answer in a temp directory, proves `..`/symlink escapes are rejected, and proves cancelling mid-command leaves a valid history; confirm `src/index.ts` re-exports `agent`, `tools`, `security` and `prompts`. Verify: `pnpm --filter @openartifact/core test` passes and root `pnpm check` stays green end-to-end.
