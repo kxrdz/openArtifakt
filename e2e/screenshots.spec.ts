@@ -39,7 +39,10 @@ const viewports = [
  * The webServer runs in fake-provider mode (§12.6), so the conversation
  * scenarios below replay the scripted fixture key-free: streaming text →
  * `edit_file` approval → `execute_command` approval → final answer → a
- * slow-streaming turn (for the mid-stream capture).
+ * slow-streaming turn (for the mid-stream capture). Feature 8 adds the
+ * settings drawer, the artifact version dropdown and the Monaco diff view:
+ * the version scenarios drive one extra turn (turn 6) that re-streams the
+ * React artifact with the same identifier, giving the panel two versions.
  */
 
 /** Open the app, wait for the shell, and pin the requested theme. */
@@ -133,6 +136,24 @@ async function openArtifact(page: Page, title: string): Promise<void> {
     await openPanel.click();
   }
   await page.getByRole("button", { name: title, exact: true }).click();
+}
+
+/**
+ * Drive to turn 6, which re-streams the React artifact with the same
+ * identifier (§5 versioning), then open it in the panel. After this the
+ * React artifact has two versions, enabling the version dropdown's older
+ * entries and the Diff tab.
+ */
+async function completeVersionTurn(page: Page): Promise<void> {
+  await completeArtifactTurn(page);
+
+  await sendMessage(page, "Update the sandbox probe");
+  await expect(page.getByRole("button", { name: "Send" })).toBeVisible();
+
+  await openArtifact(page, FAKE_REACT_TITLE);
+  const versionSelect = page.getByLabel(`Version of ${FAKE_REACT_TITLE}`);
+  await expect(versionSelect).toBeVisible();
+  await expect(versionSelect).toContainText("v2 (latest)");
 }
 
 /** A capture scenario: drive the UI into a state, then snapshot it. */
@@ -236,6 +257,44 @@ const scenarios: Scenario[] = [
       await expect(page.locator("[data-line-number]").first()).toBeVisible();
       await expect(page.locator('[data-offending="true"]')).toBeVisible();
       await expect(page.getByText(/BrokenFlow/)).toBeVisible();
+    },
+  },
+  {
+    // The settings drawer (§12.8): provider, model, base URL, key reference,
+    // context window, capabilities and approval mode.
+    name: "settings-drawer",
+    run: async (page) => {
+      await page.getByRole("button", { name: "Settings" }).click();
+      const drawer = page.getByRole("dialog", { name: "Settings" });
+      await expect(drawer).toBeVisible();
+      await expect(drawer.getByRole("button", { name: "Save" })).toBeVisible();
+      await expect(drawer.getByLabel("Approval mode")).toBeVisible();
+    },
+  },
+  {
+    // The artifact version dropdown (§12.8): two stored versions of the React
+    // artifact, the latest one marked, so versioning is visible at a glance.
+    name: "artifact-versions",
+    run: async (page) => {
+      await completeVersionTurn(page);
+      const versionSelect = page.getByLabel(`Version of ${FAKE_REACT_TITLE}`);
+      await expect(versionSelect.locator("option")).toHaveCount(2);
+      await expect(versionSelect).toContainText("v1");
+      await expect(versionSelect).toContainText("v2 (latest)");
+    },
+  },
+  {
+    // The Monaco diff view (§6, "Diff between any two versions"; task 7.2):
+    // the two stored versions compared read-only, side by side.
+    name: "artifact-diff",
+    run: async (page) => {
+      await completeVersionTurn(page);
+      await page.getByRole("button", { name: "Diff" }).click();
+      await expect(page.getByText("Loading diff editor")).toBeHidden();
+      const diffEditor = page.locator('[aria-label="Version diff, v1 to v2"]');
+      await expect(diffEditor.locator(".monaco-diff-editor")).toBeVisible();
+      // The v2-only source line proves the modified side actually rendered.
+      await expect(diffEditor).toContainText("version 2");
     },
   },
 ];

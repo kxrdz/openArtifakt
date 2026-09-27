@@ -40,6 +40,24 @@ export const FAKE_REACT_SOURCE = `export default function App() {
   return <div>React preview rendered - sandbox: {status}</div>;
 }`;
 
+/**
+ * A second version of the React artifact (turn 6). It reuses the same
+ * `identifier`, so per §5 the artifact gains a version instead of a new
+ * entry. The rendered text and one comment differ from {@link
+ * FAKE_REACT_SOURCE} so the diff view shows a real change.
+ */
+export const FAKE_REACT_SOURCE_V2 = `// version 2
+export default function App() {
+  let status = "checking";
+  try {
+    void window.parent.document;
+    status = "${FAKE_REACT_ACCESSIBLE_MARKER}";
+  } catch {
+    status = "${FAKE_REACT_SANDBOXED_MARKER}";
+  }
+  return <div>React preview v2 - sandbox: {status}</div>;
+}`;
+
 // --- HTML ----------------------------------------------------------------
 
 export const FAKE_HTML_TITLE = "Static page";
@@ -147,4 +165,20 @@ export const FAKE_ARTIFACTS_TEXT: string = [
   "",
   "Invalid inline diagram:",
   mermaidFence(FAKE_INVALID_MERMAID_SOURCE),
+].join("\n") + "\n";
+
+/** Prose streamed before the version-2 react block (turn 6). */
+export const FAKE_REACT_V2_INTRO = "Updating the sandbox probe:";
+
+/**
+ * The full text of the version turn (turn 6): the React artifact re-streamed
+ * with the same identifier, appending version 2 (§5 versioning).
+ */
+export const FAKE_REACT_V2_TEXT: string = [
+  FAKE_REACT_V2_INTRO,
+  "",
+  artifactBlock(
+    `type="application/vnd.react" title="${FAKE_REACT_TITLE}" identifier="${FAKE_REACT_IDENTIFIER}"`,
+    FAKE_REACT_SOURCE_V2,
+  ),
 ].join("\n") + "\n";
