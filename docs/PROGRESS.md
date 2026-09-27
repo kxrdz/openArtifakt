@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Next feature:** step 9 (Final design pass, Impeccable) on branch `feature/9-final-design-pass` + OpenSpec change `9-final-design-pass` (not started).
+- **Next feature:** step 9 (Final design pass, Impeccable) on branch `feature/9-final-design-pass` + OpenSpec change `9-final-design-pass` (planned; tasks 1.1–11.2 pending).
 
 - [x] 1. Scaffold
 - [x] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-Step 8 is complete and merged. Step 9 (final design pass, Impeccable) is next: run `critique` → `audit` → `harden` → `onboard` → `polish` across every surface, implement keyboard shortcuts and a command palette, then update `DESIGN.md`. Create branch `feature/9-final-design-pass` from `main` and run `openspec-propose` for change `9-final-design-pass`, then implement its tasks one commit each.
+Step 8 is complete and merged. Step 9 (final design pass, Impeccable) is next and is planned: OpenSpec change `9-final-design-pass` (proposal, specs delta, design, tasks) is committed on branch `feature/9-final-design-pass`. Run `openspec-apply-change` for `9-final-design-pass` and implement the tasks one commit each, in order: 1.1 command registry + `useKeyboardShortcuts`, 2.1 Dialog/Overlay primitive, 3.1 CommandPalette, 4.1 wire shortcuts into the shell, 5.1 critique, 6.1 audit, 7.1 harden, 8.1 onboard, 9.1 polish, 10.1 rewrite `DESIGN.md`, 11.1–11.2 e2e + screenshots. The Impeccable skill is not installed in this repo; its `reference/*.md` docs are read from a sibling checkout (see DECISIONS.md).
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
