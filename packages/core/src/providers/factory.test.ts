@@ -54,7 +54,7 @@ function sseResponse(body: string, status = 200): Response {
 }
 
 describe("createProviderAdapter: selection", () => {
-  const providers: ProviderId[] = ["openai-compatible", "anthropic", "gemini", "ollama"];
+  const providers: ProviderId[] = ["openai-compatible", "anthropic", "gemini", "ollama", "9router"];
 
   it.each(providers)("selects the %s adapter and exposes its id", (provider) => {
     const adapter = createProviderAdapter(configFor(provider), { fetchImpl: vi.fn() as unknown as typeof fetch });
@@ -64,6 +64,27 @@ describe("createProviderAdapter: selection", () => {
   it("throws on an unsupported provider id", () => {
     const bad = { ...configFor("openai-compatible"), provider: "nope" } as unknown as ModelConfig;
     expect(() => createProviderAdapter(bad)).toThrow("Unsupported provider: nope");
+  });
+});
+
+describe("createProviderAdapter: 9router preset", () => {
+  it("routes 9router through the openai-compatible adapter", async () => {
+    const fetchImpl = (async (url: unknown) => {
+      expect(url).toBe("http://localhost:20128/v1/chat/completions");
+      return sseResponse(fallbackTextSse);
+    }) as unknown as typeof fetch;
+
+    const adapter = createProviderAdapter(
+      { ...configFor("9router"), baseUrl: "http://localhost:20128/v1" },
+      { fetchImpl },
+    );
+
+    const events = await collect(adapter.stream(request, new AbortController().signal));
+
+    expect(events).toEqual([
+      { type: "text_delta", text: '<tool_call name="read_file">{"path":"src/index.ts"}</tool_call>' },
+      { type: "done", stopReason: "end_turn" },
+    ]);
   });
 });
 

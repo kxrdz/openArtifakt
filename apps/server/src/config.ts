@@ -77,6 +77,13 @@ export const PROVIDER_DEFAULTS: Record<ProviderId, ProviderDefaults> = {
     contextWindow: 8_192,
     capabilities: { nativeTools: true, streamingToolArgs: false, vision: false },
   },
+  "9router": {
+    model: "cc/claude-sonnet-4-5",
+    baseUrl: "http://localhost:20128/v1",
+    apiKeyRef: "NINEROUTER_KEY",
+    contextWindow: 200_000,
+    capabilities: { nativeTools: true, streamingToolArgs: true, vision: false },
+  },
 };
 
 /**
@@ -91,7 +98,10 @@ export function isProviderReady(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
   if (config.fakeProvider) return true;
-  if (config.provider === "ollama") return true;
+  // ollama and 9router are local gateways whose auth is optional: the adapter
+  // omits the Authorization header when their key ref is unset, so they run
+  // without a key.
+  if (config.provider === "ollama" || config.provider === "9router") return true;
   if (config.apiKeyRef === undefined) return false;
   const key = env[config.apiKeyRef];
   return typeof key === "string" && key !== "";

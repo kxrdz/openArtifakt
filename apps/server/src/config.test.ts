@@ -34,6 +34,20 @@ describe("loadConfig", () => {
     });
   });
 
+  it("wires the 9router preset to the openai-compatible gateway", () => {
+    const cfg = loadConfig({ OPENARTIFACT_PROVIDER: "9router" });
+    expect(cfg.provider).toBe("9router");
+    expect(cfg.model).toBe("cc/claude-sonnet-4-5");
+    expect(cfg.baseUrl).toBe("http://localhost:20128/v1");
+    expect(cfg.apiKeyRef).toBe("NINEROUTER_KEY");
+    expect(cfg.contextWindow).toBe(200_000);
+    expect(cfg.capabilities).toEqual({
+      nativeTools: true,
+      streamingToolArgs: true,
+      vision: false,
+    });
+  });
+
   it("enables the fake provider flag from several truthy forms", () => {
     expect(loadConfig({ OPENARTIFACT_FAKE_PROVIDER: "1" }).fakeProvider).toBe(true);
     expect(loadConfig({ OPENARTIFACT_FAKE_PROVIDER: "true" }).fakeProvider).toBe(true);
@@ -110,6 +124,11 @@ describe("isProviderReady", () => {
   it("is ready for the local ollama provider without a key", () => {
     const ollama = loadConfig({ OPENARTIFACT_PROVIDER: "ollama" });
     expect(isProviderReady(ollama)).toBe(true);
+  });
+
+  it("is ready for the 9router gateway without a key (auth is optional)", () => {
+    const nine = loadConfig({ OPENARTIFACT_PROVIDER: "9router" });
+    expect(isProviderReady(nine, {})).toBe(true);
   });
 
   it("is ready when the referenced API key is present in the environment", () => {

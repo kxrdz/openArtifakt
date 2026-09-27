@@ -12,7 +12,7 @@ Every provider adapter SHALL expose a stable `id` and a `stream(request, signal)
 #### Scenario: Adapter identity
 
 - **WHEN** a consumer asks an adapter for its identifier
-- **THEN** it returns one of `openai-compatible`, `anthropic`, `gemini`, or `ollama`
+- **THEN** it returns one of `openai-compatible`, `anthropic`, `gemini`, `ollama`, or `9router`
 
 #### Scenario: Terminal event
 
@@ -111,6 +111,11 @@ Adapters SHALL branch on declared capability flags (`nativeTools`, `streamingToo
 
 - **WHEN** an adapter must choose between native and fallback tool handling
 - **THEN** the decision is driven solely by the configured capabilities, never by comparing the provider id
+
+#### Scenario: Gateway preset reuses an adapter
+
+- **WHEN** a provider id such as `9router` is configured whose wire protocol is OpenAI-compatible
+- **THEN** it resolves to the OpenAI-compatible adapter with its own defaults (base URL, key reference, model) and requires no new adapter code
 
 ### Requirement: Retry with backoff
 
