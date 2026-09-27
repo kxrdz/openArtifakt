@@ -25,7 +25,7 @@
 
 ## 6. Tool-call cards, approval cards, terminal log
 
-- [ ] 6.1 Build `ToolCallCard` (name, args, running/done/error status), `ApprovalCard` (diff for edits/writes, full command + working directory + editable command for commands, reject-with-note) and wire `TerminalLog` to the streamed command output. Verify `pnpm design:check` passes and `pnpm build` (web) typechecks.
+- [x] 6.1 Build `ToolCallCard` (name, args, running/done/error status), `ApprovalCard` (diff for edits/writes, full command + working directory + editable command for commands, reject-with-note) and wire `TerminalLog` to the streamed command output. Verify `pnpm design:check` passes and `pnpm build` (web) typechecks.
 
 ## 7. e2e + screenshots
 

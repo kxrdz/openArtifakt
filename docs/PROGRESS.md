@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_On `feature/6-chat-ui-approvals-terminal-log`, implement the next unchecked task in `openspec/changes/6-chat-ui-approvals-terminal-log/tasks.md`, starting with task 6.1 (build `ToolCallCard` with name/args/running-done-error status, `ApprovalCard` with diff for edits/writes and full command + working directory + editable command for commands plus reject-with-note, and wire `TerminalLog` to the streamed command output). This is UI work: load the `impeccable` skill first, run `pnpm design:check` after the change, and verify `pnpm build` (web) typechecks. One task per iteration, one commit per task, `pnpm check` green before each commit._
+_On `feature/6-chat-ui-approvals-terminal-log`, implement the next unchecked task in `openspec/changes/6-chat-ui-approvals-terminal-log/tasks.md`: task 7.1 (set `OPENARTIFACT_FAKE_PROVIDER=1` and the temp-workspace env in the e2e webServer and add `e2e/chat.spec.ts` covering a full fake conversation — streaming text, an approved edit, a rejected command, the final answer, and Stop mid-stream; verify `pnpm e2e` passes). One task per iteration, one commit per task, `pnpm check` green before each commit._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
