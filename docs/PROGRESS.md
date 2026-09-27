@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_On `feature/6-chat-ui-approvals-terminal-log`, implement the next unchecked task in `openspec/changes/6-chat-ui-approvals-terminal-log/tasks.md`, starting with task 2.1 (fake provider mode: scripted adapter replaying text → edit_file → execute_command → final answer → slow Stop turn against a seeded temp workspace, with a deterministic replay unit test). One task per iteration, one commit per task, `pnpm check` green before each commit._
+_On `feature/6-chat-ui-approvals-terminal-log`, implement the next unchecked task in `openspec/changes/6-chat-ui-approvals-terminal-log/tasks.md`, starting with task 3.1 (chat endpoints: POST /api/chat SSE stream, approval decision, stop, conversation registry + command-output forwarding, wired through createApp with session token + /api/session; integration tests via app.request() with the fake provider). One task per iteration, one commit per task, `pnpm check` green before each commit._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
