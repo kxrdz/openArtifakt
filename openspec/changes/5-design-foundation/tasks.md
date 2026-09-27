@@ -14,7 +14,7 @@
 
 ## 4. Workspace shell
 
-- [ ] 4.1 Replace `App.tsx` with the empty workspace shell: CSS-grid split pane (chat left / artifact panel right) with a drag-to-resize divider (pointer + arrow-key `role="separator"`), a top status bar (product mark, agent state, settings trigger), a collapsible terminal-log region, and empty states for chat and artifact panel; below 900 px the artifact panel becomes a full-screen sheet opened from the chat. Verify: `pnpm design:check` passes and `pnpm build` (web) typechecks.
+- [x] 4.1 Replace `App.tsx` with the empty workspace shell: CSS-grid split pane (chat left / artifact panel right) with a drag-to-resize divider (pointer + arrow-key `role="separator"`), a top status bar (product mark, agent state, settings trigger), a collapsible terminal-log region, and empty states for chat and artifact panel; below 900 px the artifact panel becomes a full-screen sheet opened from the chat. Verify: `pnpm design:check` passes and `pnpm build` (web) typechecks.
 
 ## 5. Screenshots
 

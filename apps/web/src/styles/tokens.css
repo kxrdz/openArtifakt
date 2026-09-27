@@ -243,6 +243,7 @@
   body {
     margin: 0;
     height: 100%;
+    overflow: hidden;
     background-color: var(--color-bg);
     color: var(--color-text);
     font-family: var(--font-sans);
@@ -250,6 +251,11 @@
     line-height: var(--leading-normal);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /* The app is a full-viewport shell; internal regions scroll. */
+  #root {
+    height: 100%;
   }
 
   ::selection {

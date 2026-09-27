@@ -29,6 +29,7 @@ export { cn } from "./cn";
 
 export {
   CheckIcon,
+  ChevronDownIcon,
   ChevronRightIcon,
   MessageSquareIcon,
   PanelRightIcon,
