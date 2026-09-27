@@ -51,6 +51,9 @@ export function Composer({ handleRef }: ComposerProps) {
     if (!canSend) return;
     void send(value);
     setValue("");
+    // Leave the textarea so the global approve/reject bindings (Alt+A/Alt+R)
+    // are reachable while a pending approval streams; `Mod+I` returns focus.
+    textareaRef.current?.blur();
   }
 
   function focusTextarea() {

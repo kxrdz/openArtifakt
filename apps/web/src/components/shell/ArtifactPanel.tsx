@@ -212,7 +212,9 @@ export function ArtifactPanel() {
                   className="h-1.5 w-1.5"
                 />
               )}
-              <span className="max-w-[12rem] truncate">{artifact.title}</span>
+              <span className="max-w-[12rem] truncate" title={artifact.title}>
+                {artifact.title}
+              </span>
             </button>
           );
         })}

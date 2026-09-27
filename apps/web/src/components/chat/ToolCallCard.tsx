@@ -1,4 +1,6 @@
-import { Badge, ChevronRightIcon, cn, StatusDot, type StatusTone } from "../ui";
+import { useState } from "react";
+
+import { Badge, ChevronRightIcon, cn, focusRing, StatusDot, type StatusTone } from "../ui";
 import type { ToolCallStatus, ToolCallState } from "../../store/chatStore";
 import { truncateText } from "../../lib/diff";
 
@@ -38,10 +40,6 @@ function argsPreview(args: unknown): string {
  * error match the loop's result.
  */
 export function ToolCallCard({ toolCall }: { toolCall: ToolCallState }) {
-  const args = truncateText(prettyArgs(toolCall.args), MAX_BLOCK_CHARS);
-  const result =
-    toolCall.result === undefined ? null : truncateText(toolCall.result, MAX_BLOCK_CHARS);
-
   return (
     <details className="group rounded-md border border-border bg-bg-elevated">
       <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-xs [&::-webkit-details-marker]:hidden">
@@ -55,27 +53,67 @@ export function ToolCallCard({ toolCall }: { toolCall: ToolCallState }) {
       </summary>
 
       <div className="border-t border-border px-3 py-2">
-        <pre className="whitespace-pre-wrap break-words font-mono text-xs leading-normal text-text-secondary">
-          {args.text}
-        </pre>
-        {args.truncated && <p className="mt-1 text-xs text-text-muted">Arguments truncated.</p>}
+        <ClampedBlock text={prettyArgs(toolCall.args)} truncatedNote="Arguments truncated." />
 
-        {result !== null && (
+        {toolCall.result !== undefined && (
           <div className="mt-2 border-t border-border pt-2">
             <p className="mb-1 text-xs font-medium text-text-muted">Result</p>
-            <pre
-              className={cn(
-                "whitespace-pre-wrap break-words font-mono text-xs leading-normal",
-                toolCall.isError ? "text-danger" : "text-text-secondary",
-              )}
-            >
-              {result.text}
-            </pre>
-            {result.truncated && <p className="mt-1 text-xs text-text-muted">Result truncated.</p>}
+            <ClampedBlock
+              text={toolCall.result}
+              truncatedNote="Result truncated."
+              className={toolCall.isError ? "text-danger" : "text-text-secondary"}
+            />
           </div>
         )}
       </div>
     </details>
+  );
+}
+
+/** A clamped, expandable code block: truncated to `MAX_BLOCK_CHARS` with a
+ * visible marker, and expandable to the full text inside a scrollable
+ * max-height well so a huge tool argument or result never pushes the page out
+ * of shape (§12.9 harden). */
+function ClampedBlock({
+  text,
+  className,
+  truncatedNote,
+}: {
+  text: string;
+  className?: string;
+  truncatedNote: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const clamped = truncateText(text, MAX_BLOCK_CHARS);
+
+  return (
+    <div className="min-w-0">
+      <pre
+        className={cn(
+          "whitespace-pre-wrap break-words font-mono text-xs leading-normal",
+          className,
+          clamped.truncated && expanded && "max-h-64 overflow-y-auto",
+        )}
+      >
+        {expanded ? text : clamped.text}
+      </pre>
+      {clamped.truncated && (
+        <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2">
+          <span className="text-xs text-text-muted">{truncatedNote}</span>
+          <button
+            type="button"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((value) => !value)}
+            className={cn(
+              "text-xs font-medium text-text-secondary transition-colors duration-fast hover:text-text",
+              focusRing,
+            )}
+          >
+            {expanded ? "Show less" : "Show more"}
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -31,6 +31,13 @@ export interface Command {
   run: () => void;
   /** Optional availability predicate; unavailable commands are hidden or inert. */
   when?: () => boolean;
+  /**
+   * When true, this command may fire even while focus is inside a text field,
+   * but only while its `when` predicate (if any) currently passes. Approve and
+   * reject opt in so a pending approval stays reachable by keyboard right
+   * after `Mod+Enter` leaves focus in the composer.
+   */
+  allowInEditable?: boolean;
 }
 
 /**
@@ -211,6 +218,7 @@ export function buildCommands(
       shortcut: SHORTCUTS.approve,
       run: actions.approve,
       when: () => availability.hasApproval,
+      allowInEditable: true,
     },
     {
       id: "reject",
@@ -219,6 +227,7 @@ export function buildCommands(
       shortcut: SHORTCUTS.reject,
       run: actions.reject,
       when: () => availability.hasApproval,
+      allowInEditable: true,
     },
     {
       id: "toggle-artifact-panel",

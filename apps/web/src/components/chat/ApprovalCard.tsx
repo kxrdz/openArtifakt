@@ -104,10 +104,7 @@ export function ApprovalCard({ approval }: { approval: ApprovalRequestEvent }) {
                 focusRing,
               )}
             />
-            <p className="text-xs text-text-muted">
-              Working directory:{" "}
-              <span className="font-mono text-text-secondary">{cwd ?? "workspace root"}</span>
-            </p>
+            <PathLine label="Working directory:" path={cwd ?? "workspace root"} />
           </div>
         )}
 
@@ -177,6 +174,20 @@ export function ApprovalCard({ approval }: { approval: ApprovalRequestEvent }) {
   );
 }
 
+/** A one-line "label + path" that truncates with an ellipsis and keeps the
+ * full path in a `title` tooltip, so a very long path never widens the card or
+ * pushes the page out of shape (§12.9 harden). */
+function PathLine({ label, path }: { label: string; path: string }) {
+  return (
+    <p className="mb-1 flex min-w-0 items-baseline gap-1 text-xs text-text-muted">
+      <span className="shrink-0">{label}</span>
+      <span className="min-w-0 truncate font-mono text-text-secondary" title={path}>
+        {path}
+      </span>
+    </p>
+  );
+}
+
 /** Render the tool-specific body (diff / file / arguments). */
 function renderToolBody(approval: ApprovalRequestEvent): ReactNode {
   const { args } = approval;
@@ -200,11 +211,7 @@ function renderToolBody(approval: ApprovalRequestEvent): ReactNode {
     const body = truncateText(content, MAX_BODY_CHARS);
     return (
       <div>
-        {path !== undefined && (
-          <p className="mb-1 text-xs text-text-muted">
-            Writes <span className="font-mono text-text-secondary">{path}</span>
-          </p>
-        )}
+        {path !== undefined && <PathLine label="Writes" path={path} />}
         <pre className="whitespace-pre-wrap break-words font-mono text-xs leading-normal text-text-secondary">
           {body.text}
         </pre>
@@ -237,11 +244,7 @@ function DiffBlock({
   const diff = useMemo(() => lineDiff(oldText, newText), [oldText, newText]);
   return (
     <div>
-      {path !== undefined && (
-        <p className="mb-1 text-xs text-text-muted">
-          Edits <span className="font-mono text-text-secondary">{path}</span>
-        </p>
-      )}
+      {path !== undefined && <PathLine label="Edits" path={path} />}
       <pre className="overflow-x-auto whitespace-pre-wrap break-words rounded-md border border-border bg-bg-sunken px-3 py-2 font-mono text-xs leading-normal">
         {diff.map((line, index) => (
           <span

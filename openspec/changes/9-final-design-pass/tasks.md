@@ -26,7 +26,7 @@
 
 ## 7. Harden surfaces
 
-- [ ] 7.1 Harden surfaces against edge-case content: long file paths truncate with an ellipsis and a `title`, huge tool/terminal outputs clamp with a visible marker and an expand/collapse toggle, error and rejection text wraps, and `min-w-0`/overflow guards keep every surface from pushing the page wide. Verify web unit tests for the clamping/truncation behavior plus `pnpm design:check` and `pnpm --filter @openartifact/web build`.
+- [x] 7.1 Harden surfaces against edge-case content: long file paths truncate with an ellipsis and a `title`, huge tool/terminal outputs clamp with a visible marker and an expand/collapse toggle, error and rejection text wraps, and `min-w-0`/overflow guards keep every surface from pushing the page wide. Verify web unit tests for the clamping/truncation behavior plus `pnpm design:check` and `pnpm --filter @openartifact/web build`.
 
 ## 8. Onboard (first-run states)
 

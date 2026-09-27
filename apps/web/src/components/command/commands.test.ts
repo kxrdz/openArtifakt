@@ -179,6 +179,17 @@ describe("buildCommands", () => {
     expect(byId.get("jump-to-artifact-panel")?.shortcut).toBeUndefined();
   });
 
+  it("marks approve/reject as reachable inside editable fields while pending", () => {
+    const byId = new Map(
+      buildCommands(actions(), available).map((command) => [command.id, command]),
+    );
+    expect(byId.get("approve")?.allowInEditable).toBe(true);
+    expect(byId.get("reject")?.allowInEditable).toBe(true);
+    expect(byId.get("send")?.allowInEditable).toBeUndefined();
+    expect(byId.get("stop")?.allowInEditable).toBeUndefined();
+    expect(byId.get("toggle-artifact-panel")?.allowInEditable).toBeUndefined();
+  });
+
   it("gates the conditional commands on availability", () => {
     const byId = new Map(
       buildCommands(actions(), {

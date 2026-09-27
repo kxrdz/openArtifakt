@@ -158,6 +158,60 @@ describe("useKeyboardShortcuts", () => {
     expect(run).toHaveBeenCalledOnce();
   });
 
+  it("fires an allowInEditable command inside a text field while its when passes", () => {
+    const run = vi.fn();
+    const { container } = render(
+      <div>
+        <Harness
+          commands={[
+            {
+              id: "approve",
+              label: "Approve",
+              shortcut: { alt: true, key: "a" },
+              run,
+              when: () => true,
+              allowInEditable: true,
+            },
+          ]}
+        />
+        <input aria-label="composer" />
+      </div>,
+    );
+
+    const input = container.querySelector("input");
+    input!.focus();
+    pressKey(input!, { key: "a", altKey: true });
+
+    expect(run).toHaveBeenCalledOnce();
+  });
+
+  it("still suppresses an allowInEditable command while its when fails", () => {
+    const run = vi.fn();
+    const { container } = render(
+      <div>
+        <Harness
+          commands={[
+            {
+              id: "approve",
+              label: "Approve",
+              shortcut: { alt: true, key: "a" },
+              run,
+              when: () => false,
+              allowInEditable: true,
+            },
+          ]}
+        />
+        <input aria-label="composer" />
+      </div>,
+    );
+
+    const input = container.querySelector("input");
+    input!.focus();
+    pressKey(input!, { key: "a", altKey: true });
+
+    expect(run).not.toHaveBeenCalled();
+  });
+
   it("runs only the first matching command", () => {
     const first = vi.fn();
     const second = vi.fn();

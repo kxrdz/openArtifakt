@@ -14,7 +14,9 @@ import {
  * capture phase. Handled bindings call `preventDefault()` so browser chrome
  * (Cmd+J downloads, Cmd+, preferences, Cmd+I italic) is suppressed. While
  * focus is inside a text field or contenteditable, every binding except Escape
- * and Mod+K is suppressed, so typing never triggers an action.
+ * and Mod+K is suppressed, so typing never triggers an action — except a
+ * command that opts in via `allowInEditable` (approve/reject), which still
+ * fires while its `when` predicate passes so a pending approval is reachable.
  */
 
 /** True when the event target is a text field, textarea, select or editable. */
@@ -45,8 +47,13 @@ export function runMatchingShortcut(
     const shortcut = command.shortcut;
     if (shortcut === undefined) continue;
     if (!matchesShortcut(event, shortcut)) continue;
-    // Inside text fields, only Escape and Mod+K are allowed through.
-    if (inEditable && !isEditableSafeShortcut(shortcut)) continue;
+    // Inside text fields, only Escape and Mod+K are allowed through — plus a
+    // command that opts in (approve/reject) while its `when` predicate passes,
+    // so the pending-approval action stays reachable right after send.
+    if (inEditable && !isEditableSafeShortcut(shortcut)) {
+      const ready = command.when === undefined || command.when();
+      if (!(command.allowInEditable === true && ready)) continue;
+    }
     if (command.when !== undefined && !command.when()) continue;
     event.preventDefault?.();
     command.run();
