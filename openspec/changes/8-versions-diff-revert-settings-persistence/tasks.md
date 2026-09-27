@@ -34,7 +34,7 @@
 ## 8. Undo (snapshots + endpoint)
 
 - [x] 8.1 Extend `packages/core/src/tools/snapshot.ts` to also record files a turn creates (a `.created` marker when the target did not exist) and return the recorded kind, updating `write_file`/`edit_file` accordingly. Verify the updated snapshot unit tests pass.
-- [ ] 8.2 Wire a real `SnapshotLocation` (snapshot root + conversation id + turn id) through `createAgentRuntime`/`buildConversation`, and add `POST /api/conversations/:id/undo` that restores a completed turn's snapshots in reverse order (copy `.before` back, delete `.created` targets) then removes the turn's snapshot directory. Verify a server unit test that undo restores an edited file and removes a created file in a temp workspace.
+- [x] 8.2 Wire a real `SnapshotLocation` (snapshot root + conversation id + turn id) through `createAgentRuntime`/`buildConversation`, and add `POST /api/conversations/:id/undo` that restores a completed turn's snapshots in reverse order (copy `.before` back, delete `.created` targets) then removes the turn's snapshot directory. Verify a server unit test that undo restores an edited file and removes a created file in a temp workspace.
 
 ## 9. Undo UI
 

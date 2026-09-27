@@ -67,6 +67,7 @@ type WireEvent = { type: string } & Record<string, unknown>;
 async function persistenceApp(providerFactory?: () => ProviderAdapter) {
   const workspace = await createFakeWorkspace();
   const dir = await mkdtemp(join(tmpdir(), "openartifact-persistence-"));
+  const snapshots = await mkdtemp(join(tmpdir(), "openartifact-snapshots-"));
   const db = openBetterSqlite3Connection(join(dir, "data.db"));
   await runMigrations(db);
   const repository = new SqliteRepository(db);
@@ -81,6 +82,7 @@ async function persistenceApp(providerFactory?: () => ProviderAdapter) {
     sessionToken: "test-token",
     repository,
     activeConfig,
+    snapshotRoot: snapshots,
     ...(providerFactory ? { providerFactory } : {}),
   });
 
@@ -91,6 +93,7 @@ async function persistenceApp(providerFactory?: () => ProviderAdapter) {
     cleanup: async () => {
       db.close();
       await rm(dir, { recursive: true, force: true });
+      await rm(snapshots, { recursive: true, force: true });
       await workspace.cleanup();
     },
   };

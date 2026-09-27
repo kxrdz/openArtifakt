@@ -64,6 +64,7 @@ type WireEvent = { type: string } & Record<string, unknown>;
 async function settingsApp() {
   const workspace = await createFakeWorkspace();
   const dir = await mkdtemp(join(tmpdir(), "openartifact-settings-"));
+  const snapshots = await mkdtemp(join(tmpdir(), "openartifact-snapshots-"));
   const db = openBetterSqlite3Connection(join(dir, "data.db"));
   await runMigrations(db);
   const repository = new SqliteRepository(db);
@@ -78,6 +79,7 @@ async function settingsApp() {
     sessionToken: "test-token",
     repository,
     activeConfig,
+    snapshotRoot: snapshots,
   });
 
   return {
@@ -88,6 +90,7 @@ async function settingsApp() {
     cleanup: async () => {
       db.close();
       await rm(dir, { recursive: true, force: true });
+      await rm(snapshots, { recursive: true, force: true });
       await workspace.cleanup();
     },
   };

@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { snapshotBeforeMutation, snapshotFile } from "./snapshot";
+import { snapshotBeforeMutation, snapshotFile, restoreTurnSnapshots } from "./snapshot";
 import { cleanupTempWorkspaces, makeContext, makeTempWorkspace, writeFile } from "./test-utils";
 
 afterEach(cleanupTempWorkspaces);
@@ -130,5 +130,52 @@ describe("snapshotBeforeMutation", () => {
     const ctx = makeContext(root);
 
     await expect(snapshotBeforeMutation(ctx, `${root}/a.txt`)).resolves.toBeUndefined();
+  });
+
+  it("preserves the workspace-relative directory for nested files", async () => {
+    const root = await makeTempWorkspace();
+    const snapshots = await makeTempWorkspace("oa-snapshots-");
+    await writeFile(`${root}/src/app.ts`, "const x = 1;\n");
+    const ctx = makeContext(root, {
+      snapshotRoot: snapshots,
+      conversationId: "conv",
+      turnId: "turn",
+    });
+
+    const out = await snapshotBeforeMutation(ctx, `${root}/src/app.ts`);
+
+    expect(out).toEqual({
+      path: path.join(snapshots, "conv", "turn", "src", "1_app.ts.before"),
+      kind: "before",
+    });
+    await expect(fs.readFile(out!.path, "utf8")).resolves.toBe("const x = 1;\n");
+  });
+});
+
+describe("restoreTurnSnapshots", () => {
+  it("restores edited files in reverse order and deletes files the turn created", async () => {
+    const root = await makeTempWorkspace();
+    const snapshots = await makeTempWorkspace("oa-snapshots-");
+    await writeFile(`${root}/a.txt`, "v0");
+
+    const location = { snapshotRoot: snapshots, conversationId: "c", turnId: "t" };
+    // Two mutations of a.txt and one created file, mirroring a turn's order.
+    await snapshotFile(`${root}/a.txt`, location, "a.txt"); // v0 -> .before
+    await writeFile(`${root}/a.txt`, "v1");
+    await snapshotFile(`${root}/a.txt`, location, "a.txt"); // v1 -> .before
+    await writeFile(`${root}/a.txt`, "v2");
+    await snapshotFile(`${root}/new.txt`, location, "new.txt"); // created marker
+    await writeFile(`${root}/new.txt`, "brand new");
+
+    const result = await restoreTurnSnapshots(location, root);
+
+    // Reverse order: the earliest .before (v0) wins; the created file is removed.
+    await expect(fs.readFile(`${root}/a.txt`, "utf8")).resolves.toBe("v0");
+    await expect(fs.readFile(`${root}/new.txt`, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    expect(result.restored).toEqual(["a.txt"]);
+    expect(result.deleted).toEqual(["new.txt"]);
+
+    // The turn's snapshot directory is gone.
+    await expect(fs.access(path.join(snapshots, "c", "t"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 });

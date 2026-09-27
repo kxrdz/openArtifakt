@@ -1,4 +1,4 @@
-import { promises as fs } from "node:fs";
+import { promises as fs, type Dirent } from "node:fs";
 import * as path from "node:path";
 
 import type { ToolContext } from "./types";
@@ -7,8 +7,10 @@ import type { ToolContext } from "./types";
  * Pre-mutation snapshots (§8 "Undo"). Before `edit_file`/`write_file` change a
  * file, the tool snapshots its prior content so a later "Undo this turn" can
  * restore it. Snapshots live under
- * `<snapshotRoot>/<conversation>/<turn>/<counter>_<basename>.before`, with a
- * per-turn counter so successive mutations are ordered.
+ * `<snapshotRoot>/<conversation>/<turn>/<relDir>/<counter>_<basename>.<kind>`,
+ * where `<relDir>` is the file's workspace-relative directory (preserved so
+ * undo can restore a file to its exact location, not just its basename) and
+ * `<counter>` is a per-turn counter so successive mutations are ordered.
  *
  * Files a turn *creates* cannot have prior content, so the snapshot store
  * records a zero-length `<counter>_<basename>.created` marker instead; undo
@@ -35,48 +37,53 @@ export interface SnapshotResult {
   kind: SnapshotKind;
 }
 
-/** Next per-turn counter: one greater than the largest `N_…` prefix seen. */
-async function nextCounter(dir: string): Promise<number> {
-  let entries: string[];
-  try {
-    entries = await fs.readdir(dir);
-  } catch {
-    return 1;
-  }
-  let max = 0;
-  for (const entry of entries) {
-    const match = /^(\d+)_/.exec(entry);
-    if (match) {
-      const n = Number(match[1]);
-      if (n > max) max = n;
-    }
-  }
-  return max + 1;
+/** What {@link restoreTurnSnapshots} did, for reporting back to a caller. */
+export interface UndoResult {
+  /** Workspace-relative paths restored from a `.before` snapshot. */
+  restored: string[];
+  /** Workspace-relative paths deleted because the turn created them. */
+  deleted: string[];
 }
 
-/** Allocate the next snapshot path for `basename` inside the turn directory. */
-async function nextSnapshotPath(
-  dir: string,
-  base: string,
-  kind: SnapshotKind,
-): Promise<string> {
-  await fs.mkdir(dir, { recursive: true });
-  const counter = await nextCounter(dir);
-  return path.join(dir, `${counter}_${base}.${kind}`);
+/** Next per-turn counter: one greater than the largest `N_…` prefix seen. */
+async function nextCounter(turnDir: string): Promise<number> {
+  let max = 0;
+  const walk = async (dir: string): Promise<void> => {
+    let entries: Dirent[];
+    try {
+      entries = await fs.readdir(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        await walk(path.join(dir, entry.name));
+        continue;
+      }
+      const match = /^(\d+)_/.exec(entry.name);
+      if (match !== null) max = Math.max(max, Number(match[1]));
+    }
+  };
+  await walk(turnDir);
+  return max + 1;
 }
 
 /**
  * Record `absolutePath`'s state before a mutation. When the file exists its
  * current content is copied to a `.before` snapshot; when it does not exist a
- * zero-length `.created` marker is written so undo can remove it. Returns the
- * snapshot (or marker) path and the recorded kind.
+ * zero-length `.created` marker is written so undo can remove it. `relativePath`
+ * is the file's workspace-relative path (defaults to the basename for callers
+ * that only have an absolute path) and determines the snapshot's directory.
+ * Returns the snapshot (or marker) path and the recorded kind.
  */
 export async function snapshotFile(
   absolutePath: string,
   location: SnapshotLocation,
+  relativePath: string = path.basename(absolutePath),
 ): Promise<SnapshotResult> {
-  const dir = path.join(location.snapshotRoot, location.conversationId, location.turnId);
-  const base = path.basename(absolutePath);
+  const turnDir = path.join(location.snapshotRoot, location.conversationId, location.turnId);
+  const base = path.basename(relativePath);
+  const relDir = path.dirname(relativePath);
 
   let content: string | null;
   try {
@@ -86,23 +93,22 @@ export async function snapshotFile(
     else throw err;
   }
 
-  if (content === null) {
-    const out = await nextSnapshotPath(dir, base, "created");
-    await fs.writeFile(out, "", "utf8");
-    return { path: out, kind: "created" };
-  }
-
-  const out = await nextSnapshotPath(dir, base, "before");
-  await fs.writeFile(out, content, "utf8");
-  return { path: out, kind: "before" };
+  const kind: SnapshotKind = content === null ? "created" : "before";
+  const counter = await nextCounter(turnDir);
+  const dir = relDir === "." ? turnDir : path.join(turnDir, relDir);
+  await fs.mkdir(dir, { recursive: true });
+  const out = path.join(dir, `${counter}_${base}.${kind}`);
+  await fs.writeFile(out, content ?? "", "utf8");
+  return { path: out, kind };
 }
 
 /**
  * Snapshot `absolutePath` before a mutation, using whatever mechanism the host
  * configured. A `ctx.snapshot` callback (host-injected) is invoked when
  * present; when `ctx.snapshotRoot` is present a file snapshot is also written
- * via {@link snapshotFile} (defaulting the conversation/turn segments) and its
- * result — including whether the file was created this turn — is returned.
+ * via {@link snapshotFile} (defaulting the conversation/turn segments), with
+ * the file's workspace-relative path preserved, and its result — including
+ * whether the file was created this turn — is returned.
  */
 export async function snapshotBeforeMutation(
   ctx: ToolContext,
@@ -110,9 +116,103 @@ export async function snapshotBeforeMutation(
 ): Promise<SnapshotResult | undefined> {
   if (ctx.snapshot) await ctx.snapshot(absolutePath);
   if (!ctx.snapshotRoot) return undefined;
-  return snapshotFile(absolutePath, {
-    snapshotRoot: ctx.snapshotRoot,
-    conversationId: ctx.conversationId ?? "default",
-    turnId: ctx.turnId ?? "default",
-  });
+  const relativePath = path.relative(ctx.workspaceRoot, absolutePath);
+  const safe =
+    relativePath === "" || relativePath.startsWith("..") || path.isAbsolute(relativePath)
+      ? path.basename(absolutePath)
+      : relativePath;
+  return snapshotFile(
+    absolutePath,
+    {
+      snapshotRoot: ctx.snapshotRoot,
+      conversationId: ctx.conversationId ?? "default",
+      turnId: ctx.turnId ?? "default",
+    },
+    safe,
+  );
+}
+
+/** One snapshot file found under a turn directory. */
+interface SnapshotEntry {
+  counter: number;
+  kind: SnapshotKind;
+  /** Absolute path of the snapshot file. */
+  path: string;
+  /** Workspace-relative target path (counter prefix and kind suffix stripped). */
+  relPath: string;
+}
+
+/** A snapshot file name: `<counter>_<basename>.<before|created>`. */
+const SNAPSHOT_NAME = /^(\d+)_(.+)\.(before|created)$/;
+
+/** Recursively collect the snapshot files under a turn directory. */
+async function collectSnapshots(turnDir: string): Promise<SnapshotEntry[]> {
+  const entries: SnapshotEntry[] = [];
+  const walk = async (dir: string): Promise<void> => {
+    let dirents: Dirent[];
+    try {
+      dirents = await fs.readdir(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of dirents) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await walk(full);
+        continue;
+      }
+      const match = SNAPSHOT_NAME.exec(entry.name);
+      if (match === null) continue;
+      const relDir = path.relative(turnDir, dir);
+      const base = match[2]!;
+      entries.push({
+        counter: Number(match[1]),
+        kind: match[3] as SnapshotKind,
+        path: full,
+        relPath: relDir === "" ? base : path.join(relDir, base),
+      });
+    }
+  };
+  await walk(turnDir);
+  return entries;
+}
+
+/**
+ * Restore one completed turn's snapshots (§8 "Undo").
+ *
+ * Walks `<snapshotRoot>/<conversation>/<turn>/`, applies every snapshot in
+ * reverse counter order — `.before` copies are written back to the workspace
+ * and `.created` targets are deleted (so the last write for a given file is
+ * its earliest, pre-turn snapshot) — then removes the turn's snapshot
+ * directory. Returns the workspace-relative paths restored and deleted.
+ */
+export async function restoreTurnSnapshots(
+  location: SnapshotLocation,
+  workspaceRoot: string,
+): Promise<UndoResult> {
+  const turnDir = path.join(location.snapshotRoot, location.conversationId, location.turnId);
+  const entries = await collectSnapshots(turnDir);
+  entries.sort((a, b) => b.counter - a.counter);
+
+  const restored = new Set<string>();
+  const deleted = new Set<string>();
+  for (const entry of entries) {
+    const target = path.join(workspaceRoot, entry.relPath);
+    // Guard against a corrupt snapshot directory escaping the workspace.
+    const rel = path.relative(workspaceRoot, target);
+    if (rel.startsWith("..") || path.isAbsolute(rel)) continue;
+
+    if (entry.kind === "before") {
+      const content = await fs.readFile(entry.path, "utf8");
+      await fs.mkdir(path.dirname(target), { recursive: true });
+      await fs.writeFile(target, content, "utf8");
+      restored.add(entry.relPath);
+    } else {
+      await fs.rm(target, { force: true });
+      deleted.add(entry.relPath);
+    }
+  }
+
+  await fs.rm(turnDir, { recursive: true, force: true });
+  return { restored: [...restored], deleted: [...deleted] };
 }

@@ -11,7 +11,7 @@ import {
   createProviderAdapter,
 } from "@openartifact/core";
 
-import { createAgentRuntime, toModelConfig } from "../agent/runtime";
+import { createAgentRuntime, defaultSnapshotRoot, toModelConfig } from "../agent/runtime";
 import type { ActiveConfig, ServerConfig } from "../config";
 import type { Repository } from "../db";
 import { FakeServerProvider } from "../fake";
@@ -64,6 +64,8 @@ interface Conversation {
   pendingDecision: ApprovalDecision | null;
   /** The active SSE stream, for forwarding command output. */
   outputStream: SSEStreamingApi | null;
+  /** Per-conversation turn counter; the next turn id is `turnCounter + 1`. */
+  turnCounter: number;
 }
 
 /** Build an error the loop recognizes as an abort (see `AgentLoop.isAbortError`). */
@@ -92,6 +94,7 @@ function buildConversation(
   id: string,
   config: ServerConfig,
   provider: ProviderAdapter,
+  snapshotRoot: string,
 ): Conversation {
   const conversation: Conversation = {
     id,
@@ -101,6 +104,7 @@ function buildConversation(
     pendingApproval: null,
     pendingDecision: null,
     outputStream: null,
+    turnCounter: 0,
   };
 
   const approvalHandler: ApprovalHandler = (request, signal) =>
@@ -149,6 +153,8 @@ function buildConversation(
     config,
     provider,
     approvalHandler,
+    // Real snapshot location (§8 "Undo"): the turn id is set per `loop.run`.
+    snapshot: { snapshotRoot, conversationId: id, turnId: "0" },
     onCommandOutput: (chunk, stream) => {
       const output = conversation.outputStream;
       if (output !== null && !output.closed && !output.aborted) {
@@ -180,12 +186,18 @@ async function writeEvent<T extends { type: string }>(
 export class ConversationRegistry {
   readonly #activeConfig: ActiveConfig;
   readonly #providerFactory: (() => ProviderAdapter) | undefined;
+  readonly #snapshotRoot: string;
   readonly #conversations = new Map<string, Conversation>();
   #counter = 0;
 
-  constructor(activeConfig: ActiveConfig, providerFactory?: () => ProviderAdapter) {
+  constructor(
+    activeConfig: ActiveConfig,
+    providerFactory?: () => ProviderAdapter,
+    snapshotRoot: string = defaultSnapshotRoot(),
+  ) {
     this.#activeConfig = activeConfig;
     this.#providerFactory = providerFactory;
+    this.#snapshotRoot = snapshotRoot;
   }
 
   get(id: string): Conversation | undefined {
@@ -200,7 +212,7 @@ export class ConversationRegistry {
     const provider = this.#providerFactory
       ? this.#providerFactory()
       : defaultProviderFactory(config)();
-    const conversation = buildConversation(id, config, provider);
+    const conversation = buildConversation(id, config, provider, this.#snapshotRoot);
     this.#conversations.set(id, conversation);
     return conversation;
   }
@@ -224,7 +236,11 @@ async function streamTurn(
     try {
       persistence.beginTurn(message);
       await writeEvent(stream, { type: "conversation", conversationId: conversation.id });
-      for await (const event of conversation.loop.run(message)) {
+      // One turn id per `loop.run` call, so this turn's snapshots land in their
+      // own directory under `<snapshotRoot>/<conversation>/<turn>` (§8).
+      conversation.turnCounter += 1;
+      const turnId = String(conversation.turnCounter);
+      for await (const event of conversation.loop.run(message, { turnId })) {
         if (stream.closed || stream.aborted) break;
         persistence.onEvent(event);
         await writeEvent(stream, event);
@@ -251,11 +267,17 @@ export interface ChatRoutesOptions {
   repository: Repository;
   /** Provider override (tests supply a tuned fake); defaults per `config.fakeProvider`. */
   providerFactory?: () => ProviderAdapter;
+  /** Snapshot storage root for pre-mutation snapshots (§8); defaults to the home dir. */
+  snapshotRoot?: string;
 }
 
 /** The chat routes: `/` (stream), `/:conversationId/approval` and `/:conversationId/stop`. */
 export function createChatRouter(options: ChatRoutesOptions): Hono {
-  const registry = new ConversationRegistry(options.activeConfig, options.providerFactory);
+  const registry = new ConversationRegistry(
+    options.activeConfig,
+    options.providerFactory,
+    options.snapshotRoot,
+  );
   const router = new Hono();
 
   router.post("/", async (c) => {

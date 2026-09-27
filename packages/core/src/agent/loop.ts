@@ -130,12 +130,15 @@ export class AgentLoop {
   #messages: Message[];
   #controller = new AbortController();
   #msgCounter = 0;
+  /** The snapshot turn id for the run in flight (defaults to the configured location's). */
+  #turnId: string;
 
   constructor(options: AgentLoopOptions) {
     this.#options = options;
     this.#limits = normalizeAgentLoopLimits(options.limits);
     this.#identical = new IdenticalFailureTracker(this.#limits.identicalFailureThreshold);
     this.#context = new ContextManager({ contextWindow: options.contextWindow });
+    this.#turnId = options.snapshot?.turnId ?? "default";
     this.#messages = [
       {
         id: this.#nextId(),
@@ -167,10 +170,16 @@ export class AgentLoop {
    * until the model answers without tool calls or a terminal condition stops
    * the loop. Yields every state change and event for the host to render.
    */
-  async *run(userText: string): AsyncIterable<AgentEvent> {
+  async *run(
+    userText: string,
+    options?: { turnId?: string },
+  ): AsyncIterable<AgentEvent> {
     const controller = new AbortController();
     this.#controller = controller;
     const signal = controller.signal;
+
+    // Each `run` is one user turn; snapshots for the turn go under its own id.
+    this.#turnId = options?.turnId ?? this.#options.snapshot?.turnId ?? "default";
 
     const external = this.#options.signal;
     const onExternalAbort = (): void => controller.abort();
@@ -416,7 +425,7 @@ export class AgentLoop {
         ? {
             snapshotRoot: this.#options.snapshot.snapshotRoot,
             conversationId: this.#options.snapshot.conversationId,
-            turnId: this.#options.snapshot.turnId,
+            turnId: this.#turnId,
           }
         : {}),
     };
