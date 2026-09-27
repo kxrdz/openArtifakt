@@ -42,5 +42,5 @@
 
 ## 10. e2e + screenshots
 
-- [ ] 10.1 Add `e2e/persistence-settings-undo.spec.ts` (reload restores the conversation list and artifact versions; a settings change persists; undo restores a file) using the key-free fake provider. Verify `pnpm e2e`.
+- [x] 10.1 Add `e2e/persistence-settings-undo.spec.ts` (reload restores the conversation list and artifact versions; a settings change persists; undo restores a file) using the key-free fake provider. Verify `pnpm e2e`.
 - [ ] 10.2 Extend `e2e/screenshots.spec.ts` to capture the settings drawer, the version dropdown and the diff view in both themes and viewports, confirm `pnpm screenshots` writes them to `docs/screenshots/`, and verify `pnpm check` stays green end-to-end.

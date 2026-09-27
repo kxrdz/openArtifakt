@@ -269,7 +269,7 @@ export function SettingsDrawer({ onClose }: SettingsDrawerProps) {
                   type="number"
                   name="contextWindow"
                   min={1}
-                  step={1024}
+                  step={1}
                   className={fieldClass}
                   value={draft.contextWindow}
                   onChange={(event) =>
