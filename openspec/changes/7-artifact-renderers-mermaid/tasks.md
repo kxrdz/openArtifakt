@@ -12,7 +12,7 @@
 
 ## 3. SVG / Code / Mermaid renderers
 
-- [ ] 3.1 Add `SvgViewer` (DOMPurify SVG-profile sanitize before inline render, export as SVG and PNG via canvas with a size cap) and `CodeViewer` (shiki highlight themed from the design tokens, language from the `language` attribute with a plain-text fallback, copy button). Verify unit tests (script stripped from SVG; copy) pass and `pnpm design:check` is clean.
+- [x] 3.1 Add `SvgViewer` (DOMPurify SVG-profile sanitize before inline render, export as SVG and PNG via canvas with a size cap) and `CodeViewer` (shiki highlight themed from the design tokens, language from the `language` attribute with a plain-text fallback, copy button). Verify unit tests (script stripped from SVG; copy) pass and `pnpm design:check` is clean.
 - [ ] 3.2 Add `MermaidViewer` and a shared `renderMermaid(source, theme)` helper (init `{ startOnLoad: false, securityLevel: "strict" }`, `parse()` before `render()` with a unique id per render, token-derived `themeVariables` for light/dark, zoom/pan/reset/copy-SVG/download-SVG/PNG controls, and a syntax-error state showing the source + message + offending line). Verify a unit test for theme mapping and the error state, plus `pnpm design:check`.
 
 ## 4. Artifact panel + inline Mermaid

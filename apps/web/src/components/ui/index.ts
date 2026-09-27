@@ -31,6 +31,8 @@ export {
   CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  CopyIcon,
+  DownloadIcon,
   MessageSquareIcon,
   PanelRightIcon,
   PlayIcon,
