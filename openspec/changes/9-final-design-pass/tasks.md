@@ -22,7 +22,7 @@
 
 ## 6. Audit pass
 
-- [ ] 6.1 Run the Impeccable audit across a11y, performance, theming, responsive and implementation-integrity, and record the findings (severity-tagged) alongside the critique snapshot. Verify an audit summary enumerating P0/P1 issues is written and `pnpm design:check` reflects any detector findings.
+- [x] 6.1 Run the Impeccable audit across a11y, performance, theming, responsive and implementation-integrity, and record the findings (severity-tagged) alongside the critique snapshot. Verify an audit summary enumerating P0/P1 issues is written and `pnpm design:check` reflects any detector findings.
 
 ## 7. Harden surfaces
 

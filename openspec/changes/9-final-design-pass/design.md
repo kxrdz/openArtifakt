@@ -75,3 +75,23 @@ Deferred with reason (recorded in `docs/DECISIONS.md`): `ConversationMenu`
 metadata, terminal/conversation copy affordance, composer character limit,
 `CodeViewer` virtualization, refresh-mid-approval recovery (needs server change),
 and touch tooltips.
+
+## Audit snapshot (task 6.1)
+
+The Impeccable technical audit ran across a11y, performance, theming, responsive
+and implementation integrity, and persisted the full severity-tagged report to
+`.impeccable/critique/openartifact-audit.md`. **Audit health 15/20 (Good)**;
+`pnpm design:check` stays clean (exit 0, `[]`). 16 findings — 1 P0, 3 P1, 6 P2,
+6 P3 — each mapped to a fix task (7.1 harden, 9.1 polish) or a token change:
+
+1. **[P0]** approve/reject shortcuts dead while focus is in the composer → harden (7.1).
+2. **[P1]** light-theme `success`/`warning`/`running` badge text 3.63–4.07:1 (< 4.5:1) → colorize.
+3. **[P1]** form/control borders `--color-border` ~1.3:1 vs background (< 3:1 non-text) → colorize.
+4. **[P1]** `chatStore.error` never rendered (silent failures) → clarify/polish (9.1).
+5. **[P2]** `SettingsDrawer` + mobile sheet bypass `Dialog` (no focus trap) → harden (7.1).
+6. **[P2]** no `aria-live`/`role="log"` on conversation + terminal → adapt/polish (9.1).
+7. **[P2]** theme toggle not persisted to `localStorage` → polish (9.1).
+8. **[P2]** 6 px split-divider pointer target, dense Mermaid toolbar, truncated
+   switcher titles with no tooltip, unbounded expanded tool results → harden/adapt.
+9. **[P3]** duplicated `versionSelectClass`, brittle `querySelector` focus target,
+   `ConversationMenu` arrow-nav, "Revert" reads destructive → polish (9.1).
