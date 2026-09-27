@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Current feature/branch:** none active; feature 4 is merged into `main`.
+- **Current feature/branch:** `feature/5-design-foundation` (change `5-design-foundation`).
 
 - [x] 1. Scaffold
 - [x] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Start feature 5 (Design foundation, Impeccable) on `feature/5-design-foundation`: run `openspec-propose` to plan it (shape the surfaces, craft light+dark tokens, self-host fonts, build UI primitives + empty workspace shell, write DESIGN.md, add `pnpm screenshots`), then implement its first task._
+_Continue feature 5 on `feature/5-design-foundation`: the change `5-design-foundation` is planned and task 1.1 (design tokens + Tailwind wiring + DESIGN.md) is done and committed. Next is task 2.1: vendor IBM Plex Sans + IBM Plex Mono woff2 files into `apps/web/public/fonts/`, add `@font-face` rules + `--font-sans`/`--font-mono` tokens, and confirm no remote font URL remains. If the build machine cannot download the fonts, record the blocker in `docs/PROGRESS.md` with the exact fix and fall back to a system stack behind `TODO(blocked)`._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->

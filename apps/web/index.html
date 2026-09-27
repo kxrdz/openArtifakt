@@ -1,10 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="dark light" />
     <title>OpenArtifact</title>
+    <script>
+      // Set the theme before first paint to avoid a flash. Dark is the default
+      // and first-class theme; a stored preference wins. The settings drawer
+      // (feature 8) will persist the user's choice under this key.
+      (function () {
+        var theme = "dark";
+        try {
+          var stored = window.localStorage.getItem("openartifact-theme");
+          if (stored === "light" || stored === "dark") {
+            theme = stored;
+          }
+        } catch (e) {
+          /* localStorage may be unavailable; fall back to dark */
+        }
+        document.documentElement.setAttribute("data-theme", theme);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
