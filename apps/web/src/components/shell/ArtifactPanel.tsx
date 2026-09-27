@@ -19,7 +19,8 @@ import { VersionDiff } from "../artifacts/VersionDiff";
  * stored version — pinning an older one never removes the newer ones, and
  * selecting the latest returns to following it as versions arrive. The Diff
  * tab (task 7.2) compares any two stored versions in a lazily-loaded Monaco
- * diff editor.
+ * diff editor, and the Revert action (task 7.3) copies the viewed older
+ * version forward as a new version — history is never deleted.
  */
 
 /** Empty artifact state, shared by the desktop side-by-side panel and the
@@ -145,6 +146,7 @@ export function ArtifactPanel() {
   const selectArtifact = useArtifactStore((state) => state.selectArtifact);
   const versionSelections = useArtifactStore((state) => state.versionSelections);
   const selectVersion = useArtifactStore((state) => state.selectVersion);
+  const revertVersion = useArtifactStore((state) => state.revertVersion);
   const [tab, setTab] = useState<Tab>("preview");
 
   const selected =
@@ -274,6 +276,19 @@ export function ArtifactPanel() {
             </option>
           ))}
         </select>
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={viewingLatest}
+          title={
+            viewingLatest
+              ? "View an older version to revert"
+              : "Copy this version forward as a new version"
+          }
+          onClick={() => revertVersion(selected.identifier, version.version)}
+        >
+          Revert
+        </Button>
         {!viewingLatest && <Badge tone="neutral">Viewing older version</Badge>}
         {version.incomplete && (
           <Badge tone="running">

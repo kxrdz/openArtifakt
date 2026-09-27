@@ -147,3 +147,37 @@ describe("ArtifactPanel: version dropdown", () => {
     expect(writeText).toHaveBeenCalledWith("print('version three')");
   });
 });
+
+describe("ArtifactPanel: revert", () => {
+  it("disables revert while viewing the latest version", () => {
+    useArtifactStore.getState().restoreArtifacts([threeVersionArtifact()]);
+    render(<ArtifactPanel />);
+
+    const revertButton = screen.getByRole("button", {
+      name: "Revert",
+    }) as HTMLButtonElement;
+    expect(revertButton.disabled).toBe(true);
+  });
+
+  it("reverts the viewed older version by appending it as a new latest version", () => {
+    const writeText = mockClipboard();
+    useArtifactStore.getState().restoreArtifacts([threeVersionArtifact()]);
+    render(<ArtifactPanel />);
+
+    const dropdown = screen.getByRole("combobox", {
+      name: "Version of Script",
+    }) as HTMLSelectElement;
+    fireEvent.change(dropdown, { target: { value: "1" } });
+    fireEvent.click(screen.getByRole("button", { name: "Revert" }));
+
+    // The reverted content is now the latest and what renders.
+    expect(dropdown.value).toBe("4");
+    expect(screen.queryByText("Viewing older version")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /copy/i }));
+    expect(writeText).toHaveBeenCalledWith("print('version one')");
+
+    // Every prior version remains listed.
+    const options = Array.from(dropdown.options).map((option) => option.text);
+    expect(options).toEqual(["v1", "v2", "v3", "v4 (latest)"]);
+  });
+});
