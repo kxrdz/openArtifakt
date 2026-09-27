@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_On `feature/6-chat-ui-approvals-terminal-log`, implement the next unchecked task in `openspec/changes/6-chat-ui-approvals-terminal-log/tasks.md`: task 7.1 (set `OPENARTIFACT_FAKE_PROVIDER=1` and the temp-workspace env in the e2e webServer and add `e2e/chat.spec.ts` covering a full fake conversation — streaming text, an approved edit, a rejected command, the final answer, and Stop mid-stream; verify `pnpm e2e` passes). One task per iteration, one commit per task, `pnpm check` green before each commit._
+_On `feature/6-chat-ui-approvals-terminal-log`, implement the next unchecked task in `openspec/changes/6-chat-ui-approvals-terminal-log/tasks.md`: task 7.2 (extend `e2e/screenshots.spec.ts` to capture the streaming conversation, a pending approval card and the populated terminal log in both themes/viewports, and confirm `pnpm screenshots` writes them to `docs/screenshots/`). One task per iteration, one commit per task, `pnpm check` green before each commit._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->

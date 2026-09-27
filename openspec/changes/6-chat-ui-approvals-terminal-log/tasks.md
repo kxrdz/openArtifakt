@@ -29,5 +29,5 @@
 
 ## 7. e2e + screenshots
 
-- [ ] 7.1 Set `OPENARTIFACT_FAKE_PROVIDER=1` (and the temp-workspace env) in the e2e webServer and add `e2e/chat.spec.ts` covering a full fake conversation — streaming text, an approved edit, a rejected command, the final answer, and Stop mid-stream. Verify `pnpm e2e` passes.
+- [x] 7.1 Set `OPENARTIFACT_FAKE_PROVIDER=1` (and the temp-workspace env) in the e2e webServer and add `e2e/chat.spec.ts` covering a full fake conversation — streaming text, an approved edit, a rejected command, the final answer, and Stop mid-stream. Verify `pnpm e2e` passes.
 - [ ] 7.2 Extend `e2e/screenshots.spec.ts` to capture the streaming conversation, a pending approval card and the populated terminal log in both themes/viewports, and confirm `pnpm screenshots` writes them to `docs/screenshots/`. Verify `pnpm check` stays green end-to-end.

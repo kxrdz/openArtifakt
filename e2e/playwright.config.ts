@@ -19,8 +19,10 @@ export default defineConfig({
   },
   webServer: {
     // Build the web client (so the server serves the real build in production
-    // mode) and start the Hono server bound to loopback.
-    command: `pnpm build && NODE_ENV=production PORT=${port} pnpm --filter @openartifact/server start`,
+    // mode) and start the Hono server bound to loopback, in fake-provider mode
+    // (§12.6) so e2e runs key-free against a seeded temp workspace (the server
+    // creates the workspace itself when the flag is set).
+    command: `pnpm build && OPENARTIFACT_FAKE_PROVIDER=1 NODE_ENV=production PORT=${port} pnpm --filter @openartifact/server start`,
     url: `${baseURL}/health`,
     cwd: rootDir,
     reuseExistingServer: !process.env.CI,
