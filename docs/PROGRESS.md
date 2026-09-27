@@ -1,6 +1,6 @@
 # Progress
 
-Status: IN PROGRESS
+Status: DONE
 
 Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is committed.
 
@@ -8,7 +8,6 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Next feature:** step 10 (Docs) on branch `feature/10-docs` + OpenSpec change `10-docs` (not yet planned).
 
 - [x] 1. Scaffold
 - [x] 2. Shared types + stream parser
@@ -19,15 +18,15 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - [x] 7. Artifact renderers + Mermaid
 - [x] 8. Versions, diff, revert, undo, settings, persistence
 - [x] 9. Final design pass (Impeccable)
-- [ ] 10. Docs
+- [x] 10. Docs
 
 ## Blocked
 <!-- One entry per blocker: what is blocked, why, and the exact command or action a human must take. -->
-_None yet._
+- **`pnpm smoke` (real provider)**: no real provider key is present (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY` are unset in `.env`/environment) and no local Ollama server is running at `127.0.0.1:11434` (smoke reports `fetch failed`). Fix: add a provider key to `.env` (e.g. `OPENAI_API_KEY=sk-...`) and run `pnpm smoke --provider openai-compatible`, or run `ollama serve` + `ollama pull llama3.2` and `pnpm smoke --provider ollama`.
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-Step 10 (Docs) is in progress on `feature/10-docs` (change `10-docs` planned; `skip_specs` since docs-only). Tasks 1.1 (README), 2.1 (CONTRIBUTING) and 3.1 (`.env.example`) are done. Remaining: 4.1 quickstart verification + decision log; then `openspec-archive-change`, merge to `main`, tick step 10 and update the Log.
+None — all 10 features are complete. The only open item is the provider-smoke key under **Blocked** above (needed only to run `pnpm smoke` against a real provider; the key-free `OPENARTIFACT_FAKE_PROVIDER=1` mode and the full `pnpm check` suite pass without it).
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
@@ -40,3 +39,5 @@ Step 10 (Docs) is in progress on `feature/10-docs` (change `10-docs` planned; `s
 - 2026-09-27, step 4 (Agent loop, tools, security layer): the seven §8 tools (`read_file`, `list_directory`, `glob`, `search_code`, `edit_file`, `write_file`, `execute_command`) with zod schemas and approval categories; a realpath path jail rejecting `..`/symlink escapes plus `.git/` write denial and secret-file/`sudo` rules; an explicit state machine with 50-iteration / 120 s timeout / ~20k-char cap / 3-identical-failure limits, context stubbing above 75 % of window, ask/auto-edit/full-auto approval and cancel-keeps-history; a versioned snapshot-tested system prompt; and an orchestrating `AgentLoop` async generator, proven by a scripted `FakeProvider` integration test (read → edit → execute-tests → final answer in a temp dir, escape rejection, cancel mid-command leaves valid history). `pnpm check` green end-to-end.
 - 2026-09-27, step 8 (Versions, diff, revert, undo, settings, persistence): SQLite persistence via `better-sqlite3` with a `node:sqlite` fallback behind one repository interface and numbered migrations; canonical `settings`/`history` wire types in `packages/shared`; `GET/PUT /api/settings` (masked key references, live-applied) and `GET /api/conversations` + `GET /api/conversations/:id`; turn persistence writing messages, artifact versions (shared parser) and the tool-call log with approval decisions; restore-on-load in the web stores; a `SettingsDrawer`; an artifact version dropdown, a lazily-loaded local Monaco diff view and a revert action that appends a new version without deleting history; per-turn file snapshots + `POST /api/conversations/:id/undo` with an "Undo this turn" chat action; and e2e + screenshots covering reload/versions/settings/undo and the settings drawer, version dropdown and diff view in both themes/viewports. `pnpm check` green end-to-end.
 - 2026-09-27, step 9 (Final design pass, Impeccable): the full Impeccable pass in order — critique (dual sub-agent snapshot + recorded decisions), audit (15/20, 16 severity-tagged findings), harden (long paths truncate + `title`, huge outputs clamp with expand/collapse, `min-w-0` overflow guards), onboard (distinct chat/artifact empty states, a no-provider path into settings via `GET /api/session` `providerReady`/`workspaceRoot`), and polish (computed-contrast token fixes, Dialog re-parenting of drawer/sheet, `role="alert"` error banner, Restore rename, focus/querySelector/divider-target fixes) — plus a declarative command registry, `useKeyboardShortcuts` (send/stop/approve/reject/toggle-panel/toggle-terminal/settings/focus-input), a `Mod+K` command palette on the shared `Dialog` primitive, and a rewritten `DESIGN.md`. `e2e/accessibility.spec.ts` runs axe on every screenshot screen (zero serious/critical violations), and `pnpm screenshots` now captures the command palette and the refreshed surfaces in both themes at 1440×900 and 390×844. `pnpm check` green end-to-end.
+- 2026-09-27, step 10 (Docs): `README.md` (product description, features, key-free quickstart via `OPENARTIFACT_FAKE_PROVIDER=1`, provider setup for all four adapters with the exact `OPENARTIFACT_*` env vars and where keys live, security model, screenshots gallery, scripts, layout), `CONTRIBUTING.md` (one-branch-per-feature / one-commit-per-task / OpenSpec propose→apply→archive workflow, `pnpm check`/`design:check`/`screenshots`/`smoke`, the Impeccable rule, the decision-log convention), and a two-group `.env.example` (server config + provider keys/smoke). Verified end-to-end from a clean checkout: `pnpm install --frozen-lockfile` is up to date; `OPENARTIFACT_FAKE_PROVIDER=1` starts and `/health` + `/api/session` respond (session cookie issued, `providerReady: true`, seeded temp workspace), a cookie-authenticated `/api/conversations` returns `[]` and a cookie-less request returns 401; `pnpm check` green. Recorded the key-from-environment decision in `docs/DECISIONS.md`.
+- 2026-09-27, complete: all 10 features ship and `pnpm check` is green (typecheck, lint, unit/integration, e2e + axe, `design:check`). What works: any-provider chat (openai-compatible / anthropic / gemini / ollama), a local agent loop with seven tools and approvals, five artifact types with versions/diff/revert, inline Mermaid, settings/persistence/undo, and a designed light+dark interface. What's blocked: a real-provider `pnpm smoke` needs a key (or a running Ollama) — see **Blocked**. How to start: `pnpm install`, then `OPENARTIFACT_FAKE_PROVIDER=1 pnpm dev` and open http://127.0.0.1:4318 (no key), or `export <PROVIDER>_API_KEY=…; pnpm dev` for a real model.
