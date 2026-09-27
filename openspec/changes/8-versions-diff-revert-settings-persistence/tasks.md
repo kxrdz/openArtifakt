@@ -15,7 +15,7 @@
 
 ## 4. Persistence wiring + history endpoints
 
-- [ ] 4.1 Persist the user message, streamed assistant messages, artifact versions (derived from the accumulated assistant text via the shared parser) and the tool-call log (with approval decisions) from `streamTurn`, and add `GET /api/conversations` + `GET /api/conversations/:id` history endpoints. Verify a server unit test that a scripted fake-provider turn writes rows and the history endpoints return them, plus `pnpm --filter @openartifact/server typecheck`.
+- [x] 4.1 Persist the user message, streamed assistant messages, artifact versions (derived from the accumulated assistant text via the shared parser) and the tool-call log (with approval decisions) from `streamTurn`, and add `GET /api/conversations` + `GET /api/conversations/:id` history endpoints. Verify a server unit test that a scripted fake-provider turn writes rows and the history endpoints return them, plus `pnpm --filter @openartifact/server typecheck`.
 
 ## 5. Restore on load (web)
 

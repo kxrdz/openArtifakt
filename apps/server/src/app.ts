@@ -10,6 +10,7 @@ import type { ProviderAdapter } from "@openartifact/core";
 import { loadConfig, ActiveConfig, type ServerConfig } from "./config";
 import { MemoryRepository, type Repository } from "./db";
 import { createChatRouter } from "./routes/chat";
+import { createConversationsRouter } from "./routes/conversations";
 import { createSettingsRouter } from "./routes/settings";
 import {
   generateSessionToken,
@@ -88,8 +89,14 @@ export function createApp(options: CreateAppOptions = {}): Hono {
 
   app.route(
     "/api/chat",
-    createChatRouter({ activeConfig, providerFactory: options.providerFactory }),
+    createChatRouter({
+      activeConfig,
+      repository,
+      providerFactory: options.providerFactory,
+    }),
   );
+
+  app.route("/api/conversations", createConversationsRouter({ repository }));
 
   app.route("/api/settings", createSettingsRouter({ activeConfig, repository }));
 

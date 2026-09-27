@@ -13,7 +13,9 @@ import {
 
 import { createAgentRuntime, toModelConfig } from "../agent/runtime";
 import type { ActiveConfig, ServerConfig } from "../config";
+import type { Repository } from "../db";
 import { FakeServerProvider } from "../fake";
+import { TurnPersistence } from "../persistence";
 
 /**
  * Chat transport (§12.6, "Chat stream endpoint" / "Approval decision
@@ -174,7 +176,7 @@ async function writeEvent<T extends { type: string }>(
   await stream.writeSSE({ event: event.type, data: JSON.stringify(event) });
 }
 
-/** In-memory conversation registry (persistence lands in task 4.1). */
+/** In-memory registry of live conversations (persistence is a repository). */
 export class ConversationRegistry {
   readonly #activeConfig: ActiveConfig;
   readonly #providerFactory: (() => ProviderAdapter) | undefined;
@@ -204,11 +206,12 @@ export class ConversationRegistry {
   }
 }
 
-/** Stream one user turn to completion, forwarding every loop event to the client. */
+/** Stream one user turn to completion, persisting it and forwarding every loop event. */
 async function streamTurn(
   c: Context,
   conversation: Conversation,
   message: string,
+  repository: Repository,
 ): Promise<Response> {
   conversation.running = true;
   // A disconnected client must abort the in-flight provider/tool work.
@@ -217,10 +220,13 @@ async function streamTurn(
   return streamSSE(c, async (stream) => {
     conversation.outputStream = stream;
     stream.onAbort(() => conversation.loop.cancel());
+    const persistence = new TurnPersistence(repository, conversation.id);
     try {
+      persistence.beginTurn(message);
       await writeEvent(stream, { type: "conversation", conversationId: conversation.id });
       for await (const event of conversation.loop.run(message)) {
         if (stream.closed || stream.aborted) break;
+        persistence.onEvent(event);
         await writeEvent(stream, event);
       }
     } catch (error) {
@@ -231,6 +237,7 @@ async function streamTurn(
         });
       }
     } finally {
+      persistence.finish();
       conversation.outputStream = null;
       conversation.running = false;
     }
@@ -240,6 +247,8 @@ async function streamTurn(
 export interface ChatRoutesOptions {
   /** Live config; read when a conversation is created so settings apply live. */
   activeConfig: ActiveConfig;
+  /** Persistence store; messages, tool calls and artifacts are written as they stream. */
+  repository: Repository;
   /** Provider override (tests supply a tuned fake); defaults per `config.fakeProvider`. */
   providerFactory?: () => ProviderAdapter;
 }
@@ -266,7 +275,7 @@ export function createChatRouter(options: ChatRoutesOptions): Hono {
       return c.json({ error: "A turn is already running in this conversation" }, 409);
     }
 
-    return streamTurn(c, conversation, message);
+    return streamTurn(c, conversation, message, options.repository);
   });
 
   router.post("/:conversationId/approval", async (c) => {
