@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_On `feature/7-artifact-renderers-mermaid`, run `openspec-apply-change` for change `7-artifact-renderers-mermaid` and implement the next unchecked task in its `tasks.md`, starting with 1.1 (move the StreamParser into `packages/shared`, core re-exports it). One commit per task; `pnpm check` green before each commit._
+_On `feature/7-artifact-renderers-mermaid`, run `openspec-apply-change` for change `7-artifact-renderers-mermaid` and implement the next unchecked task in its `tasks.md`. 1.1 is done (StreamParser moved into `packages/shared`, core re-exports it; the parser `TextEvent` was renamed `ParserTextEvent` to avoid clashing with the chat wire `TextEvent`). Next is 1.2 (web artifact model in `apps/web/src/artifacts/`: `parseDocument` over the shared `StreamParser` + `useArtifactStore`). One commit per task; `pnpm check` green before each commit._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
