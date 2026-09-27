@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Current feature/branch:** step 8 (Versions, diff, revert, undo, settings, persistence) on branch `feature/8-versions-diff-revert-settings-persistence` + OpenSpec change `8-versions-diff-revert-settings-persistence` (tasks 1.1–1.2 done; tasks 2.1–10.2 pending).
+- **Current feature/branch:** step 8 (Versions, diff, revert, undo, settings, persistence) on branch `feature/8-versions-diff-revert-settings-persistence` + OpenSpec change `8-versions-diff-revert-settings-persistence` (tasks 1.1–2.1 done; tasks 3.1–10.2 pending).
 
 - [x] 1. Scaffold
 - [x] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-Step 8 is in progress: tasks 1.1 (better-sqlite3 + db migrations + repository) and 1.2 (repository factory with `node:sqlite` fallback) are done. On branch `feature/8-versions-diff-revert-settings-persistence`, run `openspec-apply-change` for `8-versions-diff-revert-settings-persistence` and implement task 2.1 (shared wire types: settings, conversation summary, history), then continue one task per iteration through 10.2.
+Step 8 is in progress: tasks 1.1 (better-sqlite3 + db migrations + repository), 1.2 (repository factory with `node:sqlite` fallback) and 2.1 (shared wire types: settings, conversation summary, history) are done. On branch `feature/8-versions-diff-revert-settings-persistence`, run `openspec-apply-change` for `8-versions-diff-revert-settings-persistence` and implement task 3.1 (settings server: `GET/PUT /api/settings` with key-by-reference and live-apply), then continue one task per iteration through 10.2.
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
