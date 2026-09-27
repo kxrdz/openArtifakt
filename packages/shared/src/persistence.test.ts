@@ -46,7 +46,7 @@ describe("settings schema", () => {
   });
 
   it("exposes provider and approval-mode enums and capabilities", () => {
-    for (const id of ["openai-compatible", "anthropic", "gemini", "ollama"]) {
+    for (const id of ["openai-compatible", "anthropic", "gemini", "ollama", "9router"]) {
       expect(providerIdSchema.safeParse(id).success).toBe(true);
     }
     for (const mode of ["ask", "auto-edit", "full-auto"]) {
