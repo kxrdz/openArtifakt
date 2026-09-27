@@ -23,7 +23,7 @@
 
 ## 6. Settings drawer
 
-- [ ] 6.1 Build the `SettingsDrawer` component (provider, model, base URL, masked key-reference, context window, approval mode; fake-provider flag read-only), add a settings client, and wire the status-bar trigger to open/close it (Escape and close action dismiss it). Verify web unit tests, `pnpm design:check` and `pnpm --filter @openartifact/web build`.
+- [x] 6.1 Build the `SettingsDrawer` component (provider, model, base URL, masked key-reference, context window, approval mode; fake-provider flag read-only), add a settings client, and wire the status-bar trigger to open/close it (Escape and close action dismiss it). Verify web unit tests, `pnpm design:check` and `pnpm --filter @openartifact/web build`.
 
 ## 7. Versions, diff and revert
 

@@ -27,6 +27,7 @@ export default {
         "danger-bg": "var(--color-danger-bg)",
         running: "var(--color-running)",
         "running-bg": "var(--color-running-bg)",
+        scrim: "var(--color-scrim)",
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

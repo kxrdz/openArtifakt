@@ -41,7 +41,7 @@ const statePulse: Record<AgentState, boolean> = {
 };
 
 export interface StatusBarProps {
-  /** Settings drawer trigger (feature 8); rendered as a visible seam for now. */
+  /** Opens the settings drawer (§12.8). */
   onOpenSettings?: () => void;
   /**
    * Opens the artifact panel. Only provided on narrow screens, where the panel

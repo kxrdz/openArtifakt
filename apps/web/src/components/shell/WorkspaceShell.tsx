@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { IconButton, XIcon } from "../ui";
+import { SettingsDrawer } from "../settings/SettingsDrawer";
 import { ArtifactPanel } from "./ArtifactPanel";
 import { ChatPane } from "./ChatPane";
 import { SplitPane } from "./SplitPane";
@@ -18,6 +19,7 @@ const SHEET_BREAKPOINT = "(min-width: 900px)";
 export function WorkspaceShell() {
   const isDesktop = useMediaQuery(SHEET_BREAKPOINT);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   // Growing back to desktop dismisses the sheet.
@@ -38,7 +40,10 @@ export function WorkspaceShell() {
 
   return (
     <div className="flex h-full flex-col">
-      <StatusBar onOpenPanel={isDesktop ? undefined : () => setSheetOpen(true)} />
+      <StatusBar
+        onOpenPanel={isDesktop ? undefined : () => setSheetOpen(true)}
+        onOpenSettings={() => setSettingsOpen(true)}
+      />
 
       <main className="flex min-h-0 flex-1">
         {isDesktop ? (
@@ -47,6 +52,8 @@ export function WorkspaceShell() {
           <ChatPane onOpenPanel={() => setSheetOpen(true)} />
         )}
       </main>
+
+      {settingsOpen && <SettingsDrawer onClose={() => setSettingsOpen(false)} />}
 
       {!isDesktop && sheetOpen && (
         <div

@@ -33,6 +33,7 @@ Tinted neutrals carry an indigo cast (HSL hue ≈ 222–228). Semantic roles:
 | `--color-text` / `-secondary` / `-muted` / `-faint` | Primary copy, supporting, metadata, disabled |
 | `--color-accent` / `-hover` / `-fg` | Brand + primary actions; `-fg` is text on accent |
 | `--color-success` / `-warning` / `-danger` / `-running` (+ `-bg`) | Status only; `-bg` is the soft badge wash |
+| `--color-scrim` | Modal scrim behind drawers and sheets (translucent, per theme) |
 
 Contrast targets in **both** themes: body and secondary text ≥ 4.5:1; large/display text ≥ 3:1. Secondary text is tinted from the foreground hue — never a pure gray wash.
 
