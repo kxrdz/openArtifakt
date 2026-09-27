@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-Step 8 is complete and merged. Step 9 (final design pass, Impeccable) is in progress on branch `feature/9-final-design-pass` (OpenSpec change `9-final-design-pass`). Tasks 1.1–7.1 (command registry, Dialog primitive, CommandPalette, shell wiring, critique, audit, harden) are done. Run `openspec-apply-change` for `9-final-design-pass` and implement the remaining tasks one commit each, in order: 8.1 onboard, 9.1 polish, 10.1 rewrite `DESIGN.md`, 11.1–11.2 e2e + screenshots. The Impeccable skill is not installed in this repo; its `reference/*.md` docs are read from a sibling checkout (see DECISIONS.md).
+Step 8 is complete and merged. Step 9 (final design pass, Impeccable) is in progress on branch `feature/9-final-design-pass` (OpenSpec change `9-final-design-pass`). Tasks 1.1–8.1 (command registry, Dialog primitive, CommandPalette, shell wiring, critique, audit, harden, onboard) are done. Run `openspec-apply-change` for `9-final-design-pass` and implement the remaining tasks one commit each, in order: 9.1 polish, 10.1 rewrite `DESIGN.md`, 11.1–11.2 e2e + screenshots. The Impeccable skill is not installed in this repo; its `reference/*.md` docs are read from a sibling checkout (see DECISIONS.md).
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
