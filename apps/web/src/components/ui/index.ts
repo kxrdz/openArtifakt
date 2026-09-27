@@ -37,9 +37,12 @@ export {
   PanelRightIcon,
   PlayIcon,
   PlusIcon,
+  ResetIcon,
   SendIcon,
   SettingsIcon,
   StopIcon,
   TerminalIcon,
   XIcon,
+  ZoomInIcon,
+  ZoomOutIcon,
 } from "./icons";

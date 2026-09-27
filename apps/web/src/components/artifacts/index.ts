@@ -10,5 +10,18 @@ export { SvgViewer } from "./SvgViewer";
 export type { SvgViewerProps } from "./SvgViewer";
 export { CodeViewer } from "./CodeViewer";
 export type { CodeViewerProps } from "./CodeViewer";
+export { MermaidViewer } from "./MermaidViewer";
+export { MermaidError } from "./MermaidViewer";
+export type { MermaidViewerProps, MermaidErrorProps } from "./MermaidViewer";
+export {
+  buildThemeVariables,
+  mermaidErrorLine,
+  mermaidToPngDataUrl,
+  MermaidRenderError,
+  readMermaidTokens,
+  renderMermaid,
+  toRenderError,
+} from "./mermaid";
+export type { MermaidThemeTokens } from "./mermaid";
 export { highlightCode, normalizeLanguage } from "./highlight";
 export { sanitizeSvg, svgDimensions, svgToPngDataUrl, PNG_MAX_DIMENSION } from "./svg";

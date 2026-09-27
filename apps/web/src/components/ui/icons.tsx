@@ -150,3 +150,32 @@ export function DownloadIcon(props: SVGProps<SVGSVGElement>) {
     </IconBase>
   );
 }
+
+export function ZoomInIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.35-4.35" />
+      <path d="M11 8v6M8 11h6" />
+    </IconBase>
+  );
+}
+
+export function ZoomOutIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.35-4.35" />
+      <path d="M8 11h6" />
+    </IconBase>
+  );
+}
+
+export function ResetIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="M3 12a9 9 0 1 0 2.7-6.4L3 8" />
+      <path d="M3 3v5h5" />
+    </IconBase>
+  );
+}

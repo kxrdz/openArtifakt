@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Current feature/branch:** `feature/7-artifact-renderers-mermaid` — change `7-artifact-renderers-mermaid` planned (proposal, specs, design, tasks committed); tasks not yet started.
+- **Current feature/branch:** `feature/7-artifact-renderers-mermaid` — change `7-artifact-renderers-mermaid` in progress; tasks 1.1–3.2 done.
 
 - [x] 1. Scaffold
 - [x] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_On `feature/7-artifact-renderers-mermaid`, run `openspec-apply-change` for change `7-artifact-renderers-mermaid` and implement the next unchecked task in its `tasks.md`. Tasks 1.1–3.1 are done. 3.1 added `apps/web/src/components/artifacts/`: `SvgViewer` (DOMPurify SVG-profile sanitize before inline render, export SVG + PNG via canvas with a 4096 px size cap) and `CodeViewer` (shiki via a CSS-variables theme — `--color-code-*` aliases in `tokens.css` map onto the semantic tokens so highlights recolor with light/dark — language from the `language` attribute with a plain-text fallback, copy button); `dompurify@3.4.16` + `shiki@4.4.3` added as web deps, `jsdom@27` + `@testing-library/react` for the DOM unit tests. Next is 3.2 (`MermaidViewer` + shared `renderMermaid(source, theme)`). One commit per task; `pnpm check` green before each commit._
+_On `feature/7-artifact-renderers-mermaid`, run `openspec-apply-change` for change `7-artifact-renderers-mermaid` and implement the next unchecked task in its `tasks.md`. Tasks 1.1–3.2 are done. 3.2 added `MermaidViewer` (`apps/web/src/components/artifacts/MermaidViewer.tsx`, zoom/pan/reset-view + copy-SVG + SVG/PNG download, a syntax-error state showing the source with the offending line highlighted) and the shared `renderMermaid(source, theme)` helper (`mermaid.ts`: lazy dynamic `import("mermaid")`, `{ startOnLoad:false, securityLevel:"strict" }`, `parse()` before `render()` with a unique id, token-derived `themeVariables` read from the live `--color-*` custom properties, `mermaidToPngDataUrl` rasterizing from the `viewBox`); `mermaid@11.17.2` added as a web dep, a `useActiveTheme()` hook (MutationObserver on `data-theme`) keeps diagrams recolor on theme flip, and `ZoomInIcon`/`ZoomOutIcon`/`ResetIcon` join the authored icon set. Unit tests cover the theme mapping + error state. Next is 4.1 (the `ArtifactPanel` + renderer dispatch wired to `useArtifactStore`). One commit per task; `pnpm check` green before each commit._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
