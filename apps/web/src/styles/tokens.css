@@ -3,7 +3,300 @@
 @tailwind utilities;
 
 /*
- * Design tokens (CSS custom properties for color, type, spacing, radius,
- * elevation and motion) land here in step 5 (design foundation). Components
- * must never hard-code colors or font sizes once those tokens exist.
+ * OpenArtifact design tokens.
+ *
+ * This file is the single source of truth for color, type, spacing, radius,
+ * elevation and motion. Components MUST reference these tokens (directly as
+ * var(--…) or through the Tailwind theme in tailwind.config.js) and MUST NOT
+ * hard-code colors or font sizes anywhere else in apps/web/src.
+ *
+ * Theming: `:root` carries the DARK palette (dark is the default and
+ * first-class theme per PRODUCT.md). `[data-theme="light"]` overrides it.
+ * The inline bootstrap in index.html sets data-theme before first paint.
  */
+
+/* ------------------------------------------------------------------ */
+/* Self-hosted fonts (IBM Plex Sans + IBM Plex Mono, SIL OFL 1.1)     */
+/* Files live in apps/web/public/fonts/ (task 2.1); no runtime CDN.   */
+/* ------------------------------------------------------------------ */
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/IBMPlexSans-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/IBMPlexSans-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/IBMPlexSans-SemiBold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/IBMPlexSans-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-SemiBold.woff2") format("woff2");
+}
+
+/* ------------------------------------------------------------------ */
+/* Motion (theme-independent)                                         */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 320ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Type scale (dense but calm; 14px base) */
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.8125rem; /* 13px */
+  --text-base: 0.875rem; /* 14px */
+  --text-md: 0.9375rem; /* 15px */
+  --text-lg: 1.0625rem; /* 17px */
+  --text-xl: 1.25rem; /* 20px */
+  --text-2xl: 1.5rem; /* 24px */
+  --text-3xl: 1.875rem; /* 30px */
+
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.4;
+  --leading-normal: 1.6;
+
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
+
+  /* Spacing — the 4px grid (mirrors Tailwind's default scale for
+     non-Tailwind contexts such as the split-pane divider). */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-full: 9999px;
+
+  /* Fonts (self-hosted above; the stack after each name is a graceful
+     fallback if a face fails to load, never a runtime CDN). */
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", "Cascadia Code",
+    "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* ------------------------------------------------------------------ */
+/* Dark palette (default)                                             */
+/* ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces — indigo-tinted neutrals, never pure gray */
+  --color-bg: hsl(222 24% 6%);
+  --color-bg-elevated: hsl(222 20% 9%);
+  --color-bg-sunken: hsl(225 28% 4%);
+  --color-bg-hover: hsl(222 16% 12%);
+
+  /* Borders */
+  --color-border: hsl(222 16% 18%);
+  --color-border-strong: hsl(222 14% 28%);
+
+  /* Text — tinted from the foreground hue, not pure gray */
+  --color-text: hsl(224 20% 92%);
+  --color-text-secondary: hsl(224 12% 68%);
+  --color-text-muted: hsl(224 10% 54%);
+  --color-text-faint: hsl(224 9% 40%);
+
+  /* Brand accent — restrained indigo */
+  --color-accent: hsl(233 85% 74%);
+  --color-accent-hover: hsl(233 90% 80%);
+  --color-accent-fg: hsl(228 30% 10%);
+
+  /* Semantic status colors */
+  --color-success: hsl(150 60% 55%);
+  --color-success-bg: hsl(150 60% 55% / 0.14);
+  --color-warning: hsl(40 95% 60%);
+  --color-warning-bg: hsl(40 95% 60% / 0.14);
+  --color-danger: hsl(0 75% 66%);
+  --color-danger-bg: hsl(0 75% 66% / 0.14);
+  --color-running: hsl(190 85% 60%);
+  --color-running-bg: hsl(190 85% 60% / 0.14);
+
+  /* Elevation — offset + soft blur, never a colored halo */
+  --shadow-1: 0 1px 2px hsl(228 30% 2% / 0.5), 0 1px 3px hsl(228 30% 2% / 0.3);
+  --shadow-2: 0 4px 12px -4px hsl(228 30% 2% / 0.6),
+    0 2px 4px -2px hsl(228 30% 2% / 0.4);
+  --shadow-3: 0 16px 40px -12px hsl(228 30% 1% / 0.65);
+
+  /* Focus ring (two-layer: background gap + accent) */
+  --ring-focus: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent);
+
+  /* Browser surfaces */
+  --color-selection: hsl(233 85% 74% / 0.3);
+  --color-scrollbar-thumb: hsl(222 14% 26%);
+}
+
+/* ------------------------------------------------------------------ */
+/* Light palette                                                      */
+/* ------------------------------------------------------------------ */
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg: hsl(225 40% 98%);
+  --color-bg-elevated: hsl(0 0% 100%);
+  --color-bg-sunken: hsl(225 30% 94%);
+  --color-bg-hover: hsl(225 30% 95%);
+
+  --color-border: hsl(225 25% 88%);
+  --color-border-strong: hsl(225 18% 74%);
+
+  --color-text: hsl(228 30% 13%);
+  --color-text-secondary: hsl(228 16% 33%);
+  --color-text-muted: hsl(228 12% 46%);
+  --color-text-faint: hsl(228 10% 60%);
+
+  --color-accent: hsl(234 80% 55%);
+  --color-accent-hover: hsl(234 80% 47%);
+  --color-accent-fg: hsl(0 0% 100%);
+
+  --color-success: hsl(152 55% 32%);
+  --color-success-bg: hsl(152 55% 32% / 0.12);
+  --color-warning: hsl(35 90% 35%);
+  --color-warning-bg: hsl(35 90% 35% / 0.12);
+  --color-danger: hsl(0 65% 42%);
+  --color-danger-bg: hsl(0 65% 42% / 0.12);
+  --color-running: hsl(190 90% 32%);
+  --color-running-bg: hsl(190 90% 32% / 0.12);
+
+  --shadow-1: 0 1px 2px hsl(225 30% 30% / 0.1), 0 1px 3px hsl(225 30% 30% / 0.06);
+  --shadow-2: 0 4px 12px -4px hsl(225 30% 30% / 0.16),
+    0 2px 4px -2px hsl(225 30% 30% / 0.08);
+  --shadow-3: 0 16px 40px -12px hsl(225 30% 25% / 0.22);
+
+  --ring-focus: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent);
+
+  --color-selection: hsl(234 80% 55% / 0.16);
+  --color-scrollbar-thumb: hsl(225 18% 76%);
+}
+
+/* ------------------------------------------------------------------ */
+/* Base element styling (the parts we did not draw still carry the    */
+/* design: selection, scrollbars, focus, body chrome).                */
+/* ------------------------------------------------------------------ */
+
+@layer base {
+  html {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* The app is a full-viewport shell; internal regions scroll. */
+  #root {
+    height: 100%;
+  }
+
+  ::selection {
+    background-color: var(--color-selection);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-scrollbar-thumb) transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Shared primitives layer                                            */
+/* ------------------------------------------------------------------ */
+
+@layer components {
+  /* Two-layer focus ring (background gap + accent) from the --ring-focus
+     token. Interactive primitives opt in with this class; every other
+     focusable element keeps the base-layer :focus-visible outline above. */
+  .focus-ring {
+    outline: none;
+  }
+
+  .focus-ring:focus-visible {
+    box-shadow: var(--ring-focus);
+  }
+}

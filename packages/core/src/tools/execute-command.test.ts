@@ -126,7 +126,9 @@ describe("execute_command", () => {
     );
 
     const result = await executeCommandTool.execute(
-      { command: "node parent.js", timeoutMs: 200 },
+      // Generous timeout so `node parent.js` reliably spawns its grandchild and
+      // writes `child.pid` before the kill — 200ms raced with parallel test load.
+      { command: "node parent.js", timeoutMs: 1000 },
       makeContext(root),
     );
 

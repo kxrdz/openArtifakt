@@ -26,4 +26,17 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
   },
+  projects: [
+    {
+      // The assertion suite: axe + behaviour. Screenshots are a capture tool,
+      // not an assertion, so they live in their own project below and do not
+      // run under `pnpm check` (which runs `pnpm e2e`).
+      name: "e2e",
+      testIgnore: "**/screenshots.spec.ts",
+    },
+    {
+      name: "screenshots",
+      testMatch: "**/screenshots.spec.ts",
+    },
+  ],
 });

@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Current feature/branch:** none active; feature 4 is merged into `main`.
+- **Current feature/branch:** `feature/5-design-foundation` (change `5-design-foundation`).
 
 - [x] 1. Scaffold
 - [x] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Start feature 5 (Design foundation, Impeccable) on `feature/5-design-foundation`: run `openspec-propose` to plan it (shape the surfaces, craft light+dark tokens, self-host fonts, build UI primitives + empty workspace shell, write DESIGN.md, add `pnpm screenshots`), then implement its first task._
+_Continue feature 5 on `feature/5-design-foundation`: tasks 1.1 (design tokens + Tailwind wiring + DESIGN.md), 2.1 (self-hosted IBM Plex fonts), 3.1 (UI primitives) and 4.1 (empty workspace shell: resizable split pane, status bar, collapsible terminal log, empty states, <900 px artifact sheet) are done and committed. Next is task 5.1: add a Playwright `e2e/screenshots.spec.ts` and a root `pnpm screenshots` script that serve the app, set `data-theme` per capture, and write `docs/screenshots/` at 1440×900 and 390×844 in both light and dark; confirm the images exist and `pnpm check` stays green._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
