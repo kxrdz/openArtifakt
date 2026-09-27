@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Current feature/branch:** `feature/7-artifact-renderers-mermaid` — change `7-artifact-renderers-mermaid` in progress; tasks 1.1–3.2 done.
+- **Current feature/branch:** `feature/7-artifact-renderers-mermaid` — change `7-artifact-renderers-mermaid` in progress; tasks 1.1–4.2 done.
 
 - [x] 1. Scaffold
 - [x] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_On `feature/7-artifact-renderers-mermaid`, run `openspec-apply-change` for change `7-artifact-renderers-mermaid` and implement the next unchecked task in its `tasks.md`. Tasks 1.1–4.1 are done. 4.1 built the `ArtifactPanel` (`apps/web/src/components/shell/ArtifactPanel.tsx`): artifact switcher (one entry per identifier+title, first-appearance order, running dot on streaming entries), Preview/Code tabs (Preview deferred to Code while an artifact is still streaming, so partial React/Mermaid is never rendered per token), renderer dispatch by `artifactType` (react→`ReactPreview`, html→`HtmlPreview`, svg→`SvgViewer`, mermaid→`MermaidViewer`, code+unknown→`CodeViewer`), a “Streaming” badge, and the empty state; the narrow-screen sheet now hosts the real panel instead of the empty state. Next is 4.2 (`InlineMermaid` + `MessageItem`/`ChatContainer` rendering parsed content). One commit per task; `pnpm check` green before each commit._
+_On `feature/7-artifact-renderers-mermaid`, run `openspec-apply-change` for change `7-artifact-renderers-mermaid` and implement the next unchecked task in its `tasks.md`. Tasks 1.1–4.2 are done. 4.2 added `InlineMermaid` (`apps/web/src/components/chat/InlineMermaid.tsx`, 300 ms debounced, themed via `renderMermaid`, inline `MermaidError` with the offending line, and an “Open in panel” action that calls the store's new `liftToArtifact`), and `MessageItem` now renders parsed content (prose blocks + inline diagrams; complete fences render as diagrams, still-open fences stay literal, `<artifact>` tags are lifted out). Next is 5.1: extend the fake-provider fixture with one of each artifact type plus a valid and an invalid ```mermaid fence, and add `e2e/artifacts.spec.ts` (every type renders, sandbox blocks `window.parent.document`, invalid diagram shows an inline error without crashing). One commit per task; `pnpm check` green before each commit._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->

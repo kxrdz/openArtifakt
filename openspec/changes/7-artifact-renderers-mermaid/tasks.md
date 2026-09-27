@@ -18,7 +18,7 @@
 ## 4. Artifact panel + inline Mermaid
 
 - [x] 4.1 Build the `ArtifactPanel` (artifact switcher keyed by identifier+title, Preview/Code tabs, renderer dispatch by `artifactType` with unknown types falling back to Code, incomplete-streaming badge, and the existing empty state) wired to `useArtifactStore`. Verify `pnpm design:check` passes and `pnpm --filter @openartifact/web build` typechecks.
-- [ ] 4.2 Add `InlineMermaid` (renders only complete ```mermaid fences from parsed message content, 300 ms debounce, themed, inline syntax-error with offending line, "Open in panel" that lifts the source into a Mermaid artifact) and update `MessageItem`/`ChatContainer` to render parsed message content (text blocks + inline diagrams; artifact tags lifted out). Verify unit tests for the inline renderer (complete vs. incomplete fence, error state, open-in-panel) pass and `pnpm design:check` is clean.
+- [x] 4.2 Add `InlineMermaid` (renders only complete ```mermaid fences from parsed message content, 300 ms debounce, themed, inline syntax-error with offending line, "Open in panel" that lifts the source into a Mermaid artifact) and update `MessageItem`/`ChatContainer` to render parsed message content (text blocks + inline diagrams; artifact tags lifted out). Verify unit tests for the inline renderer (complete vs. incomplete fence, error state, open-in-panel) pass and `pnpm design:check` is clean.
 
 ## 5. e2e + screenshots
 

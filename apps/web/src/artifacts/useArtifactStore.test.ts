@@ -60,3 +60,50 @@ describe("createArtifactStore", () => {
     expect(store.getState().selectedId).toBeNull();
   });
 });
+
+describe("liftToArtifact", () => {
+  it("lifts an inline diagram into a complete Mermaid artifact and selects it", () => {
+    const store = createArtifactStore();
+    store.getState().liftToArtifact("graph TD\n  A --> B", "Flow");
+
+    const artifacts = store.getState().artifacts;
+    expect(artifacts).toHaveLength(1);
+
+    const artifact = artifacts[0];
+    expect(artifact?.artifactType).toBe("application/vnd.mermaid");
+    expect(artifact?.title).toBe("Flow");
+    expect(artifact?.incomplete).toBe(false);
+    expect(artifact?.versions).toHaveLength(1);
+    expect(artifact?.versions[0]).toEqual({
+      version: 1,
+      content: "graph TD\n  A --> B",
+      incomplete: false,
+    });
+    expect(store.getState().selectedId).toBe(artifact?.identifier);
+  });
+
+  it("persists lifted artifacts across content re-derives and keeps them selected", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(CONTENT);
+    store.getState().liftToArtifact("graph TD", "Flow");
+
+    store.getState().updateFromContent(CONTENT + "\nMore prose.");
+
+    const identifiers = store.getState().artifacts.map((a) => a.identifier);
+    expect(identifiers).toContain("counter");
+    expect(identifiers).toContain("page");
+    expect(identifiers.some((id) => id.startsWith("inline-mermaid-"))).toBe(true);
+    expect(store.getState().selectedId?.startsWith("inline-mermaid-")).toBe(true);
+  });
+
+  it("defaults the title and gives each lift a unique identifier", () => {
+    const store = createArtifactStore();
+    store.getState().liftToArtifact("a");
+    store.getState().liftToArtifact("b");
+
+    const artifacts = store.getState().artifacts;
+    expect(artifacts).toHaveLength(2);
+    expect(artifacts[0]?.title).toBe("Inline diagram");
+    expect(artifacts[0]?.identifier).not.toBe(artifacts[1]?.identifier);
+  });
+});
