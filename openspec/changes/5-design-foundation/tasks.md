@@ -18,4 +18,4 @@
 
 ## 5. Screenshots
 
-- [ ] 5.1 Add a Playwright `e2e/screenshots.spec.ts` and a root `pnpm screenshots` script that serve the app, set `data-theme` per capture, and write `docs/screenshots/` at 1440×900 and 390×844 in both light and dark; confirm the images exist in both themes/viewports and `pnpm check` stays green.
+- [x] 5.1 Add a Playwright `e2e/screenshots.spec.ts` and a root `pnpm screenshots` script that serve the app, set `data-theme` per capture, and write `docs/screenshots/` at 1440×900 and 390×844 in both light and dark; confirm the images exist in both themes/viewports and `pnpm check` stays green.

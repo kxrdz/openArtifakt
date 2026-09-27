@@ -14,7 +14,8 @@
     "typecheck": "pnpm -r --if-present run typecheck",
     "lint": "pnpm -r --if-present run lint",
     "test": "pnpm -r --if-present run test",
-    "e2e": "playwright test --config e2e/playwright.config.ts",
+    "e2e": "playwright test --config e2e/playwright.config.ts --project=e2e",
+    "screenshots": "playwright test --config e2e/playwright.config.ts --project=screenshots",
     "smoke": "tsx scripts/smoke.mjs",
     "design:check": "impeccable detect --json apps/web/src",
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm design:check && pnpm e2e"
