@@ -35,7 +35,7 @@ The server is configured entirely through environment variables (`OPENARTIFACT_*
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `OPENARTIFACT_PROVIDER` | `openai-compatible` | `openai-compatible` \| `anthropic` \| `gemini` \| `ollama` |
+| `OPENARTIFACT_PROVIDER` | `openai-compatible` | `openai-compatible` \| `anthropic` \| `gemini` \| `ollama` \| `9router` |
 | `OPENARTIFACT_MODEL` | per provider | Model name (see table below) |
 | `OPENARTIFACT_BASE_URL` | per provider | API base URL (point `openai-compatible` at Groq, Together, DeepSeek, OpenRouter, vLLM, LM Studio, LocalAI, …) |
 | `OPENARTIFACT_API_KEY_REF` | per provider | Name of the environment variable holding the key |
@@ -53,6 +53,7 @@ Provider defaults:
 | `anthropic` | `claude-3-5-haiku-latest` | `https://api.anthropic.com` | `ANTHROPIC_API_KEY` |
 | `gemini` | `gemini-2.0-flash` | `https://generativelanguage.googleapis.com` | `GEMINI_API_KEY` |
 | `ollama` | `llama3.2` | `http://127.0.0.1:11434` | _none_ |
+| `9router` | `cc/claude-sonnet-4-5` | `http://localhost:20128/v1` | `NINEROUTER_KEY` (optional) |
 
 **Keys live in the server's environment, never in the browser or the database.** The server reads `process.env[OPENARTIFACT_API_KEY_REF]`; it does not auto-load `.env`. Export the key (or source `.env`) before starting:
 
@@ -66,6 +67,16 @@ Ollama needs no key — just have it running with a model pulled:
 ```bash
 ollama pull llama3.2
 OPENARTIFACT_PROVIDER=ollama pnpm dev
+```
+
+[9Router](https://9router.com/) is an OpenAI-compatible gateway that routes to many providers with automatic fallback, and its auth is optional. Start it (`npm install -g 9router && 9router`), pick a model id from `curl http://localhost:20128/v1/models`, then:
+
+```bash
+OPENARTIFACT_PROVIDER=9router \
+OPENARTIFACT_MODEL=cc/claude-sonnet-4-5 \
+pnpm dev
+# if your 9Router requires a key (Dashboard → Keys):
+#   export NINEROUTER_KEY=sk-...
 ```
 
 Any `/v1/chat/completions` endpoint works through the `openai-compatible` adapter:
@@ -121,7 +132,7 @@ Representative captures (full set — every key screen × dark/light × desktop 
 | `pnpm check` | Typecheck, lint, unit tests, `design:check`, and e2e (Playwright + axe) |
 | `pnpm design:check` | Impeccable detector over `apps/web/src` — hard-coded colors/sizes fail the build |
 | `pnpm screenshots` | Captures the key screens into `docs/screenshots/` (own Playwright project; not run by `pnpm check`) |
-| `pnpm smoke --provider <id>` | One real streaming request against `openai-compatible` \| `anthropic` \| `gemini` \| `ollama` (reads keys from `.env`) |
+| `pnpm smoke --provider <id>` | One real streaming request against `openai-compatible` \| `anthropic` \| `gemini` \| `ollama` \| `9router` (reads keys from `.env`) |
 
 ## Project layout
 

@@ -11,4 +11,4 @@
 
 ## 3. Documentation
 
-- [ ] 3.1 Document the `9router` preset in `.env.example` (provider id, `NINEROUTER_KEY`, base URL, model override note) and `README.md` (add `9router` to the provider list with the one-liner setup) and verify the documented env vars match `PROVIDER_DEFAULTS`.
+- [x] 3.1 Document the `9router` preset in `.env.example` (provider id, `NINEROUTER_KEY`, base URL, model override note) and `README.md` (add `9router` to the provider list with the one-liner setup) and verify the documented env vars match `PROVIDER_DEFAULTS`.
