@@ -201,7 +201,7 @@ export function CommandPalette({
                 >
                   <span className="min-w-0 flex-1 truncate">{command.label}</span>
                   {command.hint && (
-                    <span className="truncate text-xs text-text-muted">
+                    <span className="truncate text-xs text-text-secondary">
                       {command.hint}
                     </span>
                   )}

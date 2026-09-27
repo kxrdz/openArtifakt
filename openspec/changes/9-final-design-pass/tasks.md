@@ -43,4 +43,4 @@
 ## 11. e2e and screenshots
 
 - [x] 11.1 Extend e2e so axe runs on every screenshot screen (empty, streaming, pending approval, each artifact type, Mermaid error, settings drawer, command palette) and asserts zero serious or critical violations. Verify `pnpm e2e`.
-- [ ] 11.2 Refresh `pnpm screenshots` to capture the command palette and any changed surfaces in both themes at 1440×900 and 390×844, and verify `pnpm check` stays green end-to-end (typecheck, lint, unit, design:check, e2e).
+- [x] 11.2 Refresh `pnpm screenshots` to capture the command palette and any changed surfaces in both themes at 1440×900 and 390×844, and verify `pnpm check` stays green end-to-end (typecheck, lint, unit, design:check, e2e).
