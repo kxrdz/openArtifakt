@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-Step 9 is complete and merged to `main`. Step 10 (Docs) is next: create branch `feature/10-docs` from `main`, run `openspec-propose` for change `10-docs`, then implement its tasks — write the README (quickstart, provider setup, security model, screenshots from `docs/screenshots/`), CONTRIBUTING, and `.env.example`. *Done when* a fresh clone reaches a working chat by following only the README.
+Step 10 (Docs) is in progress on `feature/10-docs` (change `10-docs` planned; `skip_specs` since docs-only). Task 1.1 (README) is done. Remaining: 2.1 CONTRIBUTING, 3.1 `.env.example`, 4.1 quickstart verification + decision log; then `openspec-archive-change`, merge to `main`, tick step 10 and update the Log.
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
