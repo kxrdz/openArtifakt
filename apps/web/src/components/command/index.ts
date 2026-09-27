@@ -12,3 +12,9 @@ export {
   useKeyboardShortcuts,
 } from "./useKeyboardShortcuts";
 export type { KeyboardShortcutOptions } from "./useKeyboardShortcuts";
+export {
+  CommandPalette,
+  filterCommands,
+  fuzzyMatch,
+} from "./CommandPalette";
+export type { CommandPaletteProps } from "./CommandPalette";

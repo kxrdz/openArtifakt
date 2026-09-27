@@ -10,7 +10,7 @@
 
 ## 3. Command palette
 
-- [ ] 3.1 Build `CommandPalette` on the Dialog primitive and the command registry, with fuzzy filtering, arrow-key navigation, Enter to run, Escape to close, and a visible focus ring; open it with `Mod+K`. Verify web unit tests (filter, navigate, run, close) plus `pnpm design:check` and `pnpm --filter @openartifact/web build`.
+- [x] 3.1 Build `CommandPalette` on the Dialog primitive and the command registry, with fuzzy filtering, arrow-key navigation, Enter to run, Escape to close, and a visible focus ring; open it with `Mod+K`. Verify web unit tests (filter, navigate, run, close) plus `pnpm design:check` and `pnpm --filter @openartifact/web build`.
 
 ## 4. Wire global shortcuts into the shell
 
