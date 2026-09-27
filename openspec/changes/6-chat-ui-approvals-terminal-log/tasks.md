@@ -21,7 +21,7 @@
 
 ## 5. Chat UI: messages, composer, status
 
-- [ ] 5.1 Build `ChatContainer`, `MessageItem` and `Composer` (send/stop, keyboard-operable) and wire `StatusBar` + `ChatPane` to the store so a conversation renders streamed messages and the state is always visible; auto-scroll pauses on manual scroll. Verify `pnpm design:check` passes and `pnpm build` (web) typechecks.
+- [x] 5.1 Build `ChatContainer`, `MessageItem` and `Composer` (send/stop, keyboard-operable) and wire `StatusBar` + `ChatPane` to the store so a conversation renders streamed messages and the state is always visible; auto-scroll pauses on manual scroll. Verify `pnpm design:check` passes and `pnpm build` (web) typechecks.
 
 ## 6. Tool-call cards, approval cards, terminal log
 

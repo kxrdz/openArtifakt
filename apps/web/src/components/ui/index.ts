@@ -35,6 +35,7 @@ export {
   PanelRightIcon,
   PlayIcon,
   PlusIcon,
+  SendIcon,
   SettingsIcon,
   StopIcon,
   TerminalIcon,
