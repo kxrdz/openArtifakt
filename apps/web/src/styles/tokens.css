@@ -184,6 +184,9 @@
   /* Browser surfaces */
   --color-selection: hsl(233 85% 74% / 0.3);
   --color-scrollbar-thumb: hsl(222 14% 26%);
+
+  /* Modal scrim behind drawers and sheets */
+  --color-scrim: hsl(228 30% 2% / 0.55);
 }
 
 /* ------------------------------------------------------------------ */
@@ -228,6 +231,8 @@
 
   --color-selection: hsl(234 80% 55% / 0.16);
   --color-scrollbar-thumb: hsl(225 18% 76%);
+
+  --color-scrim: hsl(225 30% 20% / 0.32);
 }
 
 /* ------------------------------------------------------------------ */

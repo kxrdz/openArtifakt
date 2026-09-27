@@ -7,8 +7,12 @@ import { Hono } from "hono";
 
 import type { ProviderAdapter } from "@openartifact/core";
 
-import { loadConfig, type ServerConfig } from "./config";
+import { loadConfig, ActiveConfig, type ServerConfig } from "./config";
+import { defaultSnapshotRoot } from "./agent/runtime";
+import { MemoryRepository, type Repository } from "./db";
 import { createChatRouter } from "./routes/chat";
+import { createConversationsRouter } from "./routes/conversations";
+import { createSettingsRouter } from "./routes/settings";
 import {
   generateSessionToken,
   loopbackGuard,
@@ -47,11 +51,20 @@ export interface CreateAppOptions {
   sessionToken?: string;
   /** Provider override for the chat routes (tests inject a tuned fake). */
   providerFactory?: () => ProviderAdapter;
+  /** Persistence store; defaults to an in-memory store for tests/dev. */
+  repository?: Repository;
+  /** Mutable live config; defaults to a new {@link ActiveConfig} over `config`. */
+  activeConfig?: ActiveConfig;
+  /** Snapshot storage root for pre-mutation snapshots (§8); defaults to the home dir. */
+  snapshotRoot?: string;
 }
 
 export function createApp(options: CreateAppOptions = {}): Hono {
   const config = options.config ?? loadConfig();
   const sessionToken = options.sessionToken ?? generateSessionToken();
+  const activeConfig = options.activeConfig ?? new ActiveConfig(config);
+  const repository = options.repository ?? new MemoryRepository();
+  const snapshotRoot = options.snapshotRoot ?? defaultSnapshotRoot();
 
   const app = new Hono();
 
@@ -65,12 +78,13 @@ export function createApp(options: CreateAppOptions = {}): Hono {
   // Bootstrap the session cookie and report the public config. Token-exempt so
   // the client can always call it first to receive the cookie.
   app.get("/api/session", (c) => {
+    const live = activeConfig.get();
     c.header("Set-Cookie", sessionCookieValue(sessionToken));
     return c.json({
       ok: true,
-      approvalMode: config.approvalMode,
-      fakeProvider: config.fakeProvider,
-      provider: config.provider,
+      approvalMode: live.approvalMode,
+      fakeProvider: live.fakeProvider,
+      provider: live.provider,
     });
   });
 
@@ -79,8 +93,24 @@ export function createApp(options: CreateAppOptions = {}): Hono {
 
   app.route(
     "/api/chat",
-    createChatRouter({ config, providerFactory: options.providerFactory }),
+    createChatRouter({
+      activeConfig,
+      repository,
+      providerFactory: options.providerFactory,
+      snapshotRoot,
+    }),
   );
+
+  app.route(
+    "/api/conversations",
+    createConversationsRouter({
+      repository,
+      workspaceRoot: activeConfig.get().workspaceRoot,
+      snapshotRoot,
+    }),
+  );
+
+  app.route("/api/settings", createSettingsRouter({ activeConfig, repository }));
 
   // Vendored sandbox ESM, registered before the dev proxy / prod static handler
   // so `/vendor/*` is always served from this origin with CORS.

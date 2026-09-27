@@ -132,6 +132,16 @@ export function MessageSquareIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function HistoryIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="M3 12a9 9 0 1 0 2.6-6.3L3 8" />
+      <path d="M3 3v5h5" />
+      <path d="M12 7v5l3 2" />
+    </IconBase>
+  );
+}
+
 export function CopyIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <IconBase {...props}>
@@ -176,6 +186,15 @@ export function ResetIcon(props: SVGProps<SVGSVGElement>) {
     <IconBase {...props}>
       <path d="M3 12a9 9 0 1 0 2.7-6.4L3 8" />
       <path d="M3 3v5h5" />
+    </IconBase>
+  );
+}
+
+export function UndoIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="m9 14-5-5 5-5" />
+      <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5 5.5 5.5 0 0 1-5.5 5.5H11" />
     </IconBase>
   );
 }

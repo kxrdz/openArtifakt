@@ -61,6 +61,186 @@ describe("createArtifactStore", () => {
   });
 });
 
+describe("version selection", () => {
+  const FIRST =
+    '<artifact identifier="a" type="application/vnd.code" title="A" language="python">\nv1\n</artifact>\n';
+  const SECOND =
+    FIRST +
+    '<artifact identifier="a" type="application/vnd.code" title="A" language="python">\nv2\n</artifact>\n';
+  const THIRD =
+    SECOND +
+    '<artifact identifier="a" type="application/vnd.code" title="A" language="python">\nv3\n</artifact>\n';
+
+  it("has no pinned version until one is selected (latest is followed)", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    expect(store.getState().versionSelections).toEqual({});
+  });
+
+  it("pins an older version and keeps it pinned as new versions arrive", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    store.getState().selectVersion("a", 1);
+    expect(store.getState().versionSelections).toEqual({ a: 1 });
+
+    store.getState().updateFromContent(THIRD);
+    expect(store.getState().versionSelections).toEqual({ a: 1 });
+  });
+
+  it("selecting the latest version returns to following it", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    store.getState().selectVersion("a", 1);
+    store.getState().selectVersion("a", 2);
+    expect(store.getState().versionSelections).toEqual({});
+
+    // A new version then takes over automatically.
+    store.getState().updateFromContent(THIRD);
+    expect(store.getState().versionSelections).toEqual({});
+  });
+
+  it("ignores versions and identifiers that do not exist", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    store.getState().selectVersion("a", 9);
+    store.getState().selectVersion("missing", 1);
+    expect(store.getState().versionSelections).toEqual({});
+  });
+
+  it("drops a pin when the artifact or its version disappears", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    store.getState().selectVersion("a", 1);
+
+    store.getState().updateFromContent("");
+    expect(store.getState().versionSelections).toEqual({});
+
+    store.getState().updateFromContent(SECOND);
+    store.getState().selectVersion("a", 2);
+    store.getState().clear();
+    expect(store.getState().versionSelections).toEqual({});
+  });
+
+  it("starts a restored conversation on the latest versions", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    store.getState().selectVersion("a", 1);
+
+    const artifacts = store.getState().artifacts;
+    store.getState().restoreArtifacts(artifacts);
+    expect(store.getState().versionSelections).toEqual({});
+  });
+});
+
+describe("revert", () => {
+  const FIRST =
+    '<artifact identifier="a" type="application/vnd.code" title="A" language="python">\nv1\n</artifact>\n';
+  const SECOND =
+    FIRST +
+    '<artifact identifier="a" type="application/vnd.code" title="A" language="python">\nv2\n</artifact>\n';
+  const THIRD =
+    SECOND +
+    '<artifact identifier="a" type="application/vnd.code" title="A" language="python">\nv3\n</artifact>\n';
+  const FOURTH =
+    THIRD +
+    '<artifact identifier="a" type="application/vnd.code" title="A" language="python">\nv4\n</artifact>\n';
+
+  it("appends the older version's content as a new version and keeps every prior version", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(THIRD);
+    store.getState().revertVersion("a", 1);
+
+    const artifact = store.getState().artifacts[0];
+    expect(artifact?.versions).toHaveLength(4);
+    // The revert is the new latest and carries the older content.
+    expect(artifact?.versions[3]).toEqual({
+      version: 4,
+      content: "\nv1\n",
+      incomplete: false,
+    });
+    // Every prior version remains listed, in order.
+    expect(
+      artifact?.versions.map((version) => version.content),
+    ).toEqual(["\nv1\n", "\nv2\n", "\nv3\n", "\nv1\n"]);
+  });
+
+  it("shows the reverted content after reverting and clears the pin", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    store.getState().selectVersion("a", 1);
+    expect(store.getState().versionSelections).toEqual({ a: 1 });
+
+    store.getState().revertVersion("a", 1);
+
+    // No pin: the panel follows the latest, which is now the revert.
+    expect(store.getState().versionSelections).toEqual({});
+    const artifact = store.getState().artifacts[0];
+    expect(artifact?.versions).toHaveLength(3);
+    expect(artifact?.versions[2]?.content).toBe("\nv1\n");
+  });
+
+  it("is a no-op for the latest version or a missing identifier/version", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+
+    store.getState().revertVersion("a", 2);
+    store.getState().revertVersion("a", 9);
+    store.getState().revertVersion("missing", 1);
+
+    expect(store.getState().artifacts[0]?.versions).toHaveLength(2);
+  });
+
+  it("keeps the revert across re-derivation, with later versions appending after it", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(THIRD);
+    store.getState().revertVersion("a", 2);
+
+    // New assistant content re-derives the artifact; the revert survives and
+    // stays in chronological order (before the new version).
+    store.getState().updateFromContent(FOURTH);
+
+    const artifact = store.getState().artifacts[0];
+    expect(
+      artifact?.versions.map((version) => version.content),
+    ).toEqual(["\nv1\n", "\nv2\n", "\nv3\n", "\nv2\n", "\nv4\n"]);
+  });
+
+  it("can revert twice, stacking reverts in order", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(THIRD);
+    store.getState().revertVersion("a", 1);
+    store.getState().revertVersion("a", 2);
+
+    const artifact = store.getState().artifacts[0];
+    expect(
+      artifact?.versions.map((version) => version.content),
+    ).toEqual(["\nv1\n", "\nv2\n", "\nv3\n", "\nv1\n", "\nv2\n"]);
+  });
+
+  it("drops reverts when the artifact disappears or the store clears", () => {
+    const store = createArtifactStore();
+    store.getState().updateFromContent(SECOND);
+    store.getState().revertVersion("a", 1);
+    expect(store.getState().artifacts[0]?.versions).toHaveLength(3);
+
+    store.getState().updateFromContent("");
+    expect(store.getState().artifacts).toEqual([]);
+
+    store.getState().updateFromContent(SECOND);
+    expect(store.getState().artifacts[0]?.versions).toHaveLength(2);
+
+    store.getState().revertVersion("a", 1);
+    store.getState().restoreArtifacts(store.getState().artifacts);
+    // A restored conversation replays persisted history without reverts.
+    expect(store.getState().artifacts[0]?.versions).toHaveLength(3);
+
+    store.getState().revertVersion("a", 1);
+    store.getState().clear();
+    store.getState().updateFromContent(SECOND);
+    expect(store.getState().artifacts[0]?.versions).toHaveLength(2);
+  });
+});
+
 describe("liftToArtifact", () => {
   it("lifts an inline diagram into a complete Mermaid artifact and selects it", () => {
     const store = createArtifactStore();

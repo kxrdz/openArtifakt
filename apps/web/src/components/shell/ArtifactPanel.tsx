@@ -1,10 +1,11 @@
 import { useState } from "react";
 
 import { useArtifactStore } from "../../artifacts";
-import type { Artifact } from "../../artifacts";
+import type { Artifact, ArtifactVersion } from "../../artifacts";
 import { CodeViewer, MermaidViewer, SvgViewer } from "../artifacts";
 import { HtmlPreview, ReactPreview } from "../../sandbox";
 import { Badge, Button, cn, focusRing, PanelRightIcon, StatusDot } from "../ui";
+import { VersionDiff } from "../artifacts/VersionDiff";
 
 /**
  * The artifact panel (§12.7, "Artifact panel with switcher and tabs").
@@ -14,7 +15,12 @@ import { Badge, Button, cn, focusRing, PanelRightIcon, StatusDot } from "../ui";
  * Preview/Code tabs split the visual render from the raw source; while an
  * artifact is still streaming the Code tab updates live and the Preview is
  * deferred until it closes (so a partial React component or Mermaid diagram is
- * never compiled/rendered on every token).
+ * never compiled/rendered on every token). The version dropdown selects any
+ * stored version — pinning an older one never removes the newer ones, and
+ * selecting the latest returns to following it as versions arrive. The Diff
+ * tab (task 7.2) compares any two stored versions in a lazily-loaded Monaco
+ * diff editor, and the Revert action (task 7.3) copies the viewed older
+ * version forward as a new version — history is never deleted.
  */
 
 /** Empty artifact state, shared by the desktop side-by-side panel and the
@@ -69,17 +75,42 @@ function codeLanguage(artifact: Artifact): string | undefined {
   }
 }
 
-/** The content of the latest version (always at least one version). */
-function latestContent(artifact: Artifact): string {
-  const version = artifact.versions[artifact.versions.length - 1];
-  return version?.content ?? "";
+/**
+ * The version to render: the pinned one when the user selected it, otherwise
+ * the latest (which keeps following new versions while streaming).
+ */
+function resolveVersion(
+  artifact: Artifact,
+  pinned: number | undefined,
+): ArtifactVersion {
+  // The parser always creates at least one version; the fallback keeps the
+  // type honest if an empty list ever slips through.
+  const latest =
+    artifact.versions[artifact.versions.length - 1] ?? {
+      version: 1,
+      content: "",
+      incomplete: artifact.incomplete,
+    };
+  const chosen =
+    pinned === undefined
+      ? undefined
+      : artifact.versions.find((version) => version.version === pinned);
+  return chosen ?? latest;
 }
 
-type Tab = "preview" | "code";
+type Tab = "preview" | "code" | "diff";
 
 /** Type dispatch: known types to their viewer, unknown types to Code. */
-function ArtifactContent({ artifact, tab }: { artifact: Artifact; tab: Tab }) {
-  const code = latestContent(artifact);
+function ArtifactContent({
+  artifact,
+  version,
+  tab,
+}: {
+  artifact: Artifact;
+  version: ArtifactVersion;
+  tab: Tab;
+}) {
+  const code = version.content;
 
   if (tab === "code") {
     return <CodeViewer code={code} language={codeLanguage(artifact)} />;
@@ -99,6 +130,12 @@ function ArtifactContent({ artifact, tab }: { artifact: Artifact; tab: Tab }) {
   }
 }
 
+/** Version-dropdown control styling, consistent with the settings fields. */
+const versionSelectClass = cn(
+  "h-7 rounded-md border border-border bg-bg-sunken px-1.5 font-sans text-xs font-medium text-text",
+  focusRing,
+);
+
 /**
  * The desktop artifact panel: an artifact switcher over Preview/Code tabs and
  * the active renderer (or the empty state before the first artifact).
@@ -107,6 +144,9 @@ export function ArtifactPanel() {
   const artifacts = useArtifactStore((state) => state.artifacts);
   const selectedId = useArtifactStore((state) => state.selectedId);
   const selectArtifact = useArtifactStore((state) => state.selectArtifact);
+  const versionSelections = useArtifactStore((state) => state.versionSelections);
+  const selectVersion = useArtifactStore((state) => state.selectVersion);
+  const revertVersion = useArtifactStore((state) => state.revertVersion);
   const [tab, setTab] = useState<Tab>("preview");
 
   const selected =
@@ -118,11 +158,28 @@ export function ArtifactPanel() {
     return <ArtifactEmptyState />;
   }
 
+  const version = resolveVersion(
+    selected,
+    versionSelections[selected.identifier],
+  );
+  const latestVersion = selected.versions[selected.versions.length - 1];
+  const viewingLatest = version.version === latestVersion?.version;
+
   const previewAvailable = hasPreview(selected);
-  // Preview is deferred while streaming: the Code tab updates live and the
-  // preview builds once the artifact closes (§6/§12.7).
+  // Preview is deferred while the *viewed* version is streaming: the Code tab
+  // updates live and the preview builds once the artifact closes (§6/§12.7).
+  // Older versions are always complete, so they preview even while a newer
+  // version streams.
   const effectiveTab: Tab =
-    tab === "preview" && previewAvailable && !selected.incomplete ? "preview" : "code";
+    tab === "preview" && !(previewAvailable && !version.incomplete)
+      ? "code"
+      : tab === "diff" && selected.versions.length < 2
+        ? "code"
+        : tab;
+
+  // A diff needs two stored versions (task 7.2); the button is disabled
+  // rather than hidden so the tab bar does not reshuffle while streaming.
+  const diffAvailable = selected.versions.length >= 2;
 
   return (
     <div className="flex h-full flex-col">
@@ -161,16 +218,16 @@ export function ArtifactPanel() {
         })}
       </div>
 
-      {/* Preview/Code tabs + the streaming badge. */}
+      {/* Preview/Code tabs, the version dropdown, and the streaming badge. */}
       <div className="flex h-9 shrink-0 items-center gap-1 border-b border-border px-3">
         {previewAvailable && (
           <Button
             size="sm"
             variant={effectiveTab === "preview" ? "secondary" : "ghost"}
             aria-pressed={effectiveTab === "preview"}
-            disabled={selected.incomplete}
+            disabled={version.incomplete}
             title={
-              selected.incomplete
+              version.incomplete
                 ? "Builds once the artifact finishes streaming"
                 : undefined
             }
@@ -187,8 +244,54 @@ export function ArtifactPanel() {
         >
           Code
         </Button>
-        {selected.incomplete && (
-          <Badge tone="running" className="ml-auto">
+        <Button
+          size="sm"
+          variant={effectiveTab === "diff" ? "secondary" : "ghost"}
+          aria-pressed={effectiveTab === "diff"}
+          disabled={!diffAvailable}
+          title={
+            diffAvailable
+              ? "Compare two versions"
+              : "Needs at least two versions"
+          }
+          onClick={() => setTab("diff")}
+        >
+          Diff
+        </Button>
+        {/* Version dropdown (§12.8): any stored version; the latest is marked
+            and follows new versions until an older one is pinned. */}
+        <select
+          aria-label={`Version of ${selected.title}`}
+          title="Artifact version"
+          className={cn(versionSelectClass, "ml-auto")}
+          value={version.version}
+          onChange={(event) =>
+            selectVersion(selected.identifier, Number(event.target.value))
+          }
+        >
+          {selected.versions.map((candidate) => (
+            <option key={candidate.version} value={candidate.version}>
+              v{candidate.version}
+              {candidate.version === latestVersion?.version ? " (latest)" : ""}
+            </option>
+          ))}
+        </select>
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={viewingLatest}
+          title={
+            viewingLatest
+              ? "View an older version to revert"
+              : "Copy this version forward as a new version"
+          }
+          onClick={() => revertVersion(selected.identifier, version.version)}
+        >
+          Revert
+        </Button>
+        {!viewingLatest && <Badge tone="neutral">Viewing older version</Badge>}
+        {version.incomplete && (
+          <Badge tone="running">
             <StatusDot tone="running" pulse className="h-1.5 w-1.5" />
             Streaming
           </Badge>
@@ -196,7 +299,21 @@ export function ArtifactPanel() {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
-        <ArtifactContent artifact={selected} tab={effectiveTab} />
+        {effectiveTab === "diff" ? (
+          <VersionDiff
+            key={selected.identifier}
+            versions={selected.versions}
+            language={codeLanguage(selected)}
+            title={selected.title}
+            preferredVersion={versionSelections[selected.identifier]}
+          />
+        ) : (
+          <ArtifactContent
+            artifact={selected}
+            version={version}
+            tab={effectiveTab}
+          />
+        )}
       </div>
     </div>
   );

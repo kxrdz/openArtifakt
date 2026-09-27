@@ -74,15 +74,18 @@ describe("write_file", () => {
     await expect(fs.readFile(`${root}/a.txt`, "utf8")).resolves.toBe("after");
   });
 
-  it("does not write a snapshot for a brand-new file", async () => {
+  it("writes a `.created` marker for a brand-new file", async () => {
     const root = await makeTempWorkspace();
     const snapshots = await makeTempWorkspace("oa-snapshots-");
 
-    await writeFileTool.execute(
+    const result = await writeFileTool.execute(
       { path: "fresh.txt", content: "hi" },
       makeContext(root, { snapshotRoot: snapshots, conversationId: "conv", turnId: "turn" }),
     );
 
-    await expect(fs.readdir(snapshots)).resolves.toEqual([]);
+    expect(result.isError).toBeUndefined();
+    expect(result.content).toContain('Created "fresh.txt"');
+    const marker = path.join(snapshots, "conv", "turn", "1_fresh.txt.created");
+    await expect(fs.readFile(marker, "utf8")).resolves.toBe("");
   });
 });

@@ -10,3 +10,12 @@ export type {
   ToolCallEvent,
 } from "./events";
 export { StreamParser } from "./stream-parser";
+export { parseDocument } from "./parseDocument";
+export type {
+  Artifact,
+  ArtifactVersion,
+  MermaidBlock,
+  ParsedBlock,
+  ParsedDocument,
+  TextBlock,
+} from "./parseDocument";

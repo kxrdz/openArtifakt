@@ -10,3 +10,5 @@ export * from "./messages";
 export * from "./events";
 export * from "./chat";
 export * from "./parser";
+export * from "./settings";
+export * from "./history";

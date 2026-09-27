@@ -1,4 +1,5 @@
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import type { ProviderAdapter } from "@openartifact/core";
@@ -70,6 +71,7 @@ interface AppUnderTest {
 /** A fake-provider app over a seeded temp workspace. */
 async function fakeApp(providerFactory?: () => ProviderAdapter): Promise<AppUnderTest> {
   const workspace = await createFakeWorkspace();
+  const snapshots = await mkdtemp(join(tmpdir(), "openartifact-snapshots-"));
   const config = {
     ...loadConfig({ OPENARTIFACT_FAKE_PROVIDER: "1" }),
     workspaceRoot: workspace.root,
@@ -77,13 +79,17 @@ async function fakeApp(providerFactory?: () => ProviderAdapter): Promise<AppUnde
   const app = createApp({
     config,
     sessionToken: "test-token",
+    snapshotRoot: snapshots,
     ...(providerFactory ? { providerFactory } : {}),
   });
   return {
     app,
     cookie: `${SESSION_COOKIE_NAME}=test-token`,
     workspaceRoot: workspace.root,
-    cleanup: workspace.cleanup,
+    cleanup: async () => {
+      await workspace.cleanup();
+      await rm(snapshots, { recursive: true, force: true });
+    },
   };
 }
 
