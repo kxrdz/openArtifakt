@@ -7,7 +7,7 @@
 
 ## 2. Smoke harness
 
-- [ ] 2.1 Add `9router` to the `scripts/smoke.mjs` provider registry (key ref `NINEROUTER_KEY`, base URL `http://localhost:20128/v1`, default model) and verify `pnpm smoke --provider 9router` prints the skip message when `NINEROUTER_KEY` is unset and `--help` lists `9router`.
+- [x] 2.1 Add `9router` to the `scripts/smoke.mjs` provider registry (key ref `NINEROUTER_KEY`, base URL `http://localhost:20128/v1`, default model) and verify `pnpm smoke --provider 9router` prints the skip message when `NINEROUTER_KEY` is unset and `--help` lists `9router`.
 
 ## 3. Documentation
 

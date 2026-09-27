@@ -9,7 +9,7 @@
  * provider id, the model, the received text, and the usage counters.
  *
  * Usage:
- *   pnpm smoke --provider <id>            # openai-compatible | anthropic | gemini | ollama | all
+ *   pnpm smoke --provider <id>            # openai-compatible | anthropic | gemini | ollama | 9router | all
  *   pnpm smoke --provider <id> --model <m>        # override the default model
  *   pnpm smoke --provider <id> --base-url <url>   # override the default base URL
  *
@@ -66,6 +66,13 @@ const PROVIDERS = {
     defaultBaseUrl: "http://127.0.0.1:11434",
     contextWindow: 8_192,
     capabilities: { nativeTools: true, streamingToolArgs: false, vision: false },
+  },
+  "9router": {
+    keyRef: "NINEROUTER_KEY",
+    defaultModel: "cc/claude-sonnet-4-5",
+    defaultBaseUrl: "http://localhost:20128/v1",
+    contextWindow: 200_000,
+    capabilities: { nativeTools: true, streamingToolArgs: true, vision: false },
   },
 };
 
