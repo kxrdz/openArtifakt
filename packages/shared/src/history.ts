@@ -67,6 +67,24 @@ export const conversationHistorySchema = z.object({
 });
 export type ConversationHistory = z.infer<typeof conversationHistorySchema>;
 
+/**
+ * The result of `POST /api/conversations/:id/undo` (§8 "Undo this turn").
+ * Reports the turn undone and the workspace-relative paths it restored (from
+ * `.before` snapshots) and deleted (files the turn created).
+ */
+export const undoResponseSchema = z.object({
+  ok: z.literal(true),
+  turnId: z.string(),
+  restored: z.array(z.string()),
+  deleted: z.array(z.string()),
+});
+export type UndoResponse = z.infer<typeof undoResponseSchema>;
+
+/** Parse and validate an unknown value as an {@link UndoResponse}. Throws on failure. */
+export function parseUndoResponse(value: unknown): UndoResponse {
+  return undoResponseSchema.parse(value);
+}
+
 /** Parse and validate an unknown value as a {@link ConversationSummary}. Throws on failure. */
 export function parseConversationSummary(value: unknown): ConversationSummary {
   return conversationSummarySchema.parse(value);

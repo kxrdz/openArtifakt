@@ -38,7 +38,7 @@
 
 ## 9. Undo UI
 
-- [ ] 9.1 Add an "Undo this turn" action to the chat surface for completed turns that changed files, wired to the undo endpoint, with a clear outcome message. Verify a web unit test and `pnpm design:check`.
+- [x] 9.1 Add an "Undo this turn" action to the chat surface for completed turns that changed files, wired to the undo endpoint, with a clear outcome message. Verify a web unit test and `pnpm design:check`.
 
 ## 10. e2e + screenshots
 

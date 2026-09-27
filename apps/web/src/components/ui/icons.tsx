@@ -189,3 +189,12 @@ export function ResetIcon(props: SVGProps<SVGSVGElement>) {
     </IconBase>
   );
 }
+
+export function UndoIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="m9 14-5-5 5-5" />
+      <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5 5.5 5.5 0 0 1-5.5 5.5H11" />
+    </IconBase>
+  );
+}

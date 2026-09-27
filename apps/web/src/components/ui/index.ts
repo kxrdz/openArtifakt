@@ -43,6 +43,7 @@ export {
   SettingsIcon,
   StopIcon,
   TerminalIcon,
+  UndoIcon,
   XIcon,
   ZoomInIcon,
   ZoomOutIcon,

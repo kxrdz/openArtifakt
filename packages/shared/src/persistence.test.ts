@@ -12,9 +12,11 @@ import {
   parseConversationHistory,
   parseConversationSummary,
   parseSettings,
+  parseUndoResponse,
   providerCapabilitiesSchema,
   providerIdSchema,
   settingsSchema,
+  undoResponseSchema,
 } from "./index";
 
 describe("settings schema", () => {
@@ -151,5 +153,31 @@ describe("conversation history schema", () => {
   it("type guards distinguish history from arbitrary values", () => {
     expect(isConversationHistory("not history")).toBe(false);
     expect(isConversationSummary(42)).toBe(false);
+  });
+});
+
+describe("undo response schema", () => {
+  const undo = {
+    ok: true as const,
+    turnId: "1",
+    restored: ["notes.txt"],
+    deleted: ["sub/created.txt"],
+  };
+
+  it("parses an undo response with restored and deleted paths", () => {
+    expect(parseUndoResponse(undo)).toEqual(undo);
+  });
+
+  it("accepts empty restored/deleted lists (nothing to restore)", () => {
+    expect(parseUndoResponse({ ok: true, turnId: "2", restored: [], deleted: [] })).toEqual({
+      ok: true,
+      turnId: "2",
+      restored: [],
+      deleted: [],
+    });
+  });
+
+  it("rejects a non-ok response", () => {
+    expect(undoResponseSchema.safeParse({ ...undo, ok: false }).success).toBe(false);
   });
 });

@@ -2,11 +2,13 @@ import { create } from "zustand";
 
 import {
   parseChatEvent,
+  parseUndoResponse,
   type AgentState,
   type ApprovalDecision,
   type ApprovalRequestEvent,
   type ChatEvent,
   type ConversationSummary,
+  type UndoResponse,
 } from "@openartifact/shared";
 
 import { readSseEvents } from "../lib/sse";
@@ -100,6 +102,8 @@ export interface ChatTransport {
   decide: (input: { conversationId: string; decision: ApprovalDecision }) => Promise<void>;
   /** Ask the server to cancel the in-flight turn. */
   stop: (input: { conversationId: string }) => Promise<void>;
+  /** Undo a completed turn, restoring its pre-mutation snapshots (§8). */
+  undo: (input: { conversationId: string; turn: number }) => Promise<UndoResponse>;
 }
 
 /** Read a JSON error body, falling back to a generic message. */
@@ -153,6 +157,17 @@ export const defaultChatTransport: ChatTransport = {
       throw new Error(await readError(response, `Stop failed (${response.status})`));
     }
   },
+
+  async undo({ conversationId, turn }) {
+    const response = await fetch(
+      `/api/conversations/${encodeURIComponent(conversationId)}/undo?turn=${encodeURIComponent(String(turn))}`,
+      { method: "POST" },
+    );
+    if (!response.ok) {
+      throw new Error(await readError(response, `Undo failed (${response.status})`));
+    }
+    return parseUndoResponse((await response.json()) as unknown);
+  },
 };
 
 /** The full store: the data shape plus the actions and the in-flight controller. */
@@ -161,6 +176,8 @@ export interface ChatStore extends ChatState {
   send: (message: string) => Promise<void>;
   stop: () => void;
   decide: (decision: ApprovalDecision) => Promise<void>;
+  /** Undo a completed turn by its 1-based turn number; throws on failure. */
+  undoTurn: (turn: number) => Promise<UndoResponse>;
   /** Set the conversation-list loading/restore status (driven by lib/history). */
   setHistoryStatus: (status: HistoryStatus) => void;
   /** Replace the conversation list (driven by lib/history). */
@@ -393,6 +410,14 @@ export function createChatStore(transport: ChatTransport = defaultChatTransport)
       } catch (error) {
         set((state) => ({ ...state, error: errorMessage(error) }));
       }
+    },
+
+    undoTurn: async (turn) => {
+      const { conversationId } = get();
+      if (conversationId === null) {
+        throw new Error("No active conversation to undo.");
+      }
+      return transport.undo({ conversationId, turn });
     },
 
     setHistoryStatus: (historyStatus) => set({ historyStatus }),

@@ -15,6 +15,7 @@ const BOTTOM_THRESHOLD = 40;
  */
 export function ChatContainer() {
   const messages = useChatStore((state) => state.messages);
+  const isSending = useChatStore((state) => state.isSending);
   const listRef = useRef<HTMLDivElement>(null);
   const [pinned, setPinned] = useState(true);
 
@@ -45,6 +46,16 @@ export function ChatContainer() {
     }
   }, [messages, pinned]);
 
+  // Turns are numbered 1, 2, … per conversation (§8); each user message
+  // opens a turn and its assistant message belongs to the same turn.
+  const withTurns = (() => {
+    let turn = 0;
+    return messages.map((message) => {
+      if (message.role === "user") turn += 1;
+      return { message, turn };
+    });
+  })();
+
   return (
     <div
       ref={listRef}
@@ -52,8 +63,13 @@ export function ChatContainer() {
       aria-label="Conversation"
       className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-4"
     >
-      {messages.map((message) => (
-        <MessageItem key={message.id} message={message} />
+      {withTurns.map(({ message, turn }, index) => (
+        <MessageItem
+          key={message.id}
+          message={message}
+          turn={turn}
+          inFlight={isSending && index === messages.length - 1}
+        />
       ))}
     </div>
   );

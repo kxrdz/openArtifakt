@@ -16,6 +16,7 @@ interface FakeTransport extends ChatTransport {
   resolveStream: () => void;
   decisions: Array<{ conversationId: string; decision: ApprovalDecision }>;
   stops: string[];
+  undos: Array<{ conversationId: string; turn: number }>;
 }
 
 function makeFakeTransport(): FakeTransport {
@@ -23,6 +24,7 @@ function makeFakeTransport(): FakeTransport {
   let resolveStreamFn: (() => void) | null = null;
   const decisions: Array<{ conversationId: string; decision: ApprovalDecision }> = [];
   const stops: string[] = [];
+  const undos: Array<{ conversationId: string; turn: number }> = [];
 
   return {
     stream: ({ onEvent: handler }) => {
@@ -37,6 +39,10 @@ function makeFakeTransport(): FakeTransport {
     stop: async (input) => {
       stops.push(input.conversationId);
     },
+    undo: async (input) => {
+      undos.push(input);
+      return { ok: true, turnId: String(input.turn), restored: [], deleted: [] };
+    },
     emit: (event) => {
       onEvent?.(event);
     },
@@ -46,6 +52,7 @@ function makeFakeTransport(): FakeTransport {
     },
     decisions,
     stops,
+    undos,
   };
 }
 
@@ -293,5 +300,24 @@ describe("chat store transition", () => {
 
     // Only the first turn's messages were appended.
     expect(store.getState().messages.map((m) => m.content)).toEqual(["first", ""]);
+  });
+
+  it("undoTurn delegates to the transport with the conversation and turn ids", async () => {
+    const transport = makeFakeTransport();
+    const store = createChatStore(transport);
+    store.setState({ conversationId: "conv-1" });
+
+    const result = await store.getState().undoTurn(3);
+
+    expect(transport.undos).toEqual([{ conversationId: "conv-1", turn: 3 }]);
+    expect(result).toEqual({ ok: true, turnId: "3", restored: [], deleted: [] });
+  });
+
+  it("undoTurn rejects when there is no active conversation", async () => {
+    const store = createChatStore(makeFakeTransport());
+
+    await expect(store.getState().undoTurn(1)).rejects.toThrow(
+      "No active conversation to undo.",
+    );
   });
 });

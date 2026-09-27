@@ -1,9 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { parseDocument } from "../../artifacts";
 import type { ParsedBlock } from "../../artifacts";
+import { describeUndo, turnChangedFiles } from "../../lib/undo";
 import type { ChatMessage } from "../../store/chatStore";
 import { useChatStore } from "../../store/chatStore";
+import { Button, cn, UndoIcon } from "../ui";
 import { ToolCallCard } from "./ToolCallCard";
 import { ApprovalCard } from "./ApprovalCard";
 import { InlineMermaid } from "./InlineMermaid";
@@ -35,13 +37,45 @@ function BlockView({ block }: { block: ParsedBlock }) {
   );
 }
 
-export function MessageItem({ message }: { message: ChatMessage }) {
+export function MessageItem({
+  message,
+  turn,
+  inFlight,
+}: {
+  message: ChatMessage;
+  /** 1-based turn number (§8); the undo endpoint keys snapshots by it. */
+  turn: number;
+  /** True while this message is the turn currently being streamed. */
+  inFlight: boolean;
+}) {
   const pendingApproval = useChatStore((state) => state.pendingApproval);
+  const undoTurn = useChatStore((state) => state.undoTurn);
+  const [undoing, setUndoing] = useState(false);
+  const [outcome, setOutcome] = useState<string | null>(null);
+  const [outcomeFailed, setOutcomeFailed] = useState(false);
   const isUser = message.role === "user";
   const blocks = useMemo(
     () => (isUser ? null : parseDocument(message.content).blocks),
     [isUser, message.content],
   );
+
+  // A completed turn that changed files can be undone (§12.8, feature 9.1).
+  const canUndo = !isUser && !inFlight && turnChangedFiles(message);
+
+  async function handleUndo() {
+    setUndoing(true);
+    setOutcome(null);
+    setOutcomeFailed(false);
+    try {
+      const result = await undoTurn(turn);
+      setOutcome(describeUndo(result.restored, result.deleted));
+    } catch (error) {
+      setOutcome(error instanceof Error ? error.message : "Undo failed.");
+      setOutcomeFailed(true);
+    } finally {
+      setUndoing(false);
+    }
+  }
 
   if (isUser) {
     return (
@@ -77,6 +111,31 @@ export function MessageItem({ message }: { message: ChatMessage }) {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {canUndo && (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            loading={undoing}
+            icon={<UndoIcon className="h-3.5 w-3.5" />}
+            onClick={handleUndo}
+          >
+            Undo this turn
+          </Button>
+          {outcome !== null && (
+            <span
+              role="status"
+              className={cn(
+                "text-xs",
+                outcomeFailed ? "text-danger" : "text-text-secondary",
+              )}
+            >
+              {outcome}
+            </span>
+          )}
         </div>
       )}
     </article>
