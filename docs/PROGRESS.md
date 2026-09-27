@@ -8,7 +8,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - **Feature** = one step below → git branch `feature/N-<slug>` + OpenSpec change `N-<slug>`.
 - **Task** = one `- [ ]` item in the change's `tasks.md` → one git commit (`feat(N-<slug>): <summary>`).
 - Plan a feature with `openspec-propose`, implement tasks with `openspec-apply-change`, finish with `openspec-archive-change`, then merge the branch into `main`.
-- **Current feature/branch:** none — step 6 merged; next is step 7 (Artifact renderers + Mermaid), to be planned with `openspec-propose` on `feature/7-artifact-renderers-mermaid`.
+- **Current feature/branch:** `feature/7-artifact-renderers-mermaid` — change `7-artifact-renderers-mermaid` planned (proposal, specs, design, tasks committed); tasks not yet started.
 
 - [x] 1. Scaffold
 - [x] 2. Shared types + stream parser
@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Start feature 7 (Artifact renderers + Mermaid): from `main` create `feature/7-artifact-renderers-mermaid`, run `openspec-propose` to plan change `7-artifact-renderers-mermaid` (proposal, specs delta, design, tasks), then implement its tasks one per iteration (one commit per task, `pnpm check` green before each commit)._
+_On `feature/7-artifact-renderers-mermaid`, run `openspec-apply-change` for change `7-artifact-renderers-mermaid` and implement the next unchecked task in its `tasks.md`, starting with 1.1 (move the StreamParser into `packages/shared`, core re-exports it). One commit per task; `pnpm check` green before each commit._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
