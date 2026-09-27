@@ -27,7 +27,7 @@ _None yet._
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-_Continue feature 5 on `feature/5-design-foundation`: the change `5-design-foundation` is planned and task 1.1 (design tokens + Tailwind wiring + DESIGN.md) is done and committed. Next is task 2.1: vendor IBM Plex Sans + IBM Plex Mono woff2 files into `apps/web/public/fonts/`, add `@font-face` rules + `--font-sans`/`--font-mono` tokens, and confirm no remote font URL remains. If the build machine cannot download the fonts, record the blocker in `docs/PROGRESS.md` with the exact fix and fall back to a system stack behind `TODO(blocked)`._
+_Continue feature 5 on `feature/5-design-foundation`: tasks 1.1 (design tokens + Tailwind wiring + DESIGN.md) and 2.1 (self-hosted IBM Plex Sans + Mono woff2, `@font-face` rules, `--font-sans`/`--font-mono` tokens, no remote font URL) are done and committed. Next is task 3.1: create `apps/web/src/components/ui/` primitives built on the tokens — `Button` (variants, loading, disabled), `IconButton`, `Badge` (status variants), `StatusDot`, `Kbd`, `Spinner`, and a shared focus-visible ring — exported from `components/ui/index.ts`, plus a small screen to exercise them for the screenshots pass. Run `pnpm design:check` after the UI change._
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
