@@ -6,7 +6,7 @@
 
 ## 2. CONTRIBUTING
 
-- [ ] 2.1 Write `CONTRIBUTING.md` with: prerequisites, the one-branch-per-feature / one-commit-per-task / OpenSpec (propose→apply→archive) workflow, how to run `pnpm check` (typecheck/lint/unit/design/e2e), `pnpm design:check`, `pnpm screenshots` and `pnpm smoke --provider <id>`, the Impeccable rule for UI changes, and the `docs/DECISIONS.md` convention. Verify the commands it documents exist in `package.json` and the workflow matches `AGENTS.md`.
+- [x] 2.1 Write `CONTRIBUTING.md` with: prerequisites, the one-branch-per-feature / one-commit-per-task / OpenSpec (propose→apply→archive) workflow, how to run `pnpm check` (typecheck/lint/unit/design/e2e), `pnpm design:check`, `pnpm screenshots` and `pnpm smoke --provider <id>`, the Impeccable rule for UI changes, and the `docs/DECISIONS.md` convention. Verify the commands it documents exist in `package.json` and the workflow matches `AGENTS.md`.
 
 ## 3. .env.example
 
