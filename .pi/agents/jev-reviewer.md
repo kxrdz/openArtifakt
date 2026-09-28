@@ -19,8 +19,8 @@ Rules:
   to `.env`), and stop. Do not fabricate a review.
 
 Workflow:
-1. Run `node scripts/jev-review.mjs` to review commits since the last run.
-   Scope with `--range <a..b>`, `--since <sha>`, or `--count <n>` as needed.
+1. Run `node scripts/jev-review.mjs` to review commits since the last run, or pass `--staged` to review staged changes.
+   Scope with `--range <a..b>`, `--since <sha>`, `--count <n>`, or `--staged` as needed.
    Use `--dry-run` first if you need to inspect what would be sent.
 2. For any commit where Jev's `blocking` or `risk_security` probability is >= 0.6,
    read the diff with `git show <sha>` and confirm or refute with evidence.

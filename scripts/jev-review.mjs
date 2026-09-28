@@ -43,16 +43,19 @@ Usage:
   node scripts/jev-review.mjs [options]
 
 Options:
-  --range <a..b>   Review commits in a git revision range
-  --shas <s1,s2>   Review exactly these commit SHAs (comma-separated)
-  --since <sha>    Review commits from <sha> (exclusive) to HEAD
-  --count <n>      Review the last <n> commits (default ${DEFAULT_COUNT})
-  --dry-run        Print the payload that would be sent, without calling the API
-  --json           Emit the raw structured result as JSON
-  --gate           Exit with code 2 if any commit is blocking or a security risk
-                   (probabilities >= the gate threshold, default 0.6)
+  --staged                 Review staged git changes (e.g. in a pre-commit hook)
+  --range <a..b>           Review commits in a git revision range
+  --shas <s1,s2>           Review exactly these commit SHAs (comma-separated)
+  --since <sha>            Review commits from <sha> (exclusive) to HEAD
+  --count <n>              Review the last <n> commits (default ${DEFAULT_COUNT})
+  --dry-run                Print the payload that would be sent, without calling the API
+  --json                   Emit the raw structured result as JSON
+  --gate                   Exit with code 2 if any commit is blocking or a security risk
+                           (probabilities >= the gate threshold, default 0.6)
   --gate-threshold <0..1>  Override the --gate threshold (default 0.6)
-  --help           Show this help
+  --min-quality <0..4>     Exit with code 2 if quality score is below threshold
+                           (e.g. 2 for Acceptable: 0=Unacceptable, 1=Poor, 2=Acceptable, 3=Good, 4=Excellent)
+  --help                   Show this help
 
 Requires TYPESAFE_API_KEY in the environment or in .env.
 `);
@@ -95,7 +98,7 @@ function loadDotEnv() {
 }
 
 function parseArgs(argv) {
-  const opts = { json: false, dryRun: false };
+  const opts = { json: false, dryRun: false, staged: false };
   const positional = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -104,6 +107,8 @@ function parseArgs(argv) {
     else if (a === "--dry-run") opts.dryRun = true;
     else if (a === "--gate") opts.gate = true;
     else if (a === "--gate-threshold") opts.gateThreshold = Number(argv[++i]);
+    else if (a === "--min-quality") opts.minQuality = Number(argv[++i]);
+    else if (a === "--staged") opts.staged = true;
     else if (a === "--range") opts.range = argv[++i];
     else if (a === "--shas") opts.shas = argv[++i];
     else if (a === "--since") opts.since = argv[++i];
@@ -296,6 +301,36 @@ function buildCommitState(sha) {
   return { sha: fullSha, subject: messageLines[0] || fullSha.slice(0, 7), state };
 }
 
+function buildStagedState() {
+  const stat = git(["diff", "--cached", "--stat", "--no-color"]);
+  const diff = git(["diff", "--cached", "--no-color", "--no-ext-diff"]);
+
+  if (!stat.trim() && !diff.trim()) {
+    return null;
+  }
+
+  let branch = "HEAD";
+  try {
+    const lines = gitLines(["branch", "--show-current"]);
+    if (lines.length > 0 && lines[0]) branch = lines[0];
+  } catch {
+    // ignore
+  }
+
+  const state = [
+    `Staged changes for upcoming commit`,
+    `Branch: ${branch}`,
+    ``,
+    `Changed files:`,
+    stat,
+    ``,
+    `Diff:`,
+    diff,
+  ].join("\n");
+
+  return { sha: "staged", subject: "Staged changes for upcoming commit", state };
+}
+
 // --- rendering -------------------------------------------------------------
 
 const pct = (p) => `${(Number(p) * 100).toFixed(0)}%`;
@@ -323,15 +358,33 @@ function summarize(answer) {
   }
 }
 
-function renderMarkdown(results, { rangeLabel }) {
+function renderMarkdown(results, { rangeLabel, minQuality } = {}) {
   const lines = [];
   lines.push(`# Commit Review — Jev (TypeSafe System One)`);
   lines.push("");
   lines.push(`Reviewed ${results.length} commit${results.length === 1 ? "" : "s"}${rangeLabel ? ` (${rangeLabel})` : ""}.`);
   lines.push("");
 
-  const blocking = results.filter((r) => r.answers.blocking.noul >= 0.6);
-  const security = results.filter((r) => r.answers.risk_security.noul >= 0.6);
+  const blocking = results.filter((r) => r.answers.blocking && r.answers.blocking.noul >= 0.6);
+  const security = results.filter((r) => r.answers.risk_security && r.answers.risk_security.noul >= 0.6);
+  const qualityThreshold = Number.isFinite(minQuality) ? minQuality : null;
+  const lowQuality = qualityThreshold !== null
+    ? results.filter((r) => r.answers.quality && r.answers.quality.score < qualityThreshold)
+    : [];
+
+  if (lowQuality.length) {
+    lines.push("## Quality concerns (below minimum threshold)");
+    lines.push("");
+    for (const r of lowQuality) {
+      const q = r.answers.quality;
+      const level = Math.round(q.score);
+      const label = q.legend?.[String(level)] ?? String(q.score);
+      lines.push(
+        `- \`${r.sha.slice(0, 7)}\` — ${r.subject} (quality: ${label}, score ${q.score.toFixed(1)}/4, required >= ${qualityThreshold.toFixed(1)}/4)`,
+      );
+    }
+    lines.push("");
+  }
 
   if (blocking.length) {
     lines.push("## Blocking (must fix)");
@@ -421,21 +474,33 @@ async function main() {
     process.exit(1);
   }
 
-  const shas = listCommitShas(opts);
-  if (shas.length === 0 || (shas.length === 1 && !shas[0])) {
-    process.stdout.write("Nothing to review — no unreviewed commits found.\n");
-    process.exit(0);
-  }
+  let commits;
+  let rangeLabel;
 
-  const commits = shas.map(buildCommitState);
-  const short = (s) => s.slice(0, 7);
-  const rangeLabel =
-    opts.range ??
-    (opts.since
-      ? `${opts.since}..HEAD`
-      : shas.length === 1
-        ? short(shas[0])
-        : `${short(shas[0])}..${short(shas[shas.length - 1])}`);
+  if (opts.staged) {
+    const staged = buildStagedState();
+    if (!staged) {
+      process.stdout.write("Nothing to review — no staged changes found.\n");
+      process.exit(0);
+    }
+    commits = [staged];
+    rangeLabel = "staged changes";
+  } else {
+    const shas = listCommitShas(opts);
+    if (shas.length === 0 || (shas.length === 1 && !shas[0])) {
+      process.stdout.write("Nothing to review — no unreviewed commits found.\n");
+      process.exit(0);
+    }
+    commits = shas.map(buildCommitState);
+    const short = (s) => s.slice(0, 7);
+    rangeLabel =
+      opts.range ??
+      (opts.since
+        ? `${opts.since}..HEAD`
+        : shas.length === 1
+          ? short(shas[0])
+          : `${short(shas[0])}..${short(shas[shas.length - 1])}`);
+  }
 
   if (opts.dryRun) {
     process.stdout.write(
@@ -464,24 +529,36 @@ async function main() {
   if (opts.json) {
     process.stdout.write(renderJson(results, { rangeLabel, model }) + "\n");
   } else {
-    process.stdout.write(renderMarkdown(results, { rangeLabel }) + "\n");
+    process.stdout.write(renderMarkdown(results, { rangeLabel, minQuality: opts.minQuality }) + "\n");
   }
 
   // Record progress only for default/since/count flows (reachable from HEAD).
-  if (!opts.range && !opts.shas) {
+  if (!opts.range && !opts.shas && !opts.staged) {
     writeFileSync(MARKER_FILE, results[results.length - 1].sha + "\n");
   }
 
+  let blocked = false;
   if (opts.gate) {
     const threshold = Number.isFinite(opts.gateThreshold)
       ? opts.gateThreshold
       : DEFAULT_GATE_THRESHOLD;
-    const blocked = results.some(
+    const gateBlocked = results.some(
       (r) =>
-        r.answers.blocking.noul >= threshold ||
-        r.answers.risk_security.noul >= threshold,
+        (r.answers.blocking && r.answers.blocking.noul >= threshold) ||
+        (r.answers.risk_security && r.answers.risk_security.noul >= threshold),
     );
-    if (blocked) process.exitCode = 2;
+    if (gateBlocked) blocked = true;
+  }
+
+  if (Number.isFinite(opts.minQuality)) {
+    const qualityBlocked = results.some(
+      (r) => r.answers.quality && r.answers.quality.score < opts.minQuality,
+    );
+    if (qualityBlocked) blocked = true;
+  }
+
+  if (blocked) {
+    process.exitCode = 2;
   }
 }
 

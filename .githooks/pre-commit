@@ -1,0 +1,56 @@
+#!/bin/sh
+# Pre-commit hook: check the quality of staged changes with Jev
+# (TypeSafe System One) via scripts/jev-review.mjs.
+#
+# - Blocks the commit (exit 1) when Jev rates the quality below
+#   JEV_MIN_QUALITY (default 2.0 = Acceptable) or flags the staged
+#   diff as `blocking` or `risk_security` at or above JEV_GATE_THRESHOLD
+#   (default 0.6).
+# - Fails OPEN on a missing API key or a transient review error, so a
+#   developer without a key is never blocked silently.
+# - Bypass: JEV_REVIEW_BYPASS=1 git commit, or git commit --no-verify.
+
+# Exit early if bypass requested.
+[ -n "${JEV_REVIEW_BYPASS:-}" ] && exit 0
+
+ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT="$ROOT/scripts/jev-review.mjs"
+[ -f "$SCRIPT" ] || exit 0
+
+# If there are no staged changes, let git handle it.
+if git diff --cached --quiet; then
+  exit 0
+fi
+
+have_key() {
+  [ -n "${TYPESAFE_API_KEY:-}" ] && return 0
+  grep -qE '^TYPESAFE_API_KEY=.+' "$ROOT/.env" 2>/dev/null
+}
+
+if ! have_key; then
+  echo "jev-reviewer: TYPESAFE_API_KEY not set; skipping quality check." >&2
+  echo "jev-reviewer: set it in .env to enable, or bypass with JEV_REVIEW_BYPASS=1." >&2
+  exit 0
+fi
+
+THRESHOLD="${JEV_GATE_THRESHOLD:-0.6}"
+MIN_QUALITY="${JEV_MIN_QUALITY:-2.0}"
+
+echo "jev-reviewer: checking quality of staged changes..." >&2
+
+out="$(node "$SCRIPT" --staged --gate --gate-threshold "$THRESHOLD" --min-quality "$MIN_QUALITY" 2>&1)"
+code=$?
+
+printf '%s\n' "$out" >&2
+
+if [ "$code" -eq 2 ]; then
+  echo "jev-reviewer: quality check failed (quality below threshold, blocking, or security risk) — commit blocked." >&2
+  echo "jev-reviewer: fix the issues, or bypass with JEV_REVIEW_BYPASS=1 (or git commit --no-verify)." >&2
+  exit 1
+elif [ "$code" -ne 0 ]; then
+  # Review failed for a non-gate reason (network, API error, ...): fail open.
+  echo "jev-reviewer: review check failed (exit $code); allowing commit." >&2
+  exit 0
+fi
+
+exit 0

@@ -85,4 +85,6 @@ Entries use the format `**<Decision>**: <reason>. *<alternatives>.*`. The rule i
 
 ## Commit review
 
+A pre-commit hook (`.githooks/pre-commit`, enabled via `core.hooksPath .githooks`) checks the quality of staged changes with Jev before committing and blocks if quality is below acceptable (score < 2.0) or if changes are flagged as blocking or high-risk security. It fails open on a missing key; bypass with `JEV_REVIEW_BYPASS=1` or `git commit --no-verify`.
+
 A pre-push hook (`.githooks/pre-push`, enabled via `core.hooksPath .githooks`) runs a Jev review over the commits about to be pushed and blocks on a blocking or high-risk-security judgment. It fails open on a missing key; bypass with `JEV_REVIEW_BYPASS=1` or `git push --no-verify`.

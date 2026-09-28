@@ -43,7 +43,7 @@ echo; echo "Initialising git..."
 [ -d .git ] || git init -b main >/dev/null
 [ -f .env ] || cp .env.example .env
 
-# Enable the committed git hooks (e.g. .githooks/pre-push runs the Jev reviewer).
+# Enable the committed git hooks (e.g. .githooks/pre-commit and .githooks/pre-push run the Jev reviewer).
 git config core.hooksPath .githooks
 
 echo; echo "Installing the Impeccable skill for Pi (into .pi/skills)..."
