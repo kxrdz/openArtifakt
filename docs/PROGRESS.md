@@ -20,6 +20,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 - [x] 9. Final design pass (Impeccable)
 - [x] 10. Docs
 - [x] 11. 9Router provider preset
+- [ ] 12. Autoload .env
 
 ## Blocked
 <!-- One entry per blocker: what is blocked, why, and the exact command or action a human must take. -->
@@ -27,7 +28,7 @@ Tick each step when its acceptance criteria in docs/SPEC.md §12 pass and it is 
 
 ## Next
 <!-- If a step is only partly done, write exactly what remains here for the next iteration. -->
-None — all 11 features are complete. The only open item is the provider-smoke key under **Blocked** above (needed only to run `pnpm smoke` against a real provider; the key-free `OPENARTIFACT_FAKE_PROVIDER=1` mode and the full `pnpm check` suite pass without it).
+Task 2.1 of feature 12-autoload-env: hook autoLoadEnv() into apps/server/src/index.ts prior to loadConfig(), update README.md and docs/DECISIONS.md, run pnpm check, archive the change, and merge to main.
 
 ## Log
 <!-- One line per completed step: date, step, short summary. -->
