@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "@playwright/test";
 
 const rootDir = fileURLToPath(new URL("..", import.meta.url));
-const port = Number(process.env.PORT ?? 4318);
+const port = Number(process.env.PORT || 4318);
 const baseURL = `http://127.0.0.1:${port}`;
 
 export default defineConfig({
