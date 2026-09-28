@@ -6,4 +6,4 @@
 
 ## 2. Server Wiring and Documentation
 
-- [ ] 2.1 Hook `autoLoadEnv()` into `apps/server/src/index.ts` at server startup prior to `loadConfig()`, update `README.md` and `docs/DECISIONS.md` to document native server `.env` auto-loading, and verify with `pnpm check`.
+- [x] 2.1 Hook `autoLoadEnv()` into `apps/server/src/index.ts` at server startup prior to `loadConfig()`, update `README.md` and `docs/DECISIONS.md` to document native server `.env` auto-loading, and verify with `pnpm check`.

@@ -55,10 +55,14 @@ Provider defaults:
 | `ollama` | `llama3.2` | `http://127.0.0.1:11434` | _none_ |
 | `9router` | `cc/claude-sonnet-4-5` | `http://localhost:20128/v1` | `NINEROUTER_KEY` (optional) |
 
-**Keys live in the server's environment, never in the browser or the database.** The server reads `process.env[OPENARTIFACT_API_KEY_REF]`; it does not auto-load `.env`. Export the key (or source `.env`) before starting:
+**Keys live in the server's environment, never in the browser or the database.** The server reads `process.env[OPENARTIFACT_API_KEY_REF]` and automatically loads `.env` on startup (using Node's native `process.loadEnvFile`, searching upward to the repository root). You can place keys in `.env` (copy `.env.example`) or export them before starting:
 
 ```bash
-export OPENAI_API_KEY=sk-...      # or: set -a; source .env; set +a
+# In .env (recommended):
+# OPENAI_API_KEY=sk-...
+
+# Or exported in your shell:
+export OPENAI_API_KEY=sk-...
 pnpm dev
 ```
 

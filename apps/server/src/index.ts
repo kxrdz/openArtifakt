@@ -8,9 +8,13 @@ import { settingsSchema } from "@openartifact/shared";
 import { createApp } from "./app";
 import { ActiveConfig, loadConfig } from "./config";
 import { openRepository } from "./db";
+import { autoLoadEnv } from "./env";
 import { createFakeWorkspace } from "./fake";
 import { applySettings, SETTINGS_KEY } from "./routes/settings";
 import { generateSessionToken } from "./security";
+
+// Auto-load environment variables from .env if present (§12 feature 12).
+autoLoadEnv();
 
 const HOST = "127.0.0.1";
 const port = Number(process.env.PORT ?? 4318);
